@@ -26,11 +26,16 @@ package main
 import (
     "context"
     "log"
-    "github.com/thalassa-cloud/go-client"
+    "github.com/thalassa-cloud/client-go/pkg/thalassa"
 )
 
 func main() {
-    client, err := thalassa.NewClient(thalassa.WithAuthPersonalToken("your-api-key"))
+    baseURL := "https://<YOUR BASE URL FOR THE THALASSA API>"
+
+    client, err := thalassa.NewClient(
+		client.WithBaseURL(baseURL),
+		client.WithOrganisation("organisation-slug-or-identity"),
+        client.WithAuthPersonalToken("your-api-key"))
     if err != nil {
         log.Fatal(err)
     }
@@ -38,12 +43,96 @@ func main() {
     
     // Use the client to interact with Thalassa Cloud services
     // Example: List your vpcs
-    vpcs, err := client.ListVpcs(ctx)
+    vpcs, err := client.IaaS().ListVpcs(ctx)
     if err != nil {
         log.Fatal(err)
     }
-    
     // Process vpcs...
+}
+```
+
+## Examples
+
+### Infrastructure as a Service (IaaS)
+
+```go
+// List all VPCs
+vpcs, err := client.IaaS().ListVpcs(ctx)
+if err != nil {
+    log.Fatal(err)
+}
+
+for _, vpc := range vpcs {
+    fmt.Printf("VPC ID: %s, Name: %s\n", vpc.ID, vpc.Name)
+}
+
+// Get details of a specific VPC
+vpc, err := client.IaaS().GetVpc(ctx, "vpc-id")
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+### Kubernetes Service
+
+```go
+// List all Kubernetes clusters
+clusters, err := client.Kubernetes().ListKubernetesClusters(ctx)
+if err != nil {
+    log.Fatal(err)
+}
+
+for _, cluster := range clusters {
+    fmt.Printf("Cluster Name: %s\n", cluster.Name)
+}
+
+// Get details for a specific Kubernetes cluster
+cluster, err := client.Kubernetes().GetKubernetesCluster(ctx, "cluster-id")
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+### User and Organization Management
+
+```go
+// Get information about your organizations
+meClient := client.Me()
+organizations, err := meClient.ListMyOrganisations(ctx)
+if err != nil {
+    log.Fatal(err)
+}
+
+for _, org := range organizations {
+    fmt.Printf("Organization: %s\n", org.Name)
+}
+```
+
+### Using the Alternative Client Approach
+
+You can also initialize the client components separately:
+
+```go
+// Initialize the base client
+baseClient, err := client.NewClient(
+    client.WithBaseURL(baseURL),
+    client.WithOrganisation(organisation),
+    client.WithAuthPersonalToken(pat),
+)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Create the IaaS service
+iaasService, err := iaas.New(baseClient)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Use the IaaS service
+vpcs, err := iaasService.ListVpcs(ctx)
+if err != nil {
+    log.Fatal(err)
 }
 ```
 
