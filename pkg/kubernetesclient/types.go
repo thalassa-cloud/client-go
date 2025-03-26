@@ -62,6 +62,7 @@ type KubernetesCluster struct {
 	PodSecurityStandardsProfile KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile"` // Pod security standards configuration
 	AuditLogProfile             KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile"`             // Audit logging configuration
 	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`        // Default network policy
+	DeleteProtection            bool                                  `json:"deleteProtection"`            // Whether deletion protection is enabled
 }
 
 // CreateKubernetesCluster represents the configuration for creating a new Kubernetes cluster.
@@ -83,19 +84,17 @@ type CreateKubernetesCluster struct {
 
 // UpdateKubernetesCluster represents the configuration for updating an existing Kubernetes cluster.
 type UpdateKubernetesCluster struct {
-	Name                        string                                `json:"name"`                        // New display name
-	Description                 string                                `json:"description"`                 // New description
-	Labels                      map[string]string                     `json:"labels"`                      // Updated labels
-	Annotations                 map[string]string                     `json:"annotations"`                 // Updated annotations
-	RegionIdentity              string                                `json:"regionIdentity"`              // New region identifier
-	ClusterType                 KubernetesClusterType                 `json:"clusterType"`                 // New cluster type
-	KubernetesVersionIdentity   string                                `json:"kubernetesVersionIdentity"`   // New Kubernetes version identifier
-	DeleteProtection            bool                                  `json:"deleteProtection"`            // Updated deletion protection setting
-	Subnet                      string                                `json:"subnet"`                      // New subnet
-	Networking                  KubernetesClusterNetworking           `json:"networking"`                  // Updated network configuration
-	PodSecurityStandardsProfile KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile"` // Updated pod security standards
-	AuditLogProfile             KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile"`             // Updated audit logging configuration
-	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`        // Updated default network policy
+	Name                        *string                                `json:"name,omitempty"`                        // New display name
+	Description                 *string                                `json:"description,omitempty"`                 // New description
+	Labels                      map[string]string                      `json:"labels,omitempty"`                      // Updated labels
+	Annotations                 map[string]string                      `json:"annotations,omitempty"`                 // Updated annotations
+	KubernetesVersionIdentity   *string                                `json:"kubernetesVersionIdentity,omitempty"`   // New Kubernetes version identifier
+	DeleteProtection            *bool                                  `json:"deleteProtection,omitempty"`            // Updated deletion protection setting
+	Subnet                      *string                                `json:"subnet,omitempty"`                      // New subnet
+	Networking                  *KubernetesClusterNetworking           `json:"networking,omitempty"`                  // Updated network configuration
+	PodSecurityStandardsProfile *KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile,omitempty"` // Updated pod security standards
+	AuditLogProfile             *KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile,omitempty"`             // Updated audit logging configuration
+	DefaultNetworkPolicy        *KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy,omitempty"`        // Updated default network policy
 }
 
 // KubernetesClusterNetworking represents the network configuration for a Kubernetes cluster.
