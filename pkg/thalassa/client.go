@@ -31,6 +31,10 @@ func NewClient(opts ...client.Option) (Client, error) {
 	}, nil
 }
 
+func (c *thalassaCloudClient) SetOrganisation(organisation string) {
+	c.client.SetOrganisation(organisation)
+}
+
 func (c *thalassaCloudClient) IaaS() *iaas.Client {
 	iaasClient, err := iaas.New(c.client)
 	if err != nil {

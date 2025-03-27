@@ -52,6 +52,9 @@ type Client interface {
 	// GetOrganisationIdentity returns the organisation identity for the client, if set
 	GetOrganisationIdentity() string
 
+	// SetOrganisation sets the organisation for the client
+	SetOrganisation(organisation string)
+
 	// GetAuthToken returns the authentication token for the client, if set
 	GetAuthToken() string
 
@@ -129,6 +132,10 @@ func (c *thalassaCloudClient) GetOrganisationIdentity() string {
 		return *c.organisationIdentity
 	}
 	return ""
+}
+
+func (c *thalassaCloudClient) SetOrganisation(organisation string) {
+	c.organisationIdentity = &organisation
 }
 
 func (c *thalassaCloudClient) GetAuthToken() string {
