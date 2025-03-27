@@ -26,6 +26,8 @@ package main
 import (
     "context"
     "log"
+
+    "github.com/thalassa-cloud/client-go/pkg/client"
     "github.com/thalassa-cloud/client-go/pkg/thalassa"
 )
 

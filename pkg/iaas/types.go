@@ -275,9 +275,53 @@ type RouteEntry struct {
 }
 
 type Machine struct {
-	Identity string `json:"identity"`
-	Name     string `json:"name"`
+	Identity         string `json:"identity"`
+	Name             string `json:"name"`
+	State            MachineState
+	CloudInit        *string `json:"cloudInit"`
+	DeleteProtection bool    `json:"deleteProtection"`
+	// SecurityGroups    []SecurityGroup          `json:"securityGroups,omitempty"`
+	Organisation      *base.Organisation       `json:"organisation,omitempty"`
+	MachineType       *MachineType             `json:"machineType,omitempty"`
+	MachineImage      *MachineImage            `json:"machineImage,omitempty"`
+	PersistentVolume  *Volume                  `json:"persistentVolume,omitempty" validate:"-"`
+	Vpc               *Vpc                     `json:"vpc,omitempty"`
+	Subnet            *Subnet                  `json:"subnet,omitempty"`
+	Interfaces        VirtualMachineInterfaces `json:"interfaces,omitempty"`
+	VolumeAttachments []VolumeAttachment       `json:"volumeAttachments,omitempty"`
+	Status            ResourceStatus           `json:"status"`
 }
+
+type ResourceStatus struct {
+	Status             string    `json:"status"`
+	StatusMessage      string    `json:"statusMessage"`
+	LastTransitionTime time.Time `json:"lastTransitionTime"`
+}
+
+type VirtualMachineInterfaces []VirtualMachineInterface
+type VirtualMachineInterface struct {
+	// Name is the name of the interface
+	Name string `json:"name" validate:"required"`
+	// MacAddress is the MAC address of the interface
+	MacAddress string `json:"macAddress"`
+	// IPAddresses is a list of IP addresses that are assigned to the interface
+	IPAddresses []string `json:"ipAddresses"`
+}
+
+type MachineState string
+
+const (
+	// MachineStateCreating is the state of the machine that is being created
+	MachineStateCreating MachineState = "creating"
+	// MachineStateRunning is the state of the machine that is running
+	MachineStateRunning MachineState = "running"
+	// MachineStateStopped is the state of the machine that is stopped
+	MachineStateStopped MachineState = "stopped"
+	// MachineStateDeleting is the state of the machine that is being deleted
+	MachineStateDeleting MachineState = "deleting"
+	// MachineStateDeleted is the state of the machine that is deleted
+	MachineStateDeleted MachineState = "deleted"
+)
 
 type MachineTypeCategory struct {
 	Identity      string        `json:"identity"`

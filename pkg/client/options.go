@@ -11,6 +11,7 @@ import (
 func WithBaseURL(url string) Option {
 	return func(c *thalassaCloudClient) error {
 		c.resty.SetBaseURL(url)
+		c.baseURL = url
 		return nil
 	}
 }
