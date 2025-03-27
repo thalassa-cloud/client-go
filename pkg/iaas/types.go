@@ -275,8 +275,14 @@ type RouteEntry struct {
 }
 
 type Machine struct {
-	Identity         string `json:"identity"`
-	Name             string `json:"name"`
+	Identity         string            `json:"identity"`
+	Name             string            `json:"name"`
+	Slug             string            `json:"slug"`
+	CreatedAt        time.Time         `json:"createdAt"`
+	UpdatedAt        *time.Time        `json:"updatedAt,omitempty"`
+	Description      *string           `json:"description,omitempty"`
+	Annotations      map[string]string `json:"annotations,omitempty"`
+	Labels           map[string]string `json:"labels,omitempty"`
 	State            MachineState
 	CloudInit        *string `json:"cloudInit"`
 	DeleteProtection bool    `json:"deleteProtection"`
