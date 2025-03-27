@@ -330,42 +330,29 @@ const (
 )
 
 type MachineTypeCategory struct {
-	Identity      string        `json:"identity"`
-	Name          string        `json:"name"`
-	Slug          string        `json:"slug"`
-	Description   string        `json:"description"`
-	CreatedAt     time.Time     `json:"createdAt"`
-	ObjectVersion int           `json:"objectVersion"`
-	MachineTypes  []MachineType `json:"machineTypes"`
+	Name         string        `json:"name"`
+	Description  string        `json:"description"`
+	MachineTypes []MachineType `json:"machineTypes"`
 }
 
 type MachineType struct {
-	Identity        string               `json:"identity"`
-	Name            string               `json:"name"`
-	Slug            string               `json:"slug"`
-	Description     string               `json:"description"`
-	Category        *MachineTypeCategory `json:"category"`
-	CreatedAt       time.Time            `json:"createdAt"`
-	ObjectVersion   int                  `json:"objectVersion"`
-	Vcpus           int                  `json:"vcpus"`
-	RamMb           int                  `json:"ramMb"`
-	DiskGb          int                  `json:"diskGb"`
-	EphemeralDiskGb int                  `json:"ephemeralDiskGb"`
-	SwapMb          int                  `json:"swapMb"`
-	Active          bool                 `json:"active"`
+	Identity    string `json:"identity"`
+	Name        string `json:"name"`
+	Slug        string `json:"slug"`
+	Description string `json:"description"`
+	Vcpus       int    `json:"vcpus"`
+	RamMb       int    `json:"ramMb"`
+	DiskGb      int    `json:"diskGb"`
+	SwapMb      int    `json:"swapMb"`
 }
 
 type MachineImage struct {
-	Identity      string    `json:"identity"`
-	Name          string    `json:"name"`
-	Slug          string    `json:"slug"`
-	Description   string    `json:"description"`
-	ArtifactUri   string    `json:"artifactUri"`
-	ImageType     string    `json:"imageType"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
-	ObjectVersion int       `json:"objectVersion"`
-	Architecture  string    `json:"architecture"`
+	Identity     string            `json:"identity"`
+	Name         string            `json:"name"`
+	Slug         string            `json:"slug"`
+	Labels       map[string]string `json:"labels"`
+	Description  string            `json:"description"`
+	Architecture string            `json:"architecture"`
 }
 
 type CreateVpc struct {
