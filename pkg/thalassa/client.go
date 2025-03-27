@@ -11,6 +11,9 @@ type Client interface {
 	IaaS() *iaas.Client
 	Kubernetes() *kubernetesclient.Client
 	Me() *me.Client
+
+	// SetOrganisation sets the organisation for the client
+	SetOrganisation(organisation string)
 }
 
 type thalassaCloudClient struct {
