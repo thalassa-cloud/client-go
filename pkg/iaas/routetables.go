@@ -87,6 +87,70 @@ func (c *Client) DeleteRouteTable(ctx context.Context, identity string) error {
 	return nil
 }
 
+// CreateRouteTableRoute creates a new route for a specific RouteTable.
+func (c *Client) CreateRouteTableRoute(ctx context.Context, identity string, create CreateRouteTableRoute) (*RouteTable, error) {
+	var routeTable *RouteTable
+	req := c.R().
+		SetBody(create).SetResult(&routeTable)
+
+	resp, err := c.Do(ctx, req, client.POST, fmt.Sprintf("%s/%s/routes", RouteTableEndpoint, identity))
+	if err != nil {
+		return nil, err
+	}
+	if err := c.Check(resp); err != nil {
+		return routeTable, err
+	}
+	return routeTable, nil
+}
+
+// GetRouteTableRoute retrieves a specific route for a specific RouteTable.
+func (c *Client) GetRouteTableRoute(ctx context.Context, identity string, routeIdentity string) (*RouteTable, error) {
+	var routeTable *RouteTable
+	req := c.R().
+		SetResult(&routeTable)
+
+	resp, err := c.Do(ctx, req, client.GET, fmt.Sprintf("%s/%s/routes/%s", RouteTableEndpoint, identity, routeIdentity))
+	if err != nil {
+		return nil, err
+	}
+	if err := c.Check(resp); err != nil {
+		return routeTable, err
+	}
+	return routeTable, nil
+}
+
+// DeleteRouteTableRoute deletes a specific route for a specific RouteTable.
+func (c *Client) DeleteRouteTableRoute(ctx context.Context, identity string, routeIdentity string) (*RouteTable, error) {
+	var routeTable *RouteTable
+	req := c.R().
+		SetResult(&routeTable)
+
+	resp, err := c.Do(ctx, req, client.DELETE, fmt.Sprintf("%s/%s/routes/%s", RouteTableEndpoint, identity, routeIdentity))
+	if err != nil {
+		return nil, err
+	}
+	if err := c.Check(resp); err != nil {
+		return routeTable, err
+	}
+	return routeTable, nil
+}
+
+// UpdateRouteTableRoute updates a specific route for a specific RouteTable.
+func (c *Client) UpdateRouteTableRoute(ctx context.Context, identity string, routeIdentity string, update UpdateRouteTableRoute) (*RouteTable, error) {
+	var routeTable *RouteTable
+	req := c.R().
+		SetBody(update).SetResult(&routeTable)
+
+	resp, err := c.Do(ctx, req, client.PUT, fmt.Sprintf("%s/%s/routes/%s", RouteTableEndpoint, identity, routeIdentity))
+	if err != nil {
+		return nil, err
+	}
+	if err := c.Check(resp); err != nil {
+		return routeTable, err
+	}
+	return routeTable, nil
+}
+
 // UpdateRouteTableRoutes updates the routes for a specific RouteTable.
 func (c *Client) UpdateRouteTableRoutes(ctx context.Context, identity string, update UpdateRouteTableRoutes) (*RouteTable, error) {
 	var routeTable *RouteTable

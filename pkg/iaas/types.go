@@ -423,10 +423,17 @@ type UpdateSubnet struct {
 }
 
 type UpdateRouteTableRoutes struct {
-	Routes []UpdateRouteRequest `json:"routes"`
+	Routes []UpdateRouteTableRoute `json:"routes"`
 }
 
-type UpdateRouteRequest struct {
+type CreateRouteTableRoute struct {
+	DestinationCidrBlock     string `json:"destinationCidrBlock"`
+	TargetGatewayIdentity    string `json:"targetGatewayIdentity,omitempty"`
+	TargetNatGatewayIdentity string `json:"targetNatGatewayIdentity,omitempty"`
+	GatewayAddress           string `json:"gatewayAddress,omitempty"`
+}
+
+type UpdateRouteTableRoute struct {
 	DestinationCidrBlock     string `json:"destinationCidrBlock"`
 	TargetGatewayIdentity    string `json:"targetGatewayIdentity,omitempty"`
 	TargetNatGatewayIdentity string `json:"targetNatGatewayIdentity,omitempty"`
