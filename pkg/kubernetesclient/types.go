@@ -41,24 +41,28 @@ type KubernetesVersion struct {
 
 // KubernetesCluster represents a Kubernetes cluster in the Thalassa Cloud Platform.
 type KubernetesCluster struct {
-	Identity                    string                                `json:"identity"`                    // Unique identifier for the cluster
-	Name                        string                                `json:"name"`                        // Display name of the cluster
-	Slug                        string                                `json:"slug"`                        // URL-friendly identifier
-	Description                 string                                `json:"description"`                 // Detailed description of the cluster
-	Labels                      map[string]string                     `json:"labels"`                      // Custom labels
-	Annotations                 map[string]string                     `json:"annotations"`                 // Custom annotations
-	CreatedAt                   time.Time                             `json:"createdAt"`                   // Creation timestamp
-	ObjectVersion               int                                   `json:"objectVersion"`               // Version for optimistic locking
-	Organisation                *base.Organisation                    `json:"organisation"`                // Associated organization
-	Status                      string                                `json:"status"`                      // Current cluster status
-	StatusMessage               string                                `json:"statusMessage"`               // Detailed status message
-	LastStatusTransitionedAt    time.Time                             `json:"lastStatusTransitioned_at"`   // Last status change timestamp
-	ClusterType                 KubernetesClusterType                 `json:"clusterType"`                 // Type of cluster deployment
-	ClusterVersion              KubernetesVersion                     `json:"clusterVersion"`              // Kubernetes version configuration
-	APIServerURL                string                                `json:"apiServerURL"`                // Kubernetes API server URL
-	APIServerCA                 string                                `json:"apiServerCA"`                 // API server CA certificate
-	Configuration               KubernetesClusterConfiguration        `json:"configuration"`               // Cluster configuration
-	VPC                         *iaas.Vpc                             `json:"vpc"`                         // Associated VPC (not set for hosted-control-plane)
+	Identity                 string                         `json:"identity"`                  // Unique identifier for the cluster
+	Name                     string                         `json:"name"`                      // Display name of the cluster
+	Slug                     string                         `json:"slug"`                      // URL-friendly identifier
+	Description              string                         `json:"description"`               // Detailed description of the cluster
+	Labels                   map[string]string              `json:"labels"`                    // Custom labels
+	Annotations              map[string]string              `json:"annotations"`               // Custom annotations
+	CreatedAt                time.Time                      `json:"createdAt"`                 // Creation timestamp
+	ObjectVersion            int                            `json:"objectVersion"`             // Version for optimistic locking
+	Organisation             *base.Organisation             `json:"organisation"`              // Associated organization
+	Status                   string                         `json:"status"`                    // Current cluster status
+	StatusMessage            string                         `json:"statusMessage"`             // Detailed status message
+	LastStatusTransitionedAt time.Time                      `json:"lastStatusTransitioned_at"` // Last status change timestamp
+	ClusterType              KubernetesClusterType          `json:"clusterType"`               // Type of cluster deployment
+	ClusterVersion           KubernetesVersion              `json:"clusterVersion"`            // Kubernetes version configuration
+	APIServerURL             string                         `json:"apiServerURL"`              // Kubernetes API server URL
+	APIServerCA              string                         `json:"apiServerCA"`               // API server CA certificate
+	Configuration            KubernetesClusterConfiguration `json:"configuration"`             // Cluster configuration
+
+	VPC    *iaas.Vpc    `json:"vpc"`    // Associated VPC (not set for hosted-control-plane)
+	Subnet *iaas.Subnet `json:"subnet"` // Associated subnet (not set for hosted-control-plane)
+	Region *iaas.Region `json:"region"` // Associated region
+
 	PodSecurityStandardsProfile KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile"` // Pod security standards configuration
 	AuditLogProfile             KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile"`             // Audit logging configuration
 	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`        // Default network policy

@@ -120,19 +120,17 @@ func (c *Client) GetRouteTableRoute(ctx context.Context, identity string, routeI
 }
 
 // DeleteRouteTableRoute deletes a specific route for a specific RouteTable.
-func (c *Client) DeleteRouteTableRoute(ctx context.Context, identity string, routeIdentity string) (*RouteEntry, error) {
-	var routeEntry *RouteEntry
-	req := c.R().
-		SetResult(&routeEntry)
+func (c *Client) DeleteRouteTableRoute(ctx context.Context, identity string, routeIdentity string) error {
+	req := c.R()
 
 	resp, err := c.Do(ctx, req, client.DELETE, fmt.Sprintf("%s/%s/routes/%s", RouteTableEndpoint, identity, routeIdentity))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if err := c.Check(resp); err != nil {
-		return routeEntry, err
+		return err
 	}
-	return routeEntry, nil
+	return nil
 }
 
 // UpdateRouteTableRoute updates a specific route for a specific RouteTable.
