@@ -160,37 +160,47 @@ type KubernetesNodePool struct {
 	Labels        map[string]string `json:"labels"`        // Custom labels
 	Annotations   map[string]string `json:"annotations"`   // Custom annotations
 
-	Status string `json:"status"` // Current status of the node pool
+	Status KubernetesNodePoolStatus `json:"status"` // Current status of the node pool
 
 	EnableAutoscaling bool `json:"enableAutoscaling"` // Whether autoscaling is enabled
+	EnableAutoHealing bool `json:"enableAutoHealing"` // Whether auto-healing is enabled
 	Replicas          int  `json:"replicas"`          // Current number of nodes
 	MinReplicas       int  `json:"minReplicas"`       // Minimum number of nodes for autoscaling
 	MaxReplicas       int  `json:"maxReplicas"`       // Maximum number of nodes for autoscaling
 
-	MachineType  iaas.MachineType       `json:"machineType"`  // Type of machine for nodes
-	NodeSettings KubernetesNodeSettings `json:"nodeSettings"` // Node-specific settings
+	MachineType       iaas.MachineType       `json:"machineType"`       // Type of machine for nodes
+	NodeSettings      KubernetesNodeSettings `json:"nodeSettings"`      // Node-specific settings
+	KubernetesVersion *KubernetesVersion     `json:"kubernetesVersion"` // Kubernetes version for node pool
 }
 
 // CreateKubernetesNodePool represents the configuration for creating a new node pool.
 type CreateKubernetesNodePool struct {
-	Name              string                 `json:"name"`              // Display name for the node pool
-	MachineType       string                 `json:"machineType"`       // Type of machine for nodes
-	Replicas          int                    `json:"replicas"`          // Initial number of nodes
-	EnableAutoscaling bool                   `json:"enableAutoscaling"` // Whether to enable autoscaling
-	MinReplicas       int                    `json:"minReplicas"`       // Minimum nodes for autoscaling
-	MaxReplicas       int                    `json:"maxReplicas"`       // Maximum nodes for autoscaling
-	NodeSettings      KubernetesNodeSettings `json:"nodeSettings"`      // Node-specific settings
+	Name                      string                             `json:"name"`                      // Display name for the node pool
+	Description               string                             `json:"description"`               // Detailed description
+	MachineType               string                             `json:"machineType"`               // Type of machine for nodes
+	Replicas                  int                                `json:"replicas"`                  // Initial number of nodes
+	EnableAutoscaling         bool                               `json:"enableAutoscaling"`         // Whether to enable autoscaling
+	MinReplicas               int                                `json:"minReplicas"`               // Minimum nodes for autoscaling
+	MaxReplicas               int                                `json:"maxReplicas"`               // Maximum nodes for autoscaling
+	NodeSettings              KubernetesNodeSettings             `json:"nodeSettings"`              // Node-specific settings
+	SubnetIdentity            *string                            `json:"subnetIdentity"`            // Subnet for node pool deployment
+	EnableAutoHealing         bool                               `json:"enableAutoHealing"`         // Whether auto-healing is enabled
+	KubernetesVersionIdentity *string                            `json:"kubernetesVersionIdentity"` // Kubernetes version for node pool
+	UpgradeStrategy           *KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`           // Upgrade strategy for node pool
 }
 
 // UpdateKubernetesNodePool represents the configuration for updating an existing node pool.
 type UpdateKubernetesNodePool struct {
-	Description       string                 `json:"description"`       // New description
-	MachineType       string                 `json:"machineType"`       // New machine type
-	Replicas          int                    `json:"replicas"`          // New number of nodes
-	EnableAutoscaling bool                   `json:"enableAutoscaling"` // Updated autoscaling setting
-	MinReplicas       int                    `json:"minReplicas"`       // New minimum nodes for autoscaling
-	MaxReplicas       int                    `json:"maxReplicas"`       // New maximum nodes for autoscaling
-	NodeSettings      KubernetesNodeSettings `json:"nodeSettings"`      // Updated node settings
+	Description               string                             `json:"description"`               // New description
+	MachineType               string                             `json:"machineType"`               // New machine type
+	Replicas                  *int                               `json:"replicas"`                  // New number of nodes
+	EnableAutoscaling         *bool                              `json:"enableAutoscaling"`         // Updated autoscaling setting
+	MinReplicas               *int                               `json:"minReplicas"`               // New minimum nodes for autoscaling
+	MaxReplicas               *int                               `json:"maxReplicas"`               // New maximum nodes for autoscaling
+	NodeSettings              *KubernetesNodeSettings            `json:"nodeSettings"`              // Updated node settings
+	UpgradeStrategy           *KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`           // Upgrade strategy for node pool
+	EnableAutoHealing         *bool                              `json:"enableAutoHealing"`         // Whether auto-healing is enabled
+	KubernetesVersionIdentity *string                            `json:"kubernetesVersionIdentity"` // Kubernetes version for node pool
 }
 
 // KubernetesNodeSettings represents the configuration settings for nodes in a node pool.
@@ -206,3 +216,23 @@ type NodeTaint struct {
 	Value  string `json:"value"`  // Taint value
 	Effect string `json:"effect"` // Taint effect (NoSchedule, PreferNoSchedule, NoExecute)
 }
+
+type KubernetesNodePoolUpgradeStrategy string
+
+const (
+	KubernetesNodePoolUpgradeStrategyAlways   KubernetesNodePoolUpgradeStrategy = "always"
+	KubernetesNodePoolUpgradeStrategyOnDelete KubernetesNodePoolUpgradeStrategy = "onDelete"
+	KubernetesNodePoolUpgradeStrategyInplace  KubernetesNodePoolUpgradeStrategy = "inPlace"
+	KubernetesNodePoolUpgradeStrategyNever    KubernetesNodePoolUpgradeStrategy = "never"
+)
+
+type KubernetesNodePoolStatus string
+
+const (
+	KubernetesNodePoolStatusProvisioning KubernetesNodePoolStatus = "provisioning"
+	KubernetesNodePoolStatusReady        KubernetesNodePoolStatus = "ready"
+	KubernetesNodePoolStatusFailed       KubernetesNodePoolStatus = "failed"
+	KubernetesNodePoolStatusUpdating     KubernetesNodePoolStatus = "updating"
+	KubernetesNodePoolStatusDeleting     KubernetesNodePoolStatus = "deleting"
+	KubernetesNodePoolStatusDeleted      KubernetesNodePoolStatus = "deleted"
+)
