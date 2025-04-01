@@ -189,11 +189,14 @@ type Volume struct {
 	Labels      map[string]string `json:"labels"`
 	Annotations map[string]string `json:"annotations"`
 
-	Attachments  []VolumeAttachment `json:"attachments"`
-	Organisation *base.Organisation `json:"organisation"`
-	CloudRegion  *Region            `json:"cloudRegion"`
-	Type         string             `json:"type"`
-	Size         int                `json:"size"`
+	// SourceMachineImage is the machine image that was used to create the volume. Only set if the volume was created from a machine image.
+	SourceMachineImage *MachineImage      `json:"sourceMachineImage"`
+	VolumeType         *VolumeType        `json:"volumeType"`
+	Attachments        []VolumeAttachment `json:"attachments"`
+	Organisation       *base.Organisation `json:"organisation"`
+	CloudRegion        *Region            `json:"cloudRegion"`
+	Size               int                `json:"size"`
+	DeleteProtection   bool               `json:"deleteProtection"`
 }
 
 type VolumeType struct {
@@ -381,14 +384,16 @@ type CreateVolume struct {
 	Size                int               `json:"size"`
 	CloudRegionIdentity string            `json:"cloudRegionIdentity"`
 	VolumeTypeIdentity  string            `json:"volumeTypeIdentity"`
+	DeleteProtection    bool              `json:"deleteProtection"`
 }
 
 type UpdateVolume struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
-	Size        int               `json:"size"`
+	Name             string            `json:"name"`
+	Description      string            `json:"description"`
+	Labels           map[string]string `json:"labels"`
+	Annotations      map[string]string `json:"annotations"`
+	Size             int               `json:"size"`
+	DeleteProtection bool              `json:"deleteProtection"`
 }
 
 type AttachVolumeRequest struct {
