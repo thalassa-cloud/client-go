@@ -492,11 +492,11 @@ type CreateMachine struct {
 }
 
 type CreateMachineVolume struct {
-	ExistingVolumeRef  string `json:"existingVolumeRef"`
-	VolumeTypeIdentity string `json:"volumeTypeIdentity"`
-	Size               int    `json:"size"`
-	Name               string `json:"name"`
-	Description        string `json:"description"`
+	ExistingVolumeRef  *string `json:"existingVolumeRef,omitempty"`
+	VolumeTypeIdentity string  `json:"volumeTypeIdentity"`
+	Size               int     `json:"size"`
+	Name               *string `json:"name,omitempty"`
+	Description        *string `json:"description,omitempty"`
 }
 
 type UpdateMachine struct {
