@@ -86,7 +86,7 @@ func (c *thalassaCloudClient) AddMiddleware(mw func(*resty.Client, *resty.Reques
 
 func WithUserAgent(ua string) Option {
 	return func(c *thalassaCloudClient) error {
-		c.resty.SetHeader("User-Agent", ua)
+		c.userAgent = ua
 		return nil
 	}
 }

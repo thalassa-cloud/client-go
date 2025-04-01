@@ -15,6 +15,10 @@ import (
 	"golang.org/x/time/rate"
 )
 
+const (
+	DefaultUserAgent = "thalassa-cloud-client-go (https://github.com/thalassa-cloud/client-go)"
+)
+
 // Option is a function that modifies the Client.
 type Option func(*thalassaCloudClient) error
 
@@ -67,7 +71,10 @@ type Client interface {
 
 // NewClient applies all options, configures authentication, and returns the client.
 func NewClient(opts ...Option) (Client, error) {
-	c := &thalassaCloudClient{resty: resty.New()}
+	c := &thalassaCloudClient{
+		resty:     resty.New(),
+		userAgent: DefaultUserAgent,
+	}
 
 	for _, opt := range opts {
 		if err := opt(c); err != nil {
@@ -90,7 +97,8 @@ type thalassaCloudClient struct {
 	// Underlying resty client.
 	resty *resty.Client
 
-	baseURL string
+	baseURL   string
+	userAgent string
 
 	organisationIdentity *string
 	projectIdentity      *string
@@ -124,7 +132,7 @@ func (c *thalassaCloudClient) WithOptions(opts ...Option) Client {
 }
 
 func (c *thalassaCloudClient) R() *resty.Request {
-	return c.resty.R()
+	return c.resty.R().SetHeader("User-Agent", c.userAgent)
 }
 
 func (c *thalassaCloudClient) GetOrganisationIdentity() string {
