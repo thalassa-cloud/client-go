@@ -465,7 +465,6 @@ type CreateVpcNatGateway struct {
 	Description    string            `json:"description"`
 	Labels         map[string]string `json:"labels"`
 	Annotations    map[string]string `json:"annotations"`
-	VpcIdentity    string            `json:"vpcIdentity"`
 	SubnetIdentity string            `json:"subnetIdentity"`
 }
 
