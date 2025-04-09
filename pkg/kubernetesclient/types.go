@@ -9,34 +9,53 @@ import (
 
 // KubernetesClusterSessionToken represents the authentication and connection details for a Kubernetes cluster session.
 type KubernetesClusterSessionToken struct {
-	Username      string `json:"username"`      // Username for cluster authentication
-	APIServerURL  string `json:"apiServerUrl"`  // URL of the Kubernetes API server
-	CACertificate string `json:"caCertificate"` // CA certificate for API server verification
-	Identity      string `json:"identity"`      // Unique identifier for the session
-	Token         string `json:"token"`         // Authentication token
-	Kubeconfig    string `json:"kubeconfig"`    // Complete kubeconfig file content
+	// Username for cluster authentication
+	Username string `json:"username"`
+	// URL of the Kubernetes API server
+	APIServerURL string `json:"apiServerUrl"`
+	// CA certificate for API server verification
+	CACertificate string `json:"caCertificate"`
+	// Unique identifier for the session
+	Identity string `json:"identity"`
+	// Authentication token
+	Token string `json:"token"`
+	// Complete kubeconfig file content
+	Kubeconfig string `json:"kubeconfig"`
 }
 
 // KubernetesVersion represents a supported Kubernetes version configuration.
 type KubernetesVersion struct {
-	Identity    string            `json:"identity"`    // Unique identifier for the version
-	Name        string            `json:"name"`        // Display name of the version
-	Slug        string            `json:"slug"`        // URL-friendly identifier
-	Description string            `json:"description"` // Detailed description of the version
-	CreatedAt   time.Time         `json:"createdAt"`   // Creation timestamp
-	Labels      map[string]string `json:"labels"`      // Custom labels
-	Annotations map[string]string `json:"annotations"` // Custom annotations
+	// Unique identifier for the version
+	Identity string `json:"identity"`
+	// Display name of the version
+	Name string `json:"name"`
+	// URL-friendly identifier
+	Slug string `json:"slug"`
+	// Detailed description of the version
+	Description string `json:"description"`
+	// Creation timestamp
+	CreatedAt time.Time `json:"createdAt"`
+	// Custom annotations
+	Annotations map[string]string `json:"annotations"`
+	// Whether this version is available for use
+	Enabled bool `json:"enabled"`
 
-	Enabled bool `json:"enabled"` // Whether this version is available for use
-
-	KubernetesVersion             string `json:"kubernetesVersion"`             // Core Kubernetes version
-	ContainerdVersion             string `json:"containerdVersion"`             // Container runtime version
-	CNIPluginsVersion             string `json:"cniPluginsVersion"`             // CNI plugins version
-	CrictlVersion                 string `json:"crictlVersion"`                 // CRI tools version
-	RuncVersion                   string `json:"runcVersion"`                   // Container runtime spec version
-	CiliumVersion                 string `json:"ciliumVersion"`                 // Cilium CNI version
-	CloudControllerManagerVersion string `json:"cloudControllerManagerVersion"` // Cloud controller manager version
-	IstioVersion                  string `json:"istioVersion"`                  // Istio service mesh version
+	// Core Kubernetes version
+	KubernetesVersion string `json:"kubernetesVersion"`
+	// Container runtime version
+	ContainerdVersion string `json:"containerdVersion"`
+	// CNI plugins version
+	CNIPluginsVersion string `json:"cniPluginsVersion"`
+	// CRI tools version
+	CrictlVersion string `json:"crictlVersion"`
+	// Container runtime spec version
+	RuncVersion string `json:"runcVersion"`
+	// Cilium CNI version
+	CiliumVersion string `json:"ciliumVersion"`
+	// Cloud controller manager version
+	CloudControllerManagerVersion string `json:"cloudControllerManagerVersion"`
+	// Istio service mesh version
+	IstioVersion string `json:"istioVersion"`
 }
 
 // KubernetesCluster represents a Kubernetes cluster in the Thalassa Cloud Platform.
@@ -162,45 +181,54 @@ type KubernetesNodePool struct {
 
 	Status KubernetesNodePoolStatus `json:"status"` // Current status of the node pool
 
+	Vpc    *iaas.Vpc    `json:"vpc"`    // Associated VPC
+	Subnet *iaas.Subnet `json:"subnet"` // Associated subnet
+
 	EnableAutoscaling bool `json:"enableAutoscaling"` // Whether autoscaling is enabled
 	EnableAutoHealing bool `json:"enableAutoHealing"` // Whether auto-healing is enabled
 	Replicas          int  `json:"replicas"`          // Current number of nodes
 	MinReplicas       int  `json:"minReplicas"`       // Minimum number of nodes for autoscaling
 	MaxReplicas       int  `json:"maxReplicas"`       // Maximum number of nodes for autoscaling
 
-	MachineType       iaas.MachineType       `json:"machineType"`       // Type of machine for nodes
-	NodeSettings      KubernetesNodeSettings `json:"nodeSettings"`      // Node-specific settings
-	KubernetesVersion *KubernetesVersion     `json:"kubernetesVersion"` // Kubernetes version for node pool
+	MachineType       iaas.MachineType                  `json:"machineType"`       // Type of machine for nodes
+	NodeSettings      KubernetesNodeSettings            `json:"nodeSettings"`      // Node-specific settings
+	KubernetesVersion *KubernetesVersion                `json:"kubernetesVersion"` // Kubernetes version for node pool
+	UpgradeStrategy   KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`   // Upgrade strategy for node pool
 }
 
 // CreateKubernetesNodePool represents the configuration for creating a new node pool.
 type CreateKubernetesNodePool struct {
-	Name                      string                             `json:"name"`                      // Display name for the node pool
-	Description               string                             `json:"description"`               // Detailed description
-	MachineType               string                             `json:"machineType"`               // Type of machine for nodes
-	Replicas                  int                                `json:"replicas"`                  // Initial number of nodes
-	EnableAutoscaling         bool                               `json:"enableAutoscaling"`         // Whether to enable autoscaling
-	MinReplicas               int                                `json:"minReplicas"`               // Minimum nodes for autoscaling
-	MaxReplicas               int                                `json:"maxReplicas"`               // Maximum nodes for autoscaling
-	NodeSettings              KubernetesNodeSettings             `json:"nodeSettings"`              // Node-specific settings
-	SubnetIdentity            *string                            `json:"subnetIdentity"`            // Subnet for node pool deployment
-	EnableAutoHealing         bool                               `json:"enableAutoHealing"`         // Whether auto-healing is enabled
+	Name        string `json:"name"`        // Display name for the node pool
+	Description string `json:"description"` // Detailed description
+
+	MachineType    string  `json:"machineType"`    // Type of machine for nodes
+	Replicas       int     `json:"replicas"`       // Initial number of nodes
+	MinReplicas    int     `json:"minReplicas"`    // Minimum nodes for autoscaling
+	MaxReplicas    int     `json:"maxReplicas"`    // Maximum nodes for autoscaling
+	SubnetIdentity *string `json:"subnetIdentity"` // Subnet for node pool deployment
+
 	KubernetesVersionIdentity *string                            `json:"kubernetesVersionIdentity"` // Kubernetes version for node pool
 	UpgradeStrategy           *KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`           // Upgrade strategy for node pool
+	EnableAutoscaling         bool                               `json:"enableAutoscaling"`         // Whether to enable autoscaling
+	EnableAutoHealing         bool                               `json:"enableAutoHealing"`         // Whether auto-healing is enabled
+	NodeSettings              KubernetesNodeSettings             `json:"nodeSettings"`              // Node-specific settings
 }
 
 // UpdateKubernetesNodePool represents the configuration for updating an existing node pool.
 type UpdateKubernetesNodePool struct {
-	Description               string                             `json:"description"`               // New description
-	MachineType               string                             `json:"machineType"`               // New machine type
-	Replicas                  *int                               `json:"replicas"`                  // New number of nodes
-	EnableAutoscaling         *bool                              `json:"enableAutoscaling"`         // Updated autoscaling setting
-	MinReplicas               *int                               `json:"minReplicas"`               // New minimum nodes for autoscaling
-	MaxReplicas               *int                               `json:"maxReplicas"`               // New maximum nodes for autoscaling
-	NodeSettings              *KubernetesNodeSettings            `json:"nodeSettings"`              // Updated node settings
-	UpgradeStrategy           *KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`           // Upgrade strategy for node pool
-	EnableAutoHealing         *bool                              `json:"enableAutoHealing"`         // Whether auto-healing is enabled
-	KubernetesVersionIdentity *string                            `json:"kubernetesVersionIdentity"` // Kubernetes version for node pool
+	Description string `json:"description"` // New description
+
+	MachineType               string  `json:"machineType"`               // New machine type
+	Replicas                  *int    `json:"replicas"`                  // New number of nodes
+	MinReplicas               *int    `json:"minReplicas"`               // New minimum nodes for autoscaling
+	MaxReplicas               *int    `json:"maxReplicas"`               // New maximum nodes for autoscaling
+	KubernetesVersionIdentity *string `json:"kubernetesVersionIdentity"` // Kubernetes version for node pool
+
+	UpgradeStrategy   *KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`   // Upgrade strategy for node pool
+	EnableAutoHealing *bool                              `json:"enableAutoHealing"` // Whether auto-healing is enabled
+	EnableAutoscaling *bool                              `json:"enableAutoscaling"` // Updated autoscaling setting
+
+	NodeSettings *KubernetesNodeSettings `json:"nodeSettings"` // Updated node settings
 }
 
 // KubernetesNodeSettings represents the configuration settings for nodes in a node pool.
