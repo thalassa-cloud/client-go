@@ -46,9 +46,9 @@ type Vpc struct {
 	ObjectVersion int       `json:"objectVersion"`
 	Status        string    `json:"status"`
 
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
-	CIDRs       []string          `json:"cidrs"`
+	Labels      Labels      `json:"labels"`
+	Annotations Annotations `json:"annotations"`
+	CIDRs       []string    `json:"cidrs"`
 
 	Organisation  *base.Organisation `json:"organisation"`
 	CloudRegion   *Region            `json:"cloudRegion"`
@@ -66,19 +66,19 @@ type Subnet struct {
 	UpdatedAt     time.Time `json:"updatedAt"`
 	ObjectVersion int       `json:"objectVersion"`
 
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Labels      Labels      `json:"labels"`
+	Annotations Annotations `json:"annotations"`
 
 	VpcIdentity string `json:"vpcIdentity"`
 	Vpc         *Vpc   `json:"vpc"`
-	CloudZone   *Zone  `json:"cloudZone"`
 	Cidr        string `json:"cidr"`
 
-	RouteTable     *RouteTable `json:"routeTable,omitempty"`
-	V4usingIPs     int         `json:"v4usingIPs"`
-	V4availableIPs int         `json:"v4availableIPs"`
-	V6usingIPs     int         `json:"v6usingIPs"`
-	V6availableIPs int         `json:"v6availableIPs"`
+	RouteTable *RouteTable `json:"routeTable,omitempty"`
+
+	V4usingIPs     int `json:"v4usingIPs"`
+	V4availableIPs int `json:"v4availableIPs"`
+	V6usingIPs     int `json:"v6usingIPs"`
+	V6availableIPs int `json:"v6availableIPs"`
 }
 
 type VpcNatGateway struct {
@@ -106,16 +106,16 @@ type VpcNatGateway struct {
 }
 
 type VpcLoadbalancer struct {
-	Identity      string            `json:"identity"`
-	Name          string            `json:"name"`
-	Slug          string            `json:"slug"`
-	Description   string            `json:"description"`
-	CreatedAt     time.Time         `json:"createdAt"`
-	UpdatedAt     time.Time         `json:"updatedAt"`
-	ObjectVersion int               `json:"objectVersion"`
-	Labels        map[string]string `json:"labels"`
-	Annotations   map[string]string `json:"annotations"`
-	Status        string            `json:"status"`
+	Identity      string      `json:"identity"`
+	Name          string      `json:"name"`
+	Slug          string      `json:"slug"`
+	Description   string      `json:"description"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	UpdatedAt     time.Time   `json:"updatedAt"`
+	ObjectVersion int         `json:"objectVersion"`
+	Labels        Labels      `json:"labels"`
+	Annotations   Annotations `json:"annotations"`
+	Status        string      `json:"status"`
 
 	Organisation   *base.Organisation `json:"organisation"`
 	VpcIdentity    string             `json:"vpcIdentity"`
@@ -184,8 +184,8 @@ type Volume struct {
 	ObjectVersion int       `json:"objectVersion"`
 	Status        string    `json:"status"`
 
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Labels      Labels      `json:"labels"`
+	Annotations Annotations `json:"annotations"`
 
 	// SourceMachineImage is the machine image that was used to create the volume. Only set if the volume was created from a machine image.
 	SourceMachineImage *MachineImage      `json:"sourceMachineImage"`
@@ -228,12 +228,12 @@ type VpcGatewayEndpoint struct {
 	Description   *string           `json:"description,omitempty"`
 	Annotations   map[string]string `json:"annotations,omitempty"`
 	Labels        map[string]string `json:"labels,omitempty"`
-	CreatedAt     time.Time         `json:"createdAt"`           // ISO date string
-	UpdatedAt     *time.Time        `json:"updatedAt,omitempty"` // optional
-	DeletedAt     *time.Time        `json:"deletedAt,omitempty"` // optional
+	CreatedAt     time.Time         `json:"createdAt"`
+	UpdatedAt     *time.Time        `json:"updatedAt,omitempty"`
+	DeletedAt     *time.Time        `json:"deletedAt,omitempty"`
 	ObjectVersion int               `json:"objectVersion"`
 
-	EndpointAddress  string             `json:"endpointAddress"` // IP address
+	EndpointAddress  string             `json:"endpointAddress"`
 	EndpointHostname string             `json:"endpointHostname"`
 	Vpc              *Vpc               `json:"vpc,omitempty"`
 	Organisation     *base.Organisation `json:"organisation,omitempty"`
@@ -249,9 +249,9 @@ type RouteTable struct {
 	Description   *string           `json:"description,omitempty"`
 	Annotations   map[string]string `json:"annotations,omitempty"`
 	Labels        map[string]string `json:"labels,omitempty"`
-	CreatedAt     time.Time         `json:"createdAt"`           // ISO date string
-	UpdatedAt     *time.Time        `json:"updatedAt,omitempty"` // optional
-	DeletedAt     *time.Time        `json:"deletedAt,omitempty"` // optional
+	CreatedAt     time.Time         `json:"createdAt"`
+	UpdatedAt     *time.Time        `json:"updatedAt,omitempty"`
+	DeletedAt     *time.Time        `json:"deletedAt,omitempty"`
 	ObjectVersion int               `json:"objectVersion"`
 
 	Organisation      *base.Organisation `json:"organisation,omitempty"`
@@ -276,14 +276,14 @@ type RouteEntry struct {
 }
 
 type Machine struct {
-	Identity         string            `json:"identity"`
-	Name             string            `json:"name"`
-	Slug             string            `json:"slug"`
-	CreatedAt        time.Time         `json:"createdAt"`
-	UpdatedAt        *time.Time        `json:"updatedAt,omitempty"`
-	Description      *string           `json:"description,omitempty"`
-	Annotations      map[string]string `json:"annotations,omitempty"`
-	Labels           map[string]string `json:"labels,omitempty"`
+	Identity         string      `json:"identity"`
+	Name             string      `json:"name"`
+	Slug             string      `json:"slug"`
+	CreatedAt        time.Time   `json:"createdAt"`
+	UpdatedAt        *time.Time  `json:"updatedAt,omitempty"`
+	Description      *string     `json:"description,omitempty"`
+	Annotations      Annotations `json:"annotations,omitempty"`
+	Labels           Labels      `json:"labels,omitempty"`
 	State            MachineState
 	CloudInit        *string `json:"cloudInit"`
 	DeleteProtection bool    `json:"deleteProtection"`
@@ -318,8 +318,6 @@ type VirtualMachineInterface struct {
 type MachineState string
 
 const (
-	// MachineStateCreating is the state of the machine that is being created
-	MachineStateCreating MachineState = "creating"
 	// MachineStateRunning is the state of the machine that is running
 	MachineStateRunning MachineState = "running"
 	// MachineStateStopped is the state of the machine that is stopped
@@ -357,41 +355,41 @@ type MachineImage struct {
 }
 
 type CreateVpc struct {
-	Name                string            `json:"name"`
-	Description         string            `json:"description"`
-	Labels              map[string]string `json:"labels"`
-	Annotations         map[string]string `json:"annotations"`
-	CloudRegionIdentity string            `json:"cloudRegionIdentity"`
-	VpcCidrs            []string          `json:"vpcCidrs"`
+	Name                string      `json:"name"`
+	Description         string      `json:"description"`
+	Labels              Labels      `json:"labels"`
+	Annotations         Annotations `json:"annotations"`
+	CloudRegionIdentity string      `json:"cloudRegionIdentity"`
+	VpcCidrs            []string    `json:"vpcCidrs"`
 }
 
 type UpdateVpc struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
-	VpcCidrs    []string          `json:"vpcCidrs"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Labels      Labels      `json:"labels"`
+	Annotations Annotations `json:"annotations"`
+	VpcCidrs    []string    `json:"vpcCidrs"`
 }
 
 type CreateVolume struct {
-	Name                string            `json:"name"`
-	Description         string            `json:"description"`
-	Labels              map[string]string `json:"labels"`
-	Annotations         map[string]string `json:"annotations"`
-	Type                string            `json:"type"`
-	Size                int               `json:"size"`
-	CloudRegionIdentity string            `json:"cloudRegionIdentity"`
-	VolumeTypeIdentity  string            `json:"volumeTypeIdentity"`
-	DeleteProtection    bool              `json:"deleteProtection"`
+	Name                string      `json:"name"`
+	Description         string      `json:"description"`
+	Labels              Labels      `json:"labels"`
+	Annotations         Annotations `json:"annotations"`
+	Type                string      `json:"type"`
+	Size                int         `json:"size"`
+	CloudRegionIdentity string      `json:"cloudRegionIdentity"`
+	VolumeTypeIdentity  string      `json:"volumeTypeIdentity"`
+	DeleteProtection    bool        `json:"deleteProtection"`
 }
 
 type UpdateVolume struct {
-	Name             string            `json:"name"`
-	Description      string            `json:"description"`
-	Labels           map[string]string `json:"labels"`
-	Annotations      map[string]string `json:"annotations"`
-	Size             int               `json:"size"`
-	DeleteProtection bool              `json:"deleteProtection"`
+	Name             string      `json:"name"`
+	Description      string      `json:"description"`
+	Labels           Labels      `json:"labels"`
+	Annotations      Annotations `json:"annotations"`
+	Size             int         `json:"size"`
+	DeleteProtection bool        `json:"deleteProtection"`
 }
 
 type AttachVolumeRequest struct {
@@ -418,11 +416,11 @@ type CreateSubnet struct {
 }
 
 type UpdateSubnet struct {
-	Name                         string            `json:"name"`
-	Description                  string            `json:"description"`
-	Labels                       map[string]string `json:"labels,omitempty"`
-	Annotations                  map[string]string `json:"annotations,omitempty"`
-	AssociatedRouteTableIdentity *string           `json:"associatedRouteTableIdentity,omitempty"`
+	Name                         string      `json:"name"`
+	Description                  string      `json:"description"`
+	Labels                       Labels      `json:"labels,omitempty"`
+	Annotations                  Annotations `json:"annotations,omitempty"`
+	AssociatedRouteTableIdentity *string     `json:"associatedRouteTableIdentity,omitempty"`
 }
 
 type UpdateRouteTableRoutes struct {
@@ -444,33 +442,33 @@ type UpdateRouteTableRoute struct {
 }
 
 type CreateRouteTable struct {
-	Name        string            `json:"name"`
-	Description *string           `json:"description,omitempty"`
-	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
-	VpcIdentity string            `json:"vpcIdentity"`
+	Name        string      `json:"name"`
+	Description *string     `json:"description,omitempty"`
+	Labels      Labels      `json:"labels,omitempty"`
+	Annotations Annotations `json:"annotations,omitempty"`
+	VpcIdentity string      `json:"vpcIdentity"`
 }
 
 type UpdateRouteTable struct {
-	Name        *string           `json:"name,omitempty"`
-	Description *string           `json:"description,omitempty"`
-	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
+	Name        *string     `json:"name,omitempty"`
+	Description *string     `json:"description,omitempty"`
+	Labels      Labels      `json:"labels,omitempty"`
+	Annotations Annotations `json:"annotations,omitempty"`
 }
 
 type CreateVpcNatGateway struct {
-	Name           string            `json:"name"`
-	Description    string            `json:"description"`
-	Labels         map[string]string `json:"labels"`
-	Annotations    map[string]string `json:"annotations"`
-	SubnetIdentity string            `json:"subnetIdentity"`
+	Name           string      `json:"name"`
+	Description    string      `json:"description"`
+	Labels         Labels      `json:"labels"`
+	Annotations    Annotations `json:"annotations"`
+	SubnetIdentity string      `json:"subnetIdentity"`
 }
 
 type UpdateVpcNatGateway struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Labels      Labels      `json:"labels"`
+	Annotations Annotations `json:"annotations"`
 }
 
 type CreateMachine struct {
@@ -519,33 +517,35 @@ type CreateLoadbalancer struct {
 }
 
 type UpdateLoadbalancer struct {
-	Name                     string            `json:"name"`
-	Description              string            `json:"description"`
-	Labels                   map[string]string `json:"labels,omitempty"`
-	Annotations              map[string]string `json:"annotations,omitempty"`
-	DeleteProtection         bool              `json:"deleteProtection"`
-	SecurityGroupAttachments []string          `json:"securityGroupAttachments,omitempty"`
+	Name             string      `json:"name"`
+	Description      string      `json:"description"`
+	Labels           Labels      `json:"labels,omitempty"`
+	Annotations      Annotations `json:"annotations,omitempty"`
+	DeleteProtection bool        `json:"deleteProtection"`
+
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the loadbalancer.
+	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 type CreateTargetGroup struct {
-	Name           string            `json:"name"`
-	Description    string            `json:"description"`
-	Labels         map[string]string `json:"labels,omitempty"`
-	Annotations    map[string]string `json:"annotations,omitempty"`
-	Vpc            string            `json:"vpc"`
-	TargetPort     int               `json:"targetPort"`
-	Protocol       string            `json:"protocol"`
-	TargetSelector map[string]string `json:"targetSelector,omitempty"`
+	Name           string               `json:"name"`
+	Description    string               `json:"description"`
+	Labels         Labels               `json:"labels,omitempty"`
+	Annotations    Annotations          `json:"annotations,omitempty"`
+	Vpc            string               `json:"vpc"`
+	TargetPort     int                  `json:"targetPort"`
+	Protocol       LoadbalancerProtocol `json:"protocol"`
+	TargetSelector map[string]string    `json:"targetSelector,omitempty"`
 }
 
 type UpdateTargetGroup struct {
-	Name           string            `json:"name"`
-	Description    string            `json:"description"`
-	Labels         map[string]string `json:"labels,omitempty"`
-	Annotations    map[string]string `json:"annotations,omitempty"`
-	TargetPort     int               `json:"targetPort"`
-	Protocol       string            `json:"protocol"`
-	TargetSelector map[string]string `json:"targetSelector,omitempty"`
+	Name           string               `json:"name"`
+	Description    string               `json:"description"`
+	Labels         Labels               `json:"labels,omitempty"`
+	Annotations    Annotations          `json:"annotations,omitempty"`
+	TargetPort     int                  `json:"targetPort"`
+	Protocol       LoadbalancerProtocol `json:"protocol"`
+	TargetSelector map[string]string    `json:"targetSelector,omitempty"`
 }
 
 type AttachTargetRequest struct {
@@ -553,22 +553,22 @@ type AttachTargetRequest struct {
 }
 
 type CreateListener struct {
-	Name           string            `json:"name"`
-	Description    string            `json:"description"`
-	Labels         map[string]string `json:"labels,omitempty"`
-	Annotations    map[string]string `json:"annotations,omitempty"`
-	Port           int               `json:"port"`
-	Protocol       string            `json:"protocol"`
-	TargetGroup    string            `json:"targetGroup"`
-	AllowedSources []string          `json:"allowedSources,omitempty"`
+	Name           string               `json:"name"`
+	Description    string               `json:"description"`
+	Labels         Labels               `json:"labels,omitempty"`
+	Annotations    Annotations          `json:"annotations,omitempty"`
+	Port           int                  `json:"port"`
+	Protocol       LoadbalancerProtocol `json:"protocol"`
+	TargetGroup    string               `json:"targetGroup"`
+	AllowedSources []string             `json:"allowedSources,omitempty"`
 }
 
 type UpdateListener struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
-	Port        int               `json:"port"`
-	Protocol    string            `json:"protocol"`
-	TargetGroup string            `json:"targetGroup"`
+	Name        string               `json:"name"`
+	Description string               `json:"description"`
+	Labels      Labels               `json:"labels,omitempty"`
+	Annotations Annotations          `json:"annotations,omitempty"`
+	Port        int                  `json:"port"`
+	Protocol    LoadbalancerProtocol `json:"protocol"`
+	TargetGroup string               `json:"targetGroup"`
 }
