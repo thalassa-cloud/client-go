@@ -140,7 +140,7 @@ type VpcLoadbalancerListener struct {
 	ObjectVersion int       `json:"objectVersion"`
 
 	Port           int                         `json:"port"`
-	Protocol       string                      `json:"protocol"`
+	Protocol       LoadbalancerProtocol        `json:"protocol"`
 	TargetGroup    *VpcLoadbalancerTargetGroup `json:"targetGroup"`
 	TargetGroupId  int                         `json:"targetGroupId"`
 	AllowedSources []string                    `json:"allowedSources"`
@@ -155,23 +155,21 @@ type VpcLoadbalancerTargetGroup struct {
 	UpdatedAt     time.Time `json:"updatedAt"`
 	ObjectVersion int       `json:"objectVersion"`
 
-	Organisation   *base.Organisation `json:"organisation"`
-	Vpc            *Vpc               `json:"vpc"`
-	TargetPort     int                `json:"targetPort"`
-	Protocol       string             `json:"protocol"`
-	TargetSelector map[string]string  `json:"targetSelector"`
+	Organisation   *base.Organisation   `json:"organisation"`
+	Vpc            *Vpc                 `json:"vpc"`
+	TargetPort     int                  `json:"targetPort"`
+	Protocol       LoadbalancerProtocol `json:"protocol"`
+	TargetSelector map[string]string    `json:"targetSelector"`
 
 	LoadbalancerListeners              []VpcLoadbalancerListener           `json:"loadbalancerListeners"`
 	LoadbalancerTargetGroupAttachments []LoadbalancerTargetGroupAttachment `json:"loadbalancerTargetGroupAttachments"`
 }
 
 type LoadbalancerTargetGroupAttachment struct {
-	Identity                  string                      `json:"identity"`
-	CreatedAt                 time.Time                   `json:"createdAt"`
-	LoadbalancerTargetGroupId int                         `json:"loadbalancerTargetGroupId"`
-	LoadbalancerTargetGroup   *VpcLoadbalancerTargetGroup `json:"loadbalancerTargetGroup"`
-	VirtualMachineInstanceId  int                         `json:"virtualMachineInstanceId"`
-	VirtualMachineInstance    *Machine                    `json:"virtualMachineInstance"`
+	Identity                string                      `json:"identity"`
+	CreatedAt               time.Time                   `json:"createdAt"`
+	LoadbalancerTargetGroup *VpcLoadbalancerTargetGroup `json:"loadbalancerTargetGroup"`
+	VirtualMachineInstance  *Machine                    `json:"virtualMachineInstance"`
 }
 
 type Volume struct {
@@ -192,9 +190,11 @@ type Volume struct {
 	VolumeType         *VolumeType        `json:"volumeType"`
 	Attachments        []VolumeAttachment `json:"attachments"`
 	Organisation       *base.Organisation `json:"organisation"`
-	CloudRegion        *Region            `json:"cloudRegion"`
-	Size               int                `json:"size"`
-	DeleteProtection   bool               `json:"deleteProtection"`
+	Region             *Region            `json:"cloudRegion"`
+	// AvailabilityZones is a list of availability zones that the volume can be attached to.
+	AvailabilityZones []Zone `json:"availabilityZones,omitempty"`
+	Size              int    `json:"size"`
+	DeleteProtection  bool   `json:"deleteProtection"`
 }
 
 type VolumeType struct {
@@ -291,12 +291,15 @@ type Machine struct {
 	Organisation      *base.Organisation       `json:"organisation,omitempty"`
 	MachineType       *MachineType             `json:"machineType,omitempty"`
 	MachineImage      *MachineImage            `json:"machineImage,omitempty"`
-	PersistentVolume  *Volume                  `json:"persistentVolume,omitempty" validate:"-"`
+	PersistentVolume  *Volume                  `json:"persistentVolume,omitempty"`
 	Vpc               *Vpc                     `json:"vpc,omitempty"`
 	Subnet            *Subnet                  `json:"subnet,omitempty"`
 	Interfaces        VirtualMachineInterfaces `json:"interfaces,omitempty"`
 	VolumeAttachments []VolumeAttachment       `json:"volumeAttachments,omitempty"`
 	Status            ResourceStatus           `json:"status"`
+
+	// SecurityGroupAttachments is a list of security group identities that are attached to the virtual machine instance.
+	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 type ResourceStatus struct {
@@ -405,14 +408,18 @@ type DetachVolumeRequest struct {
 }
 
 type CreateSubnet struct {
-	Name                         string            `json:"name"`
-	Description                  string            `json:"description"`
-	Labels                       map[string]string `json:"labels,omitempty"`
-	Annotations                  map[string]string `json:"annotations,omitempty"`
-	VpcIdentity                  string            `json:"vpcIdentity"`
-	CloudZone                    string            `json:"cloudZone"`
-	Cidr                         string            `json:"cidr"`
-	AssociatedRouteTableIdentity *string           `json:"associatedRouteTableIdentity,omitempty"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Labels      Labels      `json:"labels,omitempty"`
+	Annotations Annotations `json:"annotations,omitempty"`
+	VpcIdentity string      `json:"vpcIdentity"`
+	// Cidr is the CIDR block for the subnet. i.e. 10.0.0.0/24.
+	// Supports both IPv4 and IPv6 and Dual-Stack (IPv4 and IPv6). Provide DualStack CIDR by using comma separated values. For example: "10.0.0.0/24,fc00::/64"
+	// CIDR subnets must be unique within the VPC and must fall within the VPC CIDR blocks associated with the VPC.
+	// The CIDR may not be modified once the subnet is created.
+	Cidr string `json:"cidr"`
+	// AssociatedRouteTableIdentity is the identity of the route table that will be associated with the subnet.
+	AssociatedRouteTableIdentity *string `json:"associatedRouteTableIdentity,omitempty"`
 }
 
 type UpdateSubnet struct {
@@ -472,18 +479,36 @@ type UpdateVpcNatGateway struct {
 }
 
 type CreateMachine struct {
-	Name             string              `json:"name"`
-	Description      string              `json:"description"`
-	Labels           map[string]string   `json:"labels"`
-	Annotations      map[string]string   `json:"annotations"`
-	Subnet           string              `json:"subnet"`
-	CloudInit        string              `json:"cloudInit"`
-	CloudInitRef     string              `json:"cloudInitRef"`
-	MachineImage     string              `json:"machineImage"`
-	MachineType      string              `json:"machineType"`
-	DeleteProtection bool                `json:"deleteProtection"`
-	VpcIdentity      string              `json:"vpcIdentity"`
-	RootVolume       CreateMachineVolume `json:"rootVolume"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Labels      Labels      `json:"labels"`
+	Annotations Annotations `json:"annotations"`
+
+	// Subnet is the subnet in which the machine will be deployed.
+	Subnet string `json:"subnet"`
+
+	// CloudInit is the cloud-init configuration for the machine.
+	// If non empty, will be used to populate the cloud-init configuration for the machine.
+	CloudInit string `json:"cloudInit"`
+	// CloudInitRef is the reference to the cloud-init configuration for the machine.
+	// If non empty, will be used to populate the cloud-init configuration for the machine. If cloudInit is also provided, cloudInit will take precedence.
+	CloudInitRef string `json:"cloudInitRef"`
+
+	// DeleteProtection is a flag that indicates whether the machine should be protected from deletion.
+	// Meaning delete protection will require to be disabled explicitly before the machine can be deleted.
+	DeleteProtection bool `json:"deleteProtection"`
+
+	// State is the initial state of the machine. If not provided, the machine will be created in the "running" state. Must be one of running or stopped.
+	State *MachineState `json:"state"`
+
+	MachineImage string              `json:"machineImage"`
+	MachineType  string              `json:"machineType"`
+	RootVolume   CreateMachineVolume `json:"rootVolume"`
+	// AvailabilityZone is the availability zone in which the machine will be deployed. This is the slug of the availability zone. Must match the region of the VPC and subnet.
+	// If not provided, thee machine will be scheduled within a random zone within the region of the VPC.
+	AvailabilityZone *string `json:"availabilityZone"`
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the virtual machine instance.
+	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 type CreateMachineVolume struct {
@@ -495,25 +520,51 @@ type CreateMachineVolume struct {
 }
 
 type UpdateMachine struct {
-	Name             string            `json:"name"`
-	Description      string            `json:"description"`
-	Labels           map[string]string `json:"labels"`
-	Annotations      map[string]string `json:"annotations"`
-	Subnet           string            `json:"subnet"`
-	MachineType      string            `json:"machineType"`
-	DeleteProtection bool              `json:"deleteProtection"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Labels      Labels      `json:"labels"`
+	Annotations Annotations `json:"annotations"`
+	Subnet      *string     `json:"subnet,omitempty"`
+
+	// State is the new state of the machine. Must be one of running or stopped.
+	State *MachineState `json:"state"`
+
+	// AvailabilityZone is the availability zone in which the machine will be deployed.
+	// You can use this to move the machine to a different zone.
+	// NOTE: Only possible if the cloud region supports migrating machines between zones.
+	// Depending on the region, VMs may be live migrated automatically. If not supported, the machine will be stopped and restarted in the new zone.
+	AvailabilityZone *string `json:"availabilityZone,omitempty"`
+
+	MachineType      *string `json:"machineType,omitempty"`
+	DeleteProtection *bool   `json:"deleteProtection,omitempty"`
+
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the virtual machine instance.
+	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 type CreateLoadbalancer struct {
-	Name                     string            `json:"name"`
-	Description              string            `json:"description"`
-	Labels                   map[string]string `json:"labels,omitempty"`
-	Annotations              map[string]string `json:"annotations,omitempty"`
-	Subnet                   string            `json:"subnet"`
-	InternalLoadbalancer     bool              `json:"internalLoadbalancer"`
-	DeleteProtection         bool              `json:"deleteProtection"`
-	Listeners                []CreateListener  `json:"listeners"`
-	SecurityGroupAttachments []string          `json:"securityGroupAttachments,omitempty"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Labels      Labels      `json:"labels,omitempty"`
+	Annotations Annotations `json:"annotations,omitempty"`
+
+	// Subnet is the subnet in which the loadbalancer will be deployed.
+	Subnet string `json:"subnet"`
+
+	// InternalLoadbalancer is a flag that indicates whether the loadbalancer should be an internal loadbalancer.
+	// If true, the loadbalancer will be an internal loadbalancer and will not be accessible from the public internet.
+	// It will not be assigned a public IP address, and instead will be assigned a (private) IP address from the subnet.
+	InternalLoadbalancer bool `json:"internalLoadbalancer"`
+
+	// DeleteProtection is a flag that indicates whether the loadbalancer should be protected from deletion.
+	// Meaning delete protection will require to be disabled explicitly before the loadbalancer can be deleted.
+	DeleteProtection bool `json:"deleteProtection"`
+
+	// Listeners is a list of listeners that will be created on the loadbalancer during creation.
+	Listeners []CreateListener `json:"listeners"`
+
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the loadbalancer.
+	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 type UpdateLoadbalancer struct {
