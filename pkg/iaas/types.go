@@ -299,7 +299,8 @@ type Machine struct {
 	Interfaces        VirtualMachineInterfaces `json:"interfaces,omitempty"`
 	VolumeAttachments []VolumeAttachment       `json:"volumeAttachments,omitempty"`
 	Status            ResourceStatus           `json:"status"`
-
+	// AvailabilityZone is the availability zone in which the virtual machine instance is deployed.
+	AvailabilityZone *string `json:"availabilityZone,omitempty"`
 	// SecurityGroupAttachments is a list of security group identities that are attached to the virtual machine instance.
 	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
