@@ -86,3 +86,23 @@ func (c *Client) DeleteSubnet(ctx context.Context, identity string) error {
 	}
 	return nil
 }
+
+type SubnetStatus string
+
+const (
+	SubnetStatusCreating SubnetStatus = "creating"
+	SubnetStatusUpdating SubnetStatus = "updating"
+	SubnetStatusReady    SubnetStatus = "ready"
+	SubnetStatusActive   SubnetStatus = "active"
+	SubnetStatusDeleting SubnetStatus = "deleting"
+	SubnetStatusDeleted  SubnetStatus = "deleted"
+	SubnetStatusFailed   SubnetStatus = "failed"
+)
+
+type SubnetType string
+
+const (
+	SubnetTypeIPv4 SubnetType = "IPv4"
+	SubnetTypeIPv6 SubnetType = "IPv6"
+	SubnetTypeDual SubnetType = "Dual"
+)

@@ -69,9 +69,11 @@ type Subnet struct {
 	Labels      Labels      `json:"labels"`
 	Annotations Annotations `json:"annotations"`
 
-	VpcIdentity string `json:"vpcIdentity"`
-	Vpc         *Vpc   `json:"vpc"`
-	Cidr        string `json:"cidr"`
+	Type        SubnetType   `json:"type"`
+	VpcIdentity string       `json:"vpcIdentity"`
+	Vpc         *Vpc         `json:"vpc"`
+	Cidr        string       `json:"cidr"`
+	Status      SubnetStatus `json:"status"`
 
 	RouteTable *RouteTable `json:"routeTable,omitempty"`
 
