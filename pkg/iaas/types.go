@@ -7,35 +7,33 @@ import (
 )
 
 type Region struct {
-	Identity      string            `json:"identity"`
-	Name          string            `json:"name"`
-	Slug          string            `json:"slug"`
-	Description   string            `json:"description"`
-	CreatedAt     time.Time         `json:"createdAt"`
-	UpdatedAt     time.Time         `json:"updatedAt"`
-	ObjectVersion int               `json:"objectVersion"`
-	Labels        map[string]string `json:"labels"`
-	Annotations   map[string]string `json:"annotations"`
-	Zones         []Zone            `json:"zones"`
+	Identity      string      `json:"identity"`
+	Name          string      `json:"name"`
+	Slug          string      `json:"slug"`
+	Description   string      `json:"description"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	UpdatedAt     time.Time   `json:"updatedAt"`
+	ObjectVersion int         `json:"objectVersion"`
+	Labels        Labels      `json:"labels"`
+	Annotations   Annotations `json:"annotations"`
+	Zones         []Zone      `json:"zones"`
 }
 
 type Zone struct {
-	Identity            string            `json:"identity"`
-	Name                string            `json:"name"`
-	Slug                string            `json:"slug"`
-	Description         string            `json:"description"`
-	CreatedAt           time.Time         `json:"createdAt"`
-	UpdatedAt           time.Time         `json:"updatedAt"`
-	ObjectVersion       int               `json:"objectVersion"`
-	Labels              map[string]string `json:"labels"`
-	Annotations         map[string]string `json:"annotations"`
-	CloudRegionIdentity string            `json:"cloudRegionIdentity"`
-	CloudRegion         *Region           `json:"CloudRegion"`
+	Identity            string      `json:"identity"`
+	Name                string      `json:"name"`
+	Slug                string      `json:"slug"`
+	Description         string      `json:"description"`
+	CreatedAt           time.Time   `json:"createdAt"`
+	UpdatedAt           time.Time   `json:"updatedAt"`
+	ObjectVersion       int         `json:"objectVersion"`
+	Labels              Labels      `json:"labels"`
+	Annotations         Annotations `json:"annotations"`
+	CloudRegionIdentity string      `json:"cloudRegionIdentity"`
+	CloudRegion         *Region     `json:"CloudRegion"`
 }
 
-// Stub for VpcFirewallRule (not given in your code)
 type VpcFirewallRule struct {
-	// Add fields if you have them defined elsewhere
 }
 
 type Vpc struct {
