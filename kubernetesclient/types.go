@@ -3,8 +3,8 @@ package kubernetesclient
 import (
 	"time"
 
+	"github.com/thalassa-cloud/client-go/iaas"
 	"github.com/thalassa-cloud/client-go/pkg/base"
-	"github.com/thalassa-cloud/client-go/pkg/iaas"
 )
 
 // KubernetesClusterSessionToken represents the authentication and connection details for a Kubernetes cluster session.
