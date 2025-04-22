@@ -1,10 +1,10 @@
 package thalassa
 
 import (
+	"github.com/thalassa-cloud/client-go/iaas"
+	"github.com/thalassa-cloud/client-go/kubernetesclient"
+	"github.com/thalassa-cloud/client-go/me"
 	"github.com/thalassa-cloud/client-go/pkg/client"
-	"github.com/thalassa-cloud/client-go/pkg/iaas"
-	"github.com/thalassa-cloud/client-go/pkg/kubernetesclient"
-	"github.com/thalassa-cloud/client-go/pkg/me"
 )
 
 type Client interface {
