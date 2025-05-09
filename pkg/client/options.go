@@ -1,6 +1,7 @@
 package client
 
 import (
+	"crypto/tls"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -87,6 +88,15 @@ func (c *thalassaCloudClient) AddMiddleware(mw func(*resty.Client, *resty.Reques
 func WithUserAgent(ua string) Option {
 	return func(c *thalassaCloudClient) error {
 		c.userAgent = ua
+		return nil
+	}
+}
+
+// WithInsecure disables SSL certificate verification.
+// This should only be used for development/testing purposes.
+func WithInsecure() Option {
+	return func(c *thalassaCloudClient) error {
+		c.resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 		return nil
 	}
 }

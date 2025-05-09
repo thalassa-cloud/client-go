@@ -433,3 +433,21 @@ func TestClientWithCircuitBreaker(t *testing.T) {
 	assert.NotNil(t, clientStruct.breaker)
 	assert.Equal(t, "test-breaker", clientStruct.breaker.Name())
 }
+
+func TestClientWithInsecure(t *testing.T) {
+	server := setupTestServer()
+	defer server.Close()
+
+	// Create a client with insecure option
+	client, err := NewClient(
+		WithBaseURL(server.URL),
+		WithInsecure(),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+
+	// Access the client through reflection to verify TLS config
+	clientStruct := client.(*thalassaCloudClient)
+	transport := clientStruct.resty.GetClient().Transport.(*http.Transport)
+	assert.True(t, transport.TLSClientConfig.InsecureSkipVerify)
+}
