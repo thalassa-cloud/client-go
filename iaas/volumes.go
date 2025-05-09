@@ -117,8 +117,7 @@ func (c *Client) AttachVolume(ctx context.Context, volumeIdentity string, attach
 // DetachVolume detaches a volume from a machine.
 func (c *Client) DetachVolume(ctx context.Context, volumeIdentity string, detach DetachVolumeRequest) (*Volume, error) {
 	var volume *Volume
-	req := c.R().SetResult(&volume)
-
+	req := c.R().SetResult(&volume).SetBody(detach)
 	resp, err := c.Do(ctx, req, client.POST, fmt.Sprintf("%s/%s/detach", VolumeEndpoint, volumeIdentity))
 	if err != nil {
 		return nil, err
