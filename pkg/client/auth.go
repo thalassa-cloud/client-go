@@ -1,14 +1,26 @@
 package client
 
 import (
+	"context"
+	"crypto/tls"
 	"fmt"
+	"net/http"
 
 	"github.com/go-resty/resty/v2"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
 // WithAuthOIDC uses client credentials for service-to-service flows.
 func WithAuthOIDC(clientID, clientSecret, tokenURL string, scopes ...string) Option {
+	return withAuthOIDC(clientID, clientSecret, tokenURL, false, scopes...)
+}
+
+func WithAuthOIDCInsecure(clientID, clientSecret, tokenURL string, allowInsecure bool, scopes ...string) Option {
+	return withAuthOIDC(clientID, clientSecret, tokenURL, allowInsecure, scopes...)
+}
+
+func withAuthOIDC(clientID, clientSecret, tokenURL string, insecure bool, scopes ...string) Option {
 	return func(c *thalassaCloudClient) error {
 		c.authType = AuthOIDC
 		c.oidcConfig = &clientcredentials.Config{
@@ -17,6 +29,7 @@ func WithAuthOIDC(clientID, clientSecret, tokenURL string, scopes ...string) Opt
 			TokenURL:     tokenURL,
 			Scopes:       scopes,
 		}
+		c.allowInsecureOIDC = insecure
 		return nil
 	}
 }
@@ -54,7 +67,15 @@ func (c *thalassaCloudClient) configureAuth() error {
 		// For each request, ensure token is valid or refresh it.
 		c.resty.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
 			if c.oidcToken == nil || !c.oidcToken.Valid() {
-				tok, err := c.oidcConfig.Token(req.Context())
+				ctx := req.Context()
+				if c.allowInsecureOIDC {
+					ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
+						Transport: &http.Transport{
+							TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+						},
+					})
+				}
+				tok, err := c.oidcConfig.Token(ctx)
 				if err != nil {
 					return fmt.Errorf("failed to fetch OIDC token: %w", err)
 				}
