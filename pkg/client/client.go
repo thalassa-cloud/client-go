@@ -107,8 +107,9 @@ type thalassaCloudClient struct {
 	authType AuthenticationType
 
 	// OIDC (client credentials).
-	oidcConfig *clientcredentials.Config
-	oidcToken  *oauth2.Token // cached token
+	oidcConfig        *clientcredentials.Config
+	oidcToken         *oauth2.Token // cached token
+	allowInsecureOIDC bool
 
 	// Personal Access Token.
 	personalToken string
@@ -122,6 +123,8 @@ type thalassaCloudClient struct {
 
 	// Optional circuit breaker
 	breaker *gobreaker.CircuitBreaker
+
+	insecure bool
 }
 
 func (c *thalassaCloudClient) WithOptions(opts ...Option) Client {

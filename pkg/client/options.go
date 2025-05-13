@@ -96,6 +96,7 @@ func WithUserAgent(ua string) Option {
 // This should only be used for development/testing purposes.
 func WithInsecure() Option {
 	return func(c *thalassaCloudClient) error {
+		c.insecure = true
 		c.resty.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 		return nil
 	}
