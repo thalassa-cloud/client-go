@@ -108,13 +108,15 @@ func (c *Client) DeleteListener(ctx context.Context, loadbalancerID string, list
 }
 
 type VpcLoadbalancerListener struct {
-	Identity      string    `json:"identity"`
-	Name          string    `json:"name"`
-	Slug          string    `json:"slug"`
-	Description   string    `json:"description"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
-	ObjectVersion int       `json:"objectVersion"`
+	Identity      string      `json:"identity"`
+	Name          string      `json:"name"`
+	Slug          string      `json:"slug"`
+	Description   string      `json:"description"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	UpdatedAt     time.Time   `json:"updatedAt"`
+	ObjectVersion int         `json:"objectVersion"`
+	Labels        Labels      `json:"labels,omitempty"`
+	Annotations   Annotations `json:"annotations,omitempty"`
 
 	Port           int                         `json:"port"`
 	Protocol       LoadbalancerProtocol        `json:"protocol"`
