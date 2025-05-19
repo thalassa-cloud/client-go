@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
@@ -11,10 +12,21 @@ const (
 	KubernetesClusterEndpoint = "/v1/kubernetes/clusters"
 )
 
+type ListKubernetesClustersRequest struct {
+	Filters []filters.Filter
+}
+
 // ListKubernetesClusters lists all KubernetesClusters for a given organisation.
-func (c *Client) ListKubernetesClusters(ctx context.Context) ([]KubernetesCluster, error) {
+func (c *Client) ListKubernetesClusters(ctx context.Context, request *ListKubernetesClustersRequest) ([]KubernetesCluster, error) {
 	subnets := []KubernetesCluster{}
 	req := c.R().SetResult(&subnets)
+	if request != nil {
+		for _, filter := range request.Filters {
+			for k, v := range filter.ToParams() {
+				req.SetQueryParam(k, v)
+			}
+		}
+	}
 
 	resp, err := c.Do(ctx, req, client.GET, KubernetesClusterEndpoint)
 	if err != nil {
