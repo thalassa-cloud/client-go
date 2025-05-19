@@ -1,9 +1,10 @@
-package kubernetesclient
+package kubernetes
 
 import (
 	"context"
 	"fmt"
 
+	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
@@ -15,10 +16,21 @@ func getKubernetesNodePoolEndpoint(identity string) string {
 	return fmt.Sprintf("%s/%s/%s", KubernetesClusterEndpoint, identity, KubernetesNodePoolEndpoint)
 }
 
+type ListKubernetesNodePoolsRequest struct {
+	Filters []filters.Filter
+}
+
 // ListKubernetesNodePools lists all KubernetesNodePools for a given organisation.
-func (c *Client) ListKubernetesNodePools(ctx context.Context, clusterIdentity string) ([]KubernetesNodePool, error) {
+func (c *Client) ListKubernetesNodePools(ctx context.Context, clusterIdentity string, request *ListKubernetesNodePoolsRequest) ([]KubernetesNodePool, error) {
 	subnets := []KubernetesNodePool{}
 	req := c.R().SetResult(&subnets)
+	if request != nil {
+		for _, filter := range request.Filters {
+			for k, v := range filter.ToParams() {
+				req.SetQueryParam(k, v)
+			}
+		}
+	}
 
 	resp, err := c.Do(ctx, req, client.GET, getKubernetesNodePoolEndpoint(clusterIdentity))
 	if err != nil {
