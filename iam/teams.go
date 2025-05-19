@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
@@ -11,10 +12,22 @@ const (
 	TeamEndpoint = "/v1/teams"
 )
 
+type ListTeamsRequest struct {
+	Filters []filters.Filter
+}
+
 // ListTeams lists all teams for a given organisation.
-func (c *Client) ListTeams(ctx context.Context) ([]Team, error) {
+func (c *Client) ListTeams(ctx context.Context, request *ListTeamsRequest) ([]Team, error) {
 	teams := []Team{}
 	req := c.R().SetResult(&teams)
+	if request != nil {
+		for _, filter := range request.Filters {
+			for k, v := range filter.ToParams() {
+				req.SetQueryParam(k, v)
+			}
+		}
+	}
+
 	resp, err := c.Do(ctx, req, client.GET, TeamEndpoint)
 	if err != nil {
 		return nil, err
@@ -25,8 +38,11 @@ func (c *Client) ListTeams(ctx context.Context) ([]Team, error) {
 	return teams, nil
 }
 
+type GetTeamRequest struct {
+}
+
 // GetTeam retrieves a specific team by its identity.
-func (c *Client) GetTeam(ctx context.Context, identity string) (*Team, error) {
+func (c *Client) GetTeam(ctx context.Context, identity string, _ *GetTeamRequest) (*Team, error) {
 	team := Team{}
 	req := c.R().SetResult(&team)
 	resp, err := c.Do(ctx, req, client.GET, fmt.Sprintf("%s/%s", TeamEndpoint, identity))
