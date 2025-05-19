@@ -1,4 +1,4 @@
-package kubernetesclient
+package kubernetes
 
 import (
 	"github.com/thalassa-cloud/client-go/pkg/client"

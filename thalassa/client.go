@@ -2,14 +2,14 @@ package thalassa
 
 import (
 	"github.com/thalassa-cloud/client-go/iaas"
-	"github.com/thalassa-cloud/client-go/kubernetesclient"
+	"github.com/thalassa-cloud/client-go/kubernetes"
 	"github.com/thalassa-cloud/client-go/me"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
 type Client interface {
 	IaaS() *iaas.Client
-	Kubernetes() *kubernetesclient.Client
+	Kubernetes() *kubernetes.Client
 	Me() *me.Client
 
 	// SetOrganisation sets the organisation for the client
@@ -46,8 +46,8 @@ func (c *thalassaCloudClient) IaaS() *iaas.Client {
 	return iaasClient
 }
 
-func (c *thalassaCloudClient) Kubernetes() *kubernetesclient.Client {
-	kubernetesClient, err := kubernetesclient.New(c.client)
+func (c *thalassaCloudClient) Kubernetes() *kubernetes.Client {
+	kubernetesClient, err := kubernetes.New(c.client)
 	if err != nil {
 		panic(err)
 	}
