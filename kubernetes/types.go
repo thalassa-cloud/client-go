@@ -169,15 +169,16 @@ const (
 
 // KubernetesNodePool represents a group of nodes in a Kubernetes cluster with identical configuration.
 type KubernetesNodePool struct {
-	Identity      string            `json:"identity"`      // Unique identifier for the node pool
-	Name          string            `json:"name"`          // Display name of the node pool
-	Slug          string            `json:"slug"`          // URL-friendly identifier
-	Description   string            `json:"description"`   // Detailed description
-	CreatedAt     time.Time         `json:"createdAt"`     // Creation timestamp
-	UpdatedAt     *time.Time        `json:"updatedAt"`     // Last update timestamp
-	ObjectVersion int               `json:"objectVersion"` // Version for optimistic locking
-	Labels        map[string]string `json:"labels"`        // Custom labels
-	Annotations   map[string]string `json:"annotations"`   // Custom annotations
+	Identity         string            `json:"identity"`         // Unique identifier for the node pool
+	Name             string            `json:"name"`             // Display name of the node pool
+	Slug             string            `json:"slug"`             // URL-friendly identifier
+	Description      string            `json:"description"`      // Detailed description
+	CreatedAt        time.Time         `json:"createdAt"`        // Creation timestamp
+	UpdatedAt        *time.Time        `json:"updatedAt"`        // Last update timestamp
+	ObjectVersion    int               `json:"objectVersion"`    // Version for optimistic locking
+	Labels           map[string]string `json:"labels"`           // Custom labels
+	Annotations      map[string]string `json:"annotations"`      // Custom annotations
+	AvailabilityZone string            `json:"availabilityZone"` // Availability zone for the node pool
 
 	Status KubernetesNodePoolStatus `json:"status"` // Current status of the node pool
 
@@ -201,11 +202,12 @@ type CreateKubernetesNodePool struct {
 	Name        string `json:"name"`        // Display name for the node pool
 	Description string `json:"description"` // Detailed description
 
-	MachineType    string  `json:"machineType"`    // Type of machine for nodes
-	Replicas       int     `json:"replicas"`       // Initial number of nodes
-	MinReplicas    int     `json:"minReplicas"`    // Minimum nodes for autoscaling
-	MaxReplicas    int     `json:"maxReplicas"`    // Maximum nodes for autoscaling
-	SubnetIdentity *string `json:"subnetIdentity"` // Subnet for node pool deployment
+	MachineType      string  `json:"machineType"`      // Type of machine for nodes
+	Replicas         int     `json:"replicas"`         // Initial number of nodes
+	MinReplicas      int     `json:"minReplicas"`      // Minimum nodes for autoscaling
+	MaxReplicas      int     `json:"maxReplicas"`      // Maximum nodes for autoscaling
+	SubnetIdentity   *string `json:"subnetIdentity"`   // Subnet for node pool deployment
+	AvailabilityZone string  `json:"availabilityZone"` // Availability zone for the node pool
 
 	KubernetesVersionIdentity *string                            `json:"kubernetesVersionIdentity"` // Kubernetes version for node pool
 	UpgradeStrategy           *KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`           // Upgrade strategy for node pool
@@ -223,6 +225,7 @@ type UpdateKubernetesNodePool struct {
 	MinReplicas               *int    `json:"minReplicas"`               // New minimum nodes for autoscaling
 	MaxReplicas               *int    `json:"maxReplicas"`               // New maximum nodes for autoscaling
 	KubernetesVersionIdentity *string `json:"kubernetesVersionIdentity"` // Kubernetes version for node pool
+	AvailabilityZone          string  `json:"availabilityZone"`          // Availability zone for the node pool
 
 	UpgradeStrategy   *KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`   // Upgrade strategy for node pool
 	EnableAutoHealing *bool                              `json:"enableAutoHealing"` // Whether auto-healing is enabled
