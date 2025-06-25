@@ -13,7 +13,7 @@ For detailed documentation, including API references, guides, and examples, visi
 To use this client in your Go project, add it to your dependencies:
 
 ```bash
-go get github.com/thalassa-cloud/go-client
+go get github.com/thalassa-cloud/client-go
 ```
 
 ## Quick Start
