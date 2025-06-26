@@ -45,7 +45,7 @@ func main() {
     
     // Use the client to interact with Thalassa Cloud services
     // Example: List your vpcs
-    vpcs, err := client.IaaS().ListVpcs(ctx)
+    vpcs, err := client.IaaS().ListVpcs(ctx, &iaas.ListVpcsRequest{})
     if err != nil {
         log.Fatal(err)
     }
