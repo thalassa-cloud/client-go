@@ -1,7 +1,5 @@
 # client-go for the Thalassa Cloud Platform API
 
-> **Note**: This client is currently in alpha state. While we strive to maintain stability, breaking changes may occur as we continue to develop and improve the client.
-
 This is the official Go client library for interacting with the Thalassa Cloud Platform API. It provides a simple and efficient way to integrate Thalassa Cloud services into your Go applications.
 
 ## Documentation
