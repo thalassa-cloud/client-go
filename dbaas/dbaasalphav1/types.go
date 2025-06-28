@@ -191,7 +191,7 @@ type UpdateDbClusterRequest struct {
 	// Replicas is the number of instances in the cluster
 	Replicas int `json:"replicas"`
 	// DatabaseInstanceTypeIdentity is the identity of the database instance type. Optional identity. If provided, it will be used as the database instance type for the cluster.
-	DatabaseInstanceTypeIdentity *string `json:"databaseInstanceTypeIdentity"`
+	DatabaseInstanceTypeIdentity *string `json:"databaseInstanceTypeIdentity,omitempty"`
 }
 
 type DbClusterStatus string
@@ -271,23 +271,37 @@ type UpdatePgRoleRequest struct {
 }
 
 type CreatePgBackupScheduleRequest struct {
-	Name            string      `json:"name"`
-	Description     *string     `json:"description,omitempty"`
-	Annotations     Annotations `json:"annotations,omitempty"`
-	Labels          Labels      `json:"labels,omitempty"`
-	Schedule        string      `json:"schedule"`
-	RetentionPolicy string      `json:"retentionPolicy"`
-	Target          string      `json:"target,omitempty"`
+	// Name is the name of the backup schedule
+	Name string `json:"name"`
+	// Description is the description of the backup schedule
+	Description *string `json:"description,omitempty"`
+	// Annotations is a map of annotations for the backup schedule
+	Annotations Annotations `json:"annotations,omitempty"`
+	// Labels is a map of labels for the backup schedule
+	Labels Labels `json:"labels,omitempty"`
+	// Schedule is the schedule of the backup. Cron expression.
+	Schedule string `json:"schedule"`
+	// RetentionPolicy is the retention policy of the backup
+	RetentionPolicy string `json:"retentionPolicy"`
+	// Target is the target of the backup schedule. Primary or prefer-standby.
+	Target DbClusterBackupScheduleTarget `json:"target,omitempty"`
 }
 
 type UpdatePgBackupScheduleRequest struct {
-	Name            string      `json:"name"`
-	Description     string      `json:"description"`
-	Annotations     Annotations `json:"annotations,omitempty"`
-	Labels          Labels      `json:"labels,omitempty"`
-	Schedule        string      `json:"schedule"`
-	RetentionPolicy string      `json:"retentionPolicy"`
-	Target          string      `json:"target,omitempty"`
+	// Name is the name of the backup schedule
+	Name string `json:"name"`
+	// Description is the description of the backup schedule
+	Description string `json:"description"`
+	// Annotations is a map of annotations for the backup schedule
+	Annotations Annotations `json:"annotations,omitempty"`
+	// Labels is a map of labels for the backup schedule
+	Labels Labels `json:"labels,omitempty"`
+	// Schedule is the schedule of the backup. Cron expression.
+	Schedule string `json:"schedule"`
+	// RetentionPolicy is the retention policy of the backup
+	RetentionPolicy string `json:"retentionPolicy"`
+	// Target is the target of the backup schedule
+	Target DbClusterBackupScheduleTarget `json:"target,omitempty"`
 }
 
 type DbClusterBackupScheduleMethod string
@@ -355,17 +369,23 @@ type DbClusterBackupSchedule struct {
 }
 
 type CreateDbClusterBackupRequest struct {
-	Name            string      `json:"name"`
-	Description     *string     `json:"description,omitempty"`
-	Labels          Labels      `json:"labels"`
-	Annotations     Annotations `json:"annotations"`
-	RetentionPolicy *string     `json:"retentionPolicy,omitempty"`
-	Target          string      `json:"target"`
+	// Name is the name of the backup
+	Name string `json:"name"`
+	// Description is the description of the backup
+	Description *string `json:"description,omitempty"`
+	// Labels is a map of labels for the backup
+	Labels Labels `json:"labels"`
+	// Annotations is a map of annotations for the backup
+	Annotations Annotations `json:"annotations"`
+	// RetentionPolicy is the retention policy of the backup
+	RetentionPolicy *string `json:"retentionPolicy,omitempty"`
+	// Target is the target of the backup. Primary or prefer-standby.
+	Target string `json:"target"`
 }
 
 type DbClusterBackup struct {
 	// Identity is a unique identifier for the backup
-	Identity string `json:"identity" validate:"required,notblank"`
+	Identity string `json:"identity"`
 	// DbCluster is the cluster the backup belongs to
 	DbCluster *DbCluster `json:"dbCluster,omitempty"`
 	// Organisation is the organisation the backup belongs to
@@ -432,10 +452,12 @@ const (
 )
 
 type CreatePgGrantRequest struct {
-	Name         string `json:"name"`
-	RoleName     string `json:"roleName"`
+	// Name is the name of the grant
+	Name string `json:"name"`
+	// RoleName is the name of the role
+	RoleName string `json:"roleName"`
+	// DatabaseName is the name of the database
 	DatabaseName string `json:"databaseName"`
-
 	// Read is a flag to indicate if the role can read from the database
 	Read bool `json:"read"`
 	// Write is a flag to indicate if the role can write to the database
@@ -443,7 +465,9 @@ type CreatePgGrantRequest struct {
 }
 
 type UpdatePgGrantRequest struct {
-	Read  *bool `json:"read"`
+	// Read is a flag to indicate if the role can read from the database
+	Read *bool `json:"read"`
+	// Write is a flag to indicate if the role can write to the database
 	Write *bool `json:"write"`
 }
 
