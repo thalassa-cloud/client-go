@@ -170,14 +170,16 @@ type PostgresInitDb struct {
 }
 
 type UpdateDbClusterRequest struct {
-	Name                     string            `json:"name"`
-	Description              string            `json:"description"`
-	Labels                   map[string]string `json:"labels"`
-	Annotations              map[string]string `json:"annotations"`
-	SecurityGroupAttachments []string          `json:"securityGroupAttachments"`
-	DeleteProtection         bool              `json:"deleteProtection"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// Annotations is a map of key-value pairs used for storing additional information
+	Annotations Annotations `json:"annotations,omitempty"`
+	// Labels is a map of key-value pairs used for filtering and grouping objects
+	Labels                   Labels   `json:"labels,omitempty"`
+	SecurityGroupAttachments []string `json:"securityGroupAttachments"`
+	DeleteProtection         bool     `json:"deleteProtection"`
 	// EngineVersion is the version of the database engine
-	EngineVersion string `json:"engineVersion"`
+	EngineVersion *string `json:"engineVersion,omitempty"`
 	// Parameters is a map of parameter name to database engine specific parameter value
 	Parameters map[string]string `json:"parameters"`
 	// AllocatedStorage is the amount of storage allocated to the cluster in GB
