@@ -14,14 +14,14 @@ const (
 )
 
 type DbCluster struct {
-	Identity      string            `json:"identity"`
-	Name          string            `json:"name"`
-	Description   string            `json:"description"`
-	CreatedAt     time.Time         `json:"createdAt"`
-	UpdatedAt     time.Time         `json:"updatedAt"`
-	ObjectVersion int               `json:"objectVersion"`
-	Labels        map[string]string `json:"labels"`
-	Annotations   map[string]string `json:"annotations"`
+	Identity      string      `json:"identity"`
+	Name          string      `json:"name"`
+	Description   string      `json:"description"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	UpdatedAt     time.Time   `json:"updatedAt"`
+	ObjectVersion int         `json:"objectVersion"`
+	Labels        Labels      `json:"labels"`
+	Annotations   Annotations `json:"annotations"`
 
 	Organisation *base.Organisation `json:"organisation,omitempty"`
 	// Vpc is the VPC the cluster is deployed in
@@ -93,10 +93,10 @@ type DbClusterEngineVersion struct {
 }
 
 type CreateDbClusterRequest struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Labels      Labels      `json:"labels"`
+	Annotations Annotations `json:"annotations"`
 	// Subnet is the subnet identity of the cloud subnet
 	SubnetIdentity           string   `json:"subnetIdentity"`
 	SecurityGroupAttachments []string `json:"securityGroupAttachments"`
@@ -115,21 +115,71 @@ type CreateDbClusterRequest struct {
 	DatabaseInstanceTypeIdentity string `json:"databaseInstanceTypeIdentity"`
 	// AutoMinorVersionUpgrade is a flag indicating if the cluster should automatically upgrade to the latest minor version
 	AutoMinorVersionUpgrade bool `json:"autoMinorVersionUpgrade"`
-	// DatabaseName is the name of the database on the cluster. Optional name. If provided, it will be used as the name of the database on the cluster.
-	DatabaseName *string `json:"databaseName"`
-	// Replicas is the number of instances in the cluster
-	Replicas int `json:"replicas"`
+	// Instances is the number of instances in the cluster
+	Instances int `json:"replicas"`
+	// PostgresInitDb is the initial database to create on the cluster
+	PostgresInitDb *PostgresInitDb `json:"postgresInitDb,omitempty"`
+
+	// RestoreFromBackupIdentity is the identity of the backup to restore from
+	RestoreFromBackupIdentity *string `json:"restoreFromBackupIdentity,omitempty"`
+}
+
+type PostgresInitDb struct {
+	// DataChecksums is a flag to indicate if data checksums should be enabled
+	DataChecksums bool `json:"dataChecksums,omitempty"`
+	// Maps to the `ENCODING` parameter of `CREATE DATABASE`. This setting
+	// cannot be changed. Character set encoding to use in the database.
+	Encoding string `json:"encoding,omitempty"`
+
+	// Maps to the `LOCALE` parameter of `CREATE DATABASE`. This setting
+	// cannot be changed. Sets the default collation order and character
+	// classification in the new database.
+	Locale string `json:"locale,omitempty"`
+
+	// Maps to the `LOCALE_PROVIDER` parameter of `CREATE DATABASE`. This
+	// setting cannot be changed. This option sets the locale provider for
+	// databases created in the new cluster. Available from PostgreSQL 16.
+	LocaleProvider string `json:"localeProvider,omitempty"`
+
+	// Maps to the `LC_COLLATE` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	LcCollate string `json:"localeCollate,omitempty"`
+
+	// Maps to the `LC_CTYPE` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	LcCtype string `json:"localeCType,omitempty"`
+
+	// Maps to the `ICU_LOCALE` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	// Specifies the ICU locale when the ICU provider is used.
+	// This option requires `localeProvider` to be set to `icu`. Available from PostgreSQL 15.
+	IcuLocale string `json:"icuLocale,omitempty"`
+
+	// Maps to the `ICU_RULES` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	// Specifies additional collation rules to customize the behavior of the default collation.
+	// This option requires `localeProvider` to be set to `icu`. Available from PostgreSQL 16.
+	IcuRules string `json:"icuRules,omitempty"`
+
+	// Maps to the `BUILTIN_LOCALE` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	// Specifies the locale name when the builtin provider is used. This option requires `localeProvider` to be set to `builtin`.
+	// Available from PostgreSQL 17.
+	BuiltinLocale string `json:"builtinLocale,omitempty"`
+	// Maps to the `COLLATION_VERSION` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	// CollationVersion string `json:"collationVersion,omitempty"`
+	// The value in megabytes (1 to 1024) to be passed to the `--wal-segsize`
+	// option for initdb (default: empty, resulting in PostgreSQL default: 16MB)
+	// +optional
+	WalSegmentSize int `json:"walSegmentSize,omitempty"`
 }
 
 type UpdateDbClusterRequest struct {
-	Name                     string            `json:"name"`
-	Description              string            `json:"description"`
-	Labels                   map[string]string `json:"labels"`
-	Annotations              map[string]string `json:"annotations"`
-	SecurityGroupAttachments []string          `json:"securityGroupAttachments"`
-	DeleteProtection         bool              `json:"deleteProtection"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// Annotations is a map of key-value pairs used for storing additional information
+	Annotations Annotations `json:"annotations,omitempty"`
+	// Labels is a map of key-value pairs used for filtering and grouping objects
+	Labels                   Labels   `json:"labels,omitempty"`
+	SecurityGroupAttachments []string `json:"securityGroupAttachments"`
+	DeleteProtection         bool     `json:"deleteProtection"`
 	// EngineVersion is the version of the database engine
-	EngineVersion string `json:"engineVersion"`
+	EngineVersion *string `json:"engineVersion,omitempty"`
 	// Parameters is a map of parameter name to database engine specific parameter value
 	Parameters map[string]string `json:"parameters"`
 	// AllocatedStorage is the amount of storage allocated to the cluster in GB
@@ -141,7 +191,7 @@ type UpdateDbClusterRequest struct {
 	// Replicas is the number of instances in the cluster
 	Replicas int `json:"replicas"`
 	// DatabaseInstanceTypeIdentity is the identity of the database instance type. Optional identity. If provided, it will be used as the database instance type for the cluster.
-	DatabaseInstanceTypeIdentity *string `json:"databaseInstanceTypeIdentity"`
+	DatabaseInstanceTypeIdentity *string `json:"databaseInstanceTypeIdentity,omitempty"`
 }
 
 type DbClusterStatus string
@@ -158,3 +208,292 @@ const (
 	DbClusterStatusDeleted               DbClusterStatus = "deleted"
 	DbClusterStatusUnknown               DbClusterStatus = "unknown"
 )
+
+type CreatePgDatabaseRequest struct {
+	// Name is the name of the database.
+	Name string `json:"name"`
+	// Maps to the `OWNER` parameter of `CREATE DATABASE`.
+	// Maps to the `OWNER TO` command of `ALTER DATABASE`.
+	// The role name of the user who owns the database inside PostgreSQL.
+	Owner string `json:"owner"`
+
+	// Maps to the `ALLOW_CONNECTIONS` parameter of `CREATE DATABASE` and
+	// `ALTER DATABASE`. If false then no one can connect to this database.
+	AllowConnections *bool `json:"allowConnections,omitempty"`
+
+	// Maps to the `CONNECTION LIMIT` clause of `CREATE DATABASE` and
+	// `ALTER DATABASE`. How many concurrent connections can be made to
+	// this database. -1 (the default) means no limit.
+	ConnectionLimit *int `json:"connectionLimit,omitempty"`
+}
+
+type UpdatePgDatabaseRequest struct {
+	// Maps to the `ALLOW_CONNECTIONS` parameter of `CREATE DATABASE` and
+	// `ALTER DATABASE`. If false then no one can connect to this database.
+	AllowConnections *bool `json:"allowConnections,omitempty"`
+
+	// Maps to the `CONNECTION LIMIT` clause of `CREATE DATABASE` and
+	// `ALTER DATABASE`. How many concurrent connections can be made to
+	// this database. -1 (the default) means no limit.
+	ConnectionLimit *int `json:"connectionLimit,omitempty"`
+}
+
+type CreatePgRoleRequest struct {
+	Name string `json:"name"`
+	// Login is a flag to indicate if the role can login
+	Login bool `json:"login"`
+
+	// CreateDb is a flag to indicate if the role can create databases
+	CreateDb bool `json:"createDb"`
+
+	// CreateRole is a flag to indicate if the role can create roles
+	CreateRole bool `json:"createRole"`
+
+	// ConnectionLimit is the maximum number of concurrent connections for the role. Default is -1, as per PostgreSQL default.
+	ConnectionLimit int64 `json:"connectionLimit,omitempty"`
+
+	// ValidUntil is the date and time the role will expire
+	ValidUntil *time.Time `json:"validUntil,omitempty"`
+
+	// Password is the password for the role
+	Password string `json:"password,omitempty"`
+}
+
+type UpdatePgRoleRequest struct {
+	// ConnectionLimit is the maximum number of concurrent connections for the role. Default is -1, as per PostgreSQL default.
+	ConnectionLimit int64 `json:"connectionLimit,omitempty"`
+
+	// ValidUntil is the date and time the role will expire
+	ValidUntil *time.Time `json:"validUntil,omitempty"`
+
+	// Password is the password for the role. If provided, the password will be updated. If not provided, the password will not be updated.
+	Password *string `json:"password,omitempty"`
+}
+
+type CreatePgBackupScheduleRequest struct {
+	// Name is the name of the backup schedule
+	Name string `json:"name"`
+	// Description is the description of the backup schedule
+	Description *string `json:"description,omitempty"`
+	// Annotations is a map of annotations for the backup schedule
+	Annotations Annotations `json:"annotations,omitempty"`
+	// Labels is a map of labels for the backup schedule
+	Labels Labels `json:"labels,omitempty"`
+	// Schedule is the schedule of the backup. Cron expression.
+	Schedule string `json:"schedule"`
+	// RetentionPolicy is the retention policy of the backup
+	RetentionPolicy string `json:"retentionPolicy"`
+	// Target is the target of the backup schedule. Primary or prefer-standby.
+	Target DbClusterBackupScheduleTarget `json:"target,omitempty"`
+}
+
+type UpdatePgBackupScheduleRequest struct {
+	// Name is the name of the backup schedule
+	Name string `json:"name"`
+	// Description is the description of the backup schedule
+	Description string `json:"description"`
+	// Annotations is a map of annotations for the backup schedule
+	Annotations Annotations `json:"annotations,omitempty"`
+	// Labels is a map of labels for the backup schedule
+	Labels Labels `json:"labels,omitempty"`
+	// Schedule is the schedule of the backup. Cron expression.
+	Schedule string `json:"schedule"`
+	// RetentionPolicy is the retention policy of the backup
+	RetentionPolicy string `json:"retentionPolicy"`
+	// Target is the target of the backup schedule
+	Target DbClusterBackupScheduleTarget `json:"target,omitempty"`
+}
+
+type DbClusterBackupScheduleMethod string
+
+const (
+	DbClusterBackupScheduleMethodSnapshot DbClusterBackupScheduleMethod = "snapshot"
+)
+
+type DbClusterBackupScheduleTarget string
+
+const (
+	DbClusterBackupScheduleTargetPrimary       DbClusterBackupScheduleTarget = "primary"
+	DbClusterBackupScheduleTargetPreferStandby DbClusterBackupScheduleTarget = "prefer-standby"
+)
+
+type DbClusterBackupSchedule struct {
+	// Identity is a unique identifier for the backup schedule
+	Identity string `json:"identity"`
+
+	// Name is a human-readable name of the backup schedule
+	Name string `json:"name"`
+
+	// Status is the status of the role
+	Status ObjectStatus `json:"status"`
+
+	// StatusMessage is the message of the role status
+	StatusMessage string `json:"statusMessage,omitempty"`
+
+	// CreatedAt is the date and time the object was created
+	CreatedAt time.Time `json:"createdAt"`
+
+	// DbCluster is the cluster the backup schedule belongs to
+	DbCluster *DbCluster `json:"dbCluster,omitempty"`
+
+	// Organisation is the organisation the backup schedule belongs to
+	Organisation *base.Organisation `json:"organisation,omitempty"`
+
+	// Method is the method of the backup schedule
+	Method DbClusterBackupScheduleMethod `json:"method"`
+
+	// Schedule is the schedule of the backup. Cron expression.
+	// see https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format
+	Schedule string `json:"schedule"`
+
+	// RetentionPolicy is the retention policy of the backup
+	RetentionPolicy string `json:"retentionPolicy"`
+
+	// NextBackupAt is the date and time the next backup will be taken
+	NextBackupAt *time.Time `json:"nextBackupAt,omitempty"`
+
+	// LastBackupAt is the date and time the last backup was taken
+	LastBackupAt *time.Time `json:"lastBackupAt,omitempty"`
+
+	// BackupCount is the number of backups
+	BackupCount int64 `json:"backupCount"`
+
+	// Suspended is a flag to indicate if the backup schedule is suspended
+	Suspended bool `json:"suspended"`
+
+	// Target is the target of the backup schedule
+	Target DbClusterBackupScheduleTarget `json:"target"`
+
+	// DeleteScheduledAt is the date and time the backup schedule will be deleted
+	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
+}
+
+type CreateDbClusterBackupRequest struct {
+	// Name is the name of the backup
+	Name string `json:"name"`
+	// Description is the description of the backup
+	Description *string `json:"description,omitempty"`
+	// Labels is a map of labels for the backup
+	Labels Labels `json:"labels"`
+	// Annotations is a map of annotations for the backup
+	Annotations Annotations `json:"annotations"`
+	// RetentionPolicy is the retention policy of the backup
+	RetentionPolicy *string `json:"retentionPolicy,omitempty"`
+	// Target is the target of the backup. Primary or prefer-standby.
+	Target string `json:"target"`
+}
+
+type DbClusterBackup struct {
+	// Identity is a unique identifier for the backup
+	Identity string `json:"identity"`
+	// DbCluster is the cluster the backup belongs to
+	DbCluster *DbCluster `json:"dbCluster,omitempty"`
+	// Organisation is the organisation the backup belongs to
+	Organisation *base.Organisation `json:"organisation,omitempty"`
+	// Labels is a map of labels for the backup
+	Labels map[string]string `json:"labels,omitempty"`
+	// Annotations is a map of annotations for the backup
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// Region is the region the backup belongs to
+	Region *iaas.Region `json:"region,omitempty"`
+	// BackupSchedule is the backup schedule the backup belongs to
+	// +optional
+	BackupSchedule *DbClusterBackupSchedule `json:"backupSchedule,omitempty"`
+	// BackupTrigger is the trigger of the backup
+	BackupTrigger DbClusterBackupTrigger `json:"backupTrigger"`
+	// EngineType is the type of the database engine, used for back-up restore purposes
+	EngineType DbClusterDatabaseEngine `json:"engineType"`
+	// EngineVersion is the version of the database engine, used for back-up restore purposes
+	EngineVersion string `json:"engineVersion"`
+
+	// BackupType is the type of the backup
+	BackupType string `json:"backupType"`
+
+	// Online is a flag to indicate if the backup is an online backup or offline/cold backup
+	Online bool `json:"online"`
+
+	// BeginLSN is the starting LSN of the backup
+	BeginLSN string `json:"beginLSN"`
+
+	// EndLSN is the ending LSN of the backup
+	EndLSN string `json:"endLSN"`
+
+	// BeginWAL is the starting WAL of the backup
+	BeginWAL string `json:"beginWAL"`
+
+	// EndWAL is the ending WAL of the backup
+	EndWAL string `json:"endWAL"`
+
+	// StartedAt is the date and time the backup started
+	StartedAt *time.Time `json:"startedAt,omitempty"`
+
+	// StoppedAt is the date and time the backup stopped
+	StoppedAt *time.Time `json:"stoppedAt,omitempty"`
+
+	// Status is the status of the backup
+	Status ObjectStatus `json:"status"`
+
+	// StatusMessage is the message of the backup status
+	StatusMessage string `json:"statusMessage,omitempty"`
+
+	// CreatedAt is the date and time the object was created
+	CreatedAt time.Time `json:"createdAt"`
+
+	// DeleteScheduledAt is the date and time the backup will be deleted
+	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
+}
+
+type DbClusterBackupTrigger string
+
+const (
+	DbClusterBackupTriggerManual   DbClusterBackupTrigger = "manual"
+	DbClusterBackupTriggerSchedule DbClusterBackupTrigger = "schedule"
+	DbClusterBackupTriggerSystem   DbClusterBackupTrigger = "system"
+)
+
+type CreatePgGrantRequest struct {
+	// Name is the name of the grant
+	Name string `json:"name"`
+	// RoleName is the name of the role
+	RoleName string `json:"roleName"`
+	// DatabaseName is the name of the database
+	DatabaseName string `json:"databaseName"`
+	// Read is a flag to indicate if the role can read from the database
+	Read bool `json:"read"`
+	// Write is a flag to indicate if the role can write to the database
+	Write bool `json:"write"`
+}
+
+type UpdatePgGrantRequest struct {
+	// Read is a flag to indicate if the role can read from the database
+	Read *bool `json:"read"`
+	// Write is a flag to indicate if the role can write to the database
+	Write *bool `json:"write"`
+}
+
+type DbClusterPostgresRole struct {
+	// Identity is a unique identifier for the role
+	Identity string `json:"identity"`
+	// Name is a human-readable name of the role
+	Name string `json:"name"`
+	// Status is the status of the role
+	Status ObjectStatus `json:"status"`
+	// StatusMessage is the message of the role status
+	StatusMessage string `json:"statusMessage,omitempty"`
+	// CreatedAt is the date and time the object was created
+	CreatedAt time.Time `json:"createdAt"`
+	// DbCluster is the cluster the role belongs to
+	DbCluster *DbCluster `json:"dbCluster,omitempty"`
+	// Login is a flag to indicate if the role can login
+	Login bool `json:"login"`
+	// CreateDb is a flag to indicate if the role can create databases
+	CreateDb bool `json:"createDb"`
+	// CreateRole is a flag to indicate if the role can create roles
+	CreateRole bool `json:"createRole"`
+	// ConnectionLimit is the maximum number of concurrent connections for the role. Default is -1, as per PostgreSQL default.
+	ConnectionLimit int64 `json:"connectionLimit,omitempty"`
+	// ValidUntil is the date and time the role will expire
+	ValidUntil *time.Time `json:"validUntil,omitempty"`
+	// DeleteScheduledAt is the date and time the role will be deleted
+	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
+}
