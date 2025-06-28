@@ -19,7 +19,7 @@ func (c *Client) CreatePgRole(ctx context.Context, dbClusterIdentity string, cre
 	}
 
 	req := c.R().SetBody(create)
-	resp, err := c.Do(ctx, req, client.POST, fmt.Sprintf("%s/%s/roles", DbClusterEndpoint, dbClusterIdentity))
+	resp, err := c.Do(ctx, req, client.POST, fmt.Sprintf("%s/%s/postgres-roles", DbClusterEndpoint, dbClusterIdentity))
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func (c *Client) UpdatePgRole(ctx context.Context, dbClusterIdentity string, rol
 	}
 
 	req := c.R().SetBody(update)
-	resp, err := c.Do(ctx, req, client.PUT, fmt.Sprintf("%s/%s/roles/%s", DbClusterEndpoint, dbClusterIdentity, roleName))
+	resp, err := c.Do(ctx, req, client.PUT, fmt.Sprintf("%s/%s/postgres-roles/%s", DbClusterEndpoint, dbClusterIdentity, roleName))
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (c *Client) DeletePgRole(ctx context.Context, dbClusterIdentity string, rol
 	}
 
 	req := c.R()
-	resp, err := c.Do(ctx, req, client.DELETE, fmt.Sprintf("%s/%s/roles/%s", DbClusterEndpoint, dbClusterIdentity, roleName))
+	resp, err := c.Do(ctx, req, client.DELETE, fmt.Sprintf("%s/%s/postgres-roles/%s", DbClusterEndpoint, dbClusterIdentity, roleName))
 	if err != nil {
 		return err
 	}
