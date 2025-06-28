@@ -236,9 +236,9 @@ type UpdateKubernetesNodePool struct {
 
 // KubernetesNodeSettings represents the configuration settings for nodes in a node pool.
 type KubernetesNodeSettings struct {
-	Annotations map[string]string `json:"annotations"` // Kubernetes node annotations
-	Labels      map[string]string `json:"labels"`      // Kubernetes node labels
-	Taints      []NodeTaint       `json:"taints"`      // Node taints for pod scheduling
+	Annotations map[string]string `json:"nodeAnnotations"` // Kubernetes node annotations
+	Labels      map[string]string `json:"nodeLabels"`      // Kubernetes node labels
+	Taints      []NodeTaint       `json:"nodeTaints"`      // Node taints for pod scheduling
 }
 
 // NodeTaint represents a taint that can be applied to nodes to control pod scheduling.
