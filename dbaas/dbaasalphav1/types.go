@@ -208,3 +208,268 @@ const (
 	DbClusterStatusDeleted               DbClusterStatus = "deleted"
 	DbClusterStatusUnknown               DbClusterStatus = "unknown"
 )
+
+type CreatePgDatabaseRequest struct {
+	// Name is the name of the database.
+	Name string `json:"name"`
+	// Maps to the `OWNER` parameter of `CREATE DATABASE`.
+	// Maps to the `OWNER TO` command of `ALTER DATABASE`.
+	// The role name of the user who owns the database inside PostgreSQL.
+	Owner string `json:"owner"`
+
+	// Maps to the `ALLOW_CONNECTIONS` parameter of `CREATE DATABASE` and
+	// `ALTER DATABASE`. If false then no one can connect to this database.
+	AllowConnections *bool `json:"allowConnections,omitempty"`
+
+	// Maps to the `CONNECTION LIMIT` clause of `CREATE DATABASE` and
+	// `ALTER DATABASE`. How many concurrent connections can be made to
+	// this database. -1 (the default) means no limit.
+	ConnectionLimit *int `json:"connectionLimit,omitempty"`
+}
+
+type UpdatePgDatabaseRequest struct {
+	// Maps to the `ALLOW_CONNECTIONS` parameter of `CREATE DATABASE` and
+	// `ALTER DATABASE`. If false then no one can connect to this database.
+	AllowConnections *bool `json:"allowConnections,omitempty"`
+
+	// Maps to the `CONNECTION LIMIT` clause of `CREATE DATABASE` and
+	// `ALTER DATABASE`. How many concurrent connections can be made to
+	// this database. -1 (the default) means no limit.
+	ConnectionLimit *int `json:"connectionLimit,omitempty"`
+}
+
+type CreatePgRoleRequest struct {
+	Name string `json:"name"`
+	// Login is a flag to indicate if the role can login
+	Login bool `json:"login"`
+
+	// CreateDb is a flag to indicate if the role can create databases
+	CreateDb bool `json:"createDb"`
+
+	// CreateRole is a flag to indicate if the role can create roles
+	CreateRole bool `json:"createRole"`
+
+	// ConnectionLimit is the maximum number of concurrent connections for the role. Default is -1, as per PostgreSQL default.
+	ConnectionLimit int64 `json:"connectionLimit,omitempty"`
+
+	// ValidUntil is the date and time the role will expire
+	ValidUntil *time.Time `json:"validUntil,omitempty"`
+
+	// Password is the password for the role
+	Password string `json:"password,omitempty"`
+}
+
+type UpdatePgRoleRequest struct {
+	// ConnectionLimit is the maximum number of concurrent connections for the role. Default is -1, as per PostgreSQL default.
+	ConnectionLimit int64 `json:"connectionLimit,omitempty"`
+
+	// ValidUntil is the date and time the role will expire
+	ValidUntil *time.Time `json:"validUntil,omitempty"`
+
+	// Password is the password for the role. If provided, the password will be updated. If not provided, the password will not be updated.
+	Password *string `json:"password,omitempty"`
+}
+
+type CreatePgBackupScheduleRequest struct {
+	Name            string      `json:"name"`
+	Description     *string     `json:"description,omitempty"`
+	Annotations     Annotations `json:"annotations,omitempty"`
+	Labels          Labels      `json:"labels,omitempty"`
+	Schedule        string      `json:"schedule"`
+	RetentionPolicy string      `json:"retentionPolicy"`
+	Target          string      `json:"target,omitempty"`
+}
+
+type UpdatePgBackupScheduleRequest struct {
+	Name            string      `json:"name"`
+	Description     string      `json:"description"`
+	Annotations     Annotations `json:"annotations,omitempty"`
+	Labels          Labels      `json:"labels,omitempty"`
+	Schedule        string      `json:"schedule"`
+	RetentionPolicy string      `json:"retentionPolicy"`
+	Target          string      `json:"target,omitempty"`
+}
+
+type DbClusterBackupScheduleMethod string
+
+const (
+	DbClusterBackupScheduleMethodSnapshot DbClusterBackupScheduleMethod = "snapshot"
+)
+
+type DbClusterBackupScheduleTarget string
+
+const (
+	DbClusterBackupScheduleTargetPrimary       DbClusterBackupScheduleTarget = "primary"
+	DbClusterBackupScheduleTargetPreferStandby DbClusterBackupScheduleTarget = "prefer-standby"
+)
+
+type DbClusterBackupSchedule struct {
+	// Identity is a unique identifier for the backup schedule
+	Identity string `json:"identity"`
+
+	// Name is a human-readable name of the backup schedule
+	Name string `json:"name"`
+
+	// Status is the status of the role
+	Status ObjectStatus `json:"status"`
+
+	// StatusMessage is the message of the role status
+	StatusMessage string `json:"statusMessage,omitempty"`
+
+	// CreatedAt is the date and time the object was created
+	CreatedAt time.Time `json:"createdAt"`
+
+	// DbCluster is the cluster the backup schedule belongs to
+	DbCluster *DbCluster `json:"dbCluster,omitempty"`
+
+	// Organisation is the organisation the backup schedule belongs to
+	Organisation *base.Organisation `json:"organisation,omitempty"`
+
+	// Method is the method of the backup schedule
+	Method DbClusterBackupScheduleMethod `json:"method"`
+
+	// Schedule is the schedule of the backup. Cron expression.
+	// see https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format
+	Schedule string `json:"schedule"`
+
+	// RetentionPolicy is the retention policy of the backup
+	RetentionPolicy string `json:"retentionPolicy"`
+
+	// NextBackupAt is the date and time the next backup will be taken
+	NextBackupAt *time.Time `json:"nextBackupAt,omitempty"`
+
+	// LastBackupAt is the date and time the last backup was taken
+	LastBackupAt *time.Time `json:"lastBackupAt,omitempty"`
+
+	// BackupCount is the number of backups
+	BackupCount int64 `json:"backupCount"`
+
+	// Suspended is a flag to indicate if the backup schedule is suspended
+	Suspended bool `json:"suspended"`
+
+	// Target is the target of the backup schedule
+	Target DbClusterBackupScheduleTarget `json:"target"`
+
+	// DeleteScheduledAt is the date and time the backup schedule will be deleted
+	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
+}
+
+type CreateDbClusterBackupRequest struct {
+	Name            string      `json:"name"`
+	Description     *string     `json:"description,omitempty"`
+	Labels          Labels      `json:"labels"`
+	Annotations     Annotations `json:"annotations"`
+	RetentionPolicy *string     `json:"retentionPolicy,omitempty"`
+	Target          string      `json:"target"`
+}
+
+type DbClusterBackup struct {
+	// Identity is a unique identifier for the backup
+	Identity string `json:"identity" validate:"required,notblank"`
+	// DbCluster is the cluster the backup belongs to
+	DbCluster *DbCluster `json:"dbCluster,omitempty"`
+	// Organisation is the organisation the backup belongs to
+	Organisation *base.Organisation `json:"organisation,omitempty"`
+	// Labels is a map of labels for the backup
+	Labels map[string]string `json:"labels,omitempty"`
+	// Annotations is a map of annotations for the backup
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// Region is the region the backup belongs to
+	Region *iaas.Region `json:"region,omitempty"`
+	// BackupSchedule is the backup schedule the backup belongs to
+	// +optional
+	BackupSchedule *DbClusterBackupSchedule `json:"backupSchedule,omitempty"`
+	// BackupTrigger is the trigger of the backup
+	BackupTrigger DbClusterBackupTrigger `json:"backupTrigger"`
+	// EngineType is the type of the database engine, used for back-up restore purposes
+	EngineType DbClusterDatabaseEngine `json:"engineType"`
+	// EngineVersion is the version of the database engine, used for back-up restore purposes
+	EngineVersion string `json:"engineVersion"`
+
+	// BackupType is the type of the backup
+	BackupType string `json:"backupType"`
+
+	// Online is a flag to indicate if the backup is an online backup or offline/cold backup
+	Online bool `json:"online"`
+
+	// BeginLSN is the starting LSN of the backup
+	BeginLSN string `json:"beginLSN"`
+
+	// EndLSN is the ending LSN of the backup
+	EndLSN string `json:"endLSN"`
+
+	// BeginWAL is the starting WAL of the backup
+	BeginWAL string `json:"beginWAL"`
+
+	// EndWAL is the ending WAL of the backup
+	EndWAL string `json:"endWAL"`
+
+	// StartedAt is the date and time the backup started
+	StartedAt *time.Time `json:"startedAt,omitempty"`
+
+	// StoppedAt is the date and time the backup stopped
+	StoppedAt *time.Time `json:"stoppedAt,omitempty"`
+
+	// Status is the status of the backup
+	Status ObjectStatus `json:"status"`
+
+	// StatusMessage is the message of the backup status
+	StatusMessage string `json:"statusMessage,omitempty"`
+
+	// CreatedAt is the date and time the object was created
+	CreatedAt time.Time `json:"createdAt"`
+
+	// DeleteScheduledAt is the date and time the backup will be deleted
+	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
+}
+
+type DbClusterBackupTrigger string
+
+const (
+	DbClusterBackupTriggerManual   DbClusterBackupTrigger = "manual"
+	DbClusterBackupTriggerSchedule DbClusterBackupTrigger = "schedule"
+	DbClusterBackupTriggerSystem   DbClusterBackupTrigger = "system"
+)
+
+type CreatePgGrantRequest struct {
+	Name         string `json:"name"`
+	RoleName     string `json:"roleName"`
+	DatabaseName string `json:"databaseName"`
+
+	// Read is a flag to indicate if the role can read from the database
+	Read bool `json:"read"`
+	// Write is a flag to indicate if the role can write to the database
+	Write bool `json:"write"`
+}
+
+type UpdatePgGrantRequest struct {
+	Read  *bool `json:"read"`
+	Write *bool `json:"write"`
+}
+
+type DbClusterPostgresRole struct {
+	// Identity is a unique identifier for the role
+	Identity string `json:"identity"`
+	// Name is a human-readable name of the role
+	Name string `json:"name"`
+	// Status is the status of the role
+	Status ObjectStatus `json:"status"`
+	// StatusMessage is the message of the role status
+	StatusMessage string `json:"statusMessage,omitempty"`
+	// CreatedAt is the date and time the object was created
+	CreatedAt time.Time `json:"createdAt"`
+	// DbCluster is the cluster the role belongs to
+	DbCluster *DbCluster `json:"dbCluster,omitempty"`
+	// Login is a flag to indicate if the role can login
+	Login bool `json:"login"`
+	// CreateDb is a flag to indicate if the role can create databases
+	CreateDb bool `json:"createDb"`
+	// CreateRole is a flag to indicate if the role can create roles
+	CreateRole bool `json:"createRole"`
+	// ConnectionLimit is the maximum number of concurrent connections for the role. Default is -1, as per PostgreSQL default.
+	ConnectionLimit int64 `json:"connectionLimit,omitempty"`
+	// ValidUntil is the date and time the role will expire
+	ValidUntil *time.Time `json:"validUntil,omitempty"`
+	// DeleteScheduledAt is the date and time the role will be deleted
+	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
+}
