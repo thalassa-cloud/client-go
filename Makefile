@@ -1,5 +1,4 @@
-
-PKG_LIST := $(shell go list ./pkg/...)
+PKG_LIST := $(shell go list ./... | grep -v tests)
 
 default: test
 
