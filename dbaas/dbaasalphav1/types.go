@@ -14,14 +14,14 @@ const (
 )
 
 type DbCluster struct {
-	Identity      string            `json:"identity"`
-	Name          string            `json:"name"`
-	Description   string            `json:"description"`
-	CreatedAt     time.Time         `json:"createdAt"`
-	UpdatedAt     time.Time         `json:"updatedAt"`
-	ObjectVersion int               `json:"objectVersion"`
-	Labels        map[string]string `json:"labels"`
-	Annotations   map[string]string `json:"annotations"`
+	Identity      string      `json:"identity"`
+	Name          string      `json:"name"`
+	Description   string      `json:"description"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	UpdatedAt     time.Time   `json:"updatedAt"`
+	ObjectVersion int         `json:"objectVersion"`
+	Labels        Labels      `json:"labels"`
+	Annotations   Annotations `json:"annotations"`
 
 	Organisation *base.Organisation `json:"organisation,omitempty"`
 	// Vpc is the VPC the cluster is deployed in
