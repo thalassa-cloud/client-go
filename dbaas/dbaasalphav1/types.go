@@ -93,10 +93,10 @@ type DbClusterEngineVersion struct {
 }
 
 type CreateDbClusterRequest struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Labels      map[string]string `json:"labels"`
-	Annotations map[string]string `json:"annotations"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Labels      Labels      `json:"labels"`
+	Annotations Annotations `json:"annotations"`
 	// Subnet is the subnet identity of the cloud subnet
 	SubnetIdentity           string   `json:"subnetIdentity"`
 	SecurityGroupAttachments []string `json:"securityGroupAttachments"`
@@ -115,10 +115,58 @@ type CreateDbClusterRequest struct {
 	DatabaseInstanceTypeIdentity string `json:"databaseInstanceTypeIdentity"`
 	// AutoMinorVersionUpgrade is a flag indicating if the cluster should automatically upgrade to the latest minor version
 	AutoMinorVersionUpgrade bool `json:"autoMinorVersionUpgrade"`
-	// DatabaseName is the name of the database on the cluster. Optional name. If provided, it will be used as the name of the database on the cluster.
-	DatabaseName *string `json:"databaseName"`
-	// Replicas is the number of instances in the cluster
-	Replicas int `json:"replicas"`
+	// Instances is the number of instances in the cluster
+	Instances int `json:"replicas"`
+	// PostgresInitDb is the initial database to create on the cluster
+	PostgresInitDb *PostgresInitDb `json:"postgresInitDb,omitempty"`
+
+	// RestoreFromBackupIdentity is the identity of the backup to restore from
+	RestoreFromBackupIdentity *string `json:"restoreFromBackupIdentity,omitempty"`
+}
+
+type PostgresInitDb struct {
+	// DataChecksums is a flag to indicate if data checksums should be enabled
+	DataChecksums bool `json:"dataChecksums,omitempty"`
+	// Maps to the `ENCODING` parameter of `CREATE DATABASE`. This setting
+	// cannot be changed. Character set encoding to use in the database.
+	Encoding string `json:"encoding,omitempty"`
+
+	// Maps to the `LOCALE` parameter of `CREATE DATABASE`. This setting
+	// cannot be changed. Sets the default collation order and character
+	// classification in the new database.
+	Locale string `json:"locale,omitempty"`
+
+	// Maps to the `LOCALE_PROVIDER` parameter of `CREATE DATABASE`. This
+	// setting cannot be changed. This option sets the locale provider for
+	// databases created in the new cluster. Available from PostgreSQL 16.
+	LocaleProvider string `json:"localeProvider,omitempty"`
+
+	// Maps to the `LC_COLLATE` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	LcCollate string `json:"localeCollate,omitempty"`
+
+	// Maps to the `LC_CTYPE` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	LcCtype string `json:"localeCType,omitempty"`
+
+	// Maps to the `ICU_LOCALE` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	// Specifies the ICU locale when the ICU provider is used.
+	// This option requires `localeProvider` to be set to `icu`. Available from PostgreSQL 15.
+	IcuLocale string `json:"icuLocale,omitempty"`
+
+	// Maps to the `ICU_RULES` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	// Specifies additional collation rules to customize the behavior of the default collation.
+	// This option requires `localeProvider` to be set to `icu`. Available from PostgreSQL 16.
+	IcuRules string `json:"icuRules,omitempty"`
+
+	// Maps to the `BUILTIN_LOCALE` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	// Specifies the locale name when the builtin provider is used. This option requires `localeProvider` to be set to `builtin`.
+	// Available from PostgreSQL 17.
+	BuiltinLocale string `json:"builtinLocale,omitempty"`
+	// Maps to the `COLLATION_VERSION` parameter of `CREATE DATABASE`. This setting cannot be changed.
+	// CollationVersion string `json:"collationVersion,omitempty"`
+	// The value in megabytes (1 to 1024) to be passed to the `--wal-segsize`
+	// option for initdb (default: empty, resulting in PostgreSQL default: 16MB)
+	// +optional
+	WalSegmentSize int `json:"walSegmentSize,omitempty"`
 }
 
 type UpdateDbClusterRequest struct {
