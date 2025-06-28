@@ -22,7 +22,7 @@ func (c *Client) CreatePgDatabase(ctx context.Context, dbClusterIdentity string,
 	}
 
 	req := c.R().SetBody(create)
-	resp, err := c.Do(ctx, req, client.POST, fmt.Sprintf("%s/%s/databases", DbClusterEndpoint, dbClusterIdentity))
+	resp, err := c.Do(ctx, req, client.POST, fmt.Sprintf("%s/%s/postgres-databases", DbClusterEndpoint, dbClusterIdentity))
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (c *Client) UpdatePgDatabase(ctx context.Context, dbClusterIdentity string,
 	}
 
 	req := c.R().SetBody(update)
-	resp, err := c.Do(ctx, req, client.PUT, fmt.Sprintf("%s/%s/databases/%s", DbClusterEndpoint, dbClusterIdentity, databaseName))
+	resp, err := c.Do(ctx, req, client.PUT, fmt.Sprintf("%s/%s/postgres-databases/%s", DbClusterEndpoint, dbClusterIdentity, databaseName))
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (c *Client) DeletePgDatabase(ctx context.Context, dbClusterIdentity string,
 	}
 
 	req := c.R()
-	resp, err := c.Do(ctx, req, client.DELETE, fmt.Sprintf("%s/%s/databases/%s", DbClusterEndpoint, dbClusterIdentity, databaseName))
+	resp, err := c.Do(ctx, req, client.DELETE, fmt.Sprintf("%s/%s/postgres-databases/%s", DbClusterEndpoint, dbClusterIdentity, databaseName))
 	if err != nil {
 		return err
 	}
