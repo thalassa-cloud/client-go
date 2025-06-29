@@ -26,6 +26,8 @@ type Organisation struct {
 	CreatedAt     time.Time         `json:"createdAt"`
 	UpdatedAt     *time.Time        `json:"updatedAt,omitempty"`
 	ObjectVersion int               `json:"objectVersion"`
+
+	FeatureGates OrganisationFeatureGates `json:"featureGates,omitempty"`
 }
 
 // OrganisationMemberType is a type that represents a role of a member in an organisation
@@ -50,4 +52,9 @@ type OrganisationMember struct {
 	AppUser *AppUser `json:"user,omitempty"`
 	// Role is the role of the user in the organisation
 	Role OrganisationMemberType `json:"role"`
+}
+
+type OrganisationFeatureGates struct {
+	DBaaS    bool `json:"dbaas,omitempty"`
+	BetaUser bool `json:"betaUser,omitempty"`
 }
