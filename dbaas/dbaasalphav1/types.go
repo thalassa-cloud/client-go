@@ -30,7 +30,7 @@ type DbCluster struct {
 	// Subnet is the subnet the cluster is deployed in
 	Subnet *iaas.Subnet `json:"subnet,omitempty"`
 	// DatabaseInstanceType is the instance type used to determine the size of the cluster instances
-	DatabaseInstanceType *iaas.MachineType `json:"database_instance_type,omitempty"`
+	DatabaseInstanceType *DatabaseInstanceType `json:"database_instance_type,omitempty"`
 	// Replicas is the number of instances in the cluster
 	Replicas int `json:"replicas"`
 	// Engine is the database engine of the cluster
