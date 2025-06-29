@@ -2,7 +2,9 @@ package kubernetes
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/client"
@@ -101,4 +103,86 @@ func (c *Client) DeleteKubernetesNodePool(ctx context.Context, clusterIdentity s
 		return err
 	}
 	return nil
+}
+
+// WaitUntilKubernetesNodePoolReady waits until the node pool is ready. A node pool is ready when all nodes within the node pool are up-to-date and running.
+// It returns the node pool when it is ready or an error if the node pool is not being ready or if the context is cancelled.
+// You are responsible for providing a context that can be cancelled, and for handling the error case.
+// Example: ctxt, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+// defer cancel()
+// nodePool, err := c.WaitUntilKubernetesNodePoolReady(ctxt, "cluster-identity1234", "node-pool-identity1234")
+//
+//	if err != nil {
+//		log.Fatalf("Failed to wait for node pool to be ready: %v", err)
+//	}
+func (c *Client) WaitUntilKubernetesNodePoolReady(ctx context.Context, clusterIdentity string, identity string) (*KubernetesNodePool, error) {
+	nodePool, err := c.GetKubernetesNodePool(ctx, clusterIdentity, identity)
+	if err != nil {
+		return nil, err
+	}
+	if nodePool.Status == KubernetesNodePoolStatusReady {
+		return nodePool, nil
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(5 * time.Second):
+			nodePool, err = c.GetKubernetesNodePool(ctx, clusterIdentity, identity)
+			if err != nil {
+				return nil, err
+			}
+			if nodePool.Status == KubernetesNodePoolStatusReady {
+				return nodePool, nil
+			}
+		}
+	}
+}
+
+// WaitUntilKubernetesNodePoolDeleted waits until the node pool is deleted.
+// It returns an error if the node pool is not being deleted or if the context is cancelled.
+// You are responsible for providing a context that can be cancelled, and for handling the error case.
+// Example: ctxt, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+// defer cancel()
+// err := c.WaitUntilKubernetesNodePoolDeleted(ctxt, "cluster-identity1234", "node-pool-identity1234")
+//
+//	if err != nil {
+//		log.Fatalf("Failed to wait for node pool to be deleted: %v", err)
+//	}
+func (c *Client) WaitUntilKubernetesNodePoolDeleted(ctx context.Context, clusterIdentity string, identity string) error {
+	nodePool, err := c.GetKubernetesNodePool(ctx, clusterIdentity, identity)
+	if err != nil {
+		return err
+	}
+	if nodePool == nil {
+		return nil
+	}
+	if nodePool.Status == KubernetesNodePoolStatusDeleted {
+		return nil
+	}
+	if nodePool.Status != KubernetesNodePoolStatusDeleting {
+		return fmt.Errorf("node pool %s is not being deleted", identity)
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(5 * time.Second):
+			nodePool, err := c.GetKubernetesNodePool(ctx, clusterIdentity, identity)
+			if err != nil {
+				if errors.Is(err, client.ErrNotFound) {
+					return nil
+				}
+				return err
+			}
+			if nodePool.Status == KubernetesNodePoolStatusDeleted {
+				return nil
+			}
+			if nodePool.Status != KubernetesNodePoolStatusDeleting {
+				return fmt.Errorf("node pool %s is not being deleted", identity)
+			}
+		}
+	}
 }
