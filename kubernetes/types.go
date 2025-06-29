@@ -202,6 +202,9 @@ type CreateKubernetesNodePool struct {
 	Name        string `json:"name"`        // Display name for the node pool
 	Description string `json:"description"` // Detailed description
 
+	Labels      map[string]string `json:"labels"`      // Custom labels
+	Annotations map[string]string `json:"annotations"` // Custom annotations
+
 	MachineType      string  `json:"machineType"`      // Type of machine for nodes
 	Replicas         int     `json:"replicas"`         // Initial number of nodes
 	MinReplicas      int     `json:"minReplicas"`      // Minimum nodes for autoscaling
@@ -219,6 +222,9 @@ type CreateKubernetesNodePool struct {
 // UpdateKubernetesNodePool represents the configuration for updating an existing node pool.
 type UpdateKubernetesNodePool struct {
 	Description string `json:"description"` // New description
+
+	Labels      map[string]string `json:"labels"`      // Updated labels
+	Annotations map[string]string `json:"annotations"` // Updated annotations
 
 	MachineType               string  `json:"machineType"`               // New machine type
 	Replicas                  *int    `json:"replicas"`                  // New number of nodes
