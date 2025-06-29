@@ -246,9 +246,10 @@ type KubernetesNodeSettings struct {
 
 // NodeTaint represents a taint that can be applied to nodes to control pod scheduling.
 type NodeTaint struct {
-	Key    string `json:"key"`    // Taint key
-	Value  string `json:"value"`  // Taint value
-	Effect string `json:"effect"` // Taint effect (NoSchedule, PreferNoSchedule, NoExecute)
+	Key      string `json:"key"`      // Taint key
+	Value    string `json:"value"`    // Taint value
+	Operator string `json:"operator"` // Taint operator (Equal, Exists)
+	Effect   string `json:"effect"`   // Taint effect (NoSchedule, PreferNoSchedule, NoExecute)
 }
 
 type KubernetesNodePoolUpgradeStrategy string
