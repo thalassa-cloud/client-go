@@ -107,17 +107,16 @@ type CreateKubernetesCluster struct {
 
 // UpdateKubernetesCluster represents the configuration for updating an existing Kubernetes cluster.
 type UpdateKubernetesCluster struct {
-	Name                        *string                                `json:"name,omitempty"`                        // New display name
-	Description                 *string                                `json:"description,omitempty"`                 // New description
-	Labels                      map[string]string                      `json:"labels,omitempty"`                      // Updated labels
-	Annotations                 map[string]string                      `json:"annotations,omitempty"`                 // Updated annotations
-	KubernetesVersionIdentity   *string                                `json:"kubernetesVersionIdentity,omitempty"`   // New Kubernetes version identifier
-	DeleteProtection            *bool                                  `json:"deleteProtection,omitempty"`            // Updated deletion protection setting
-	Subnet                      *string                                `json:"subnet,omitempty"`                      // New subnet
-	Networking                  *KubernetesClusterNetworking           `json:"networking,omitempty"`                  // Updated network configuration
+	Name                      *string           `json:"name,omitempty"`                      // New display name
+	Description               *string           `json:"description,omitempty"`               // New description
+	Labels                    map[string]string `json:"labels,omitempty"`                    // Updated labels
+	Annotations               map[string]string `json:"annotations,omitempty"`               // Updated annotations
+	KubernetesVersionIdentity *string           `json:"kubernetesVersionIdentity,omitempty"` // New Kubernetes version identifier
+	DeleteProtection          *bool             `json:"deleteProtection,omitempty"`          // Updated deletion protection setting
+
+	DefaultNetworkPolicy        *KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy,omitempty"`        // Updated default network policy
 	PodSecurityStandardsProfile *KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile,omitempty"` // Updated pod security standards
 	AuditLogProfile             *KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile,omitempty"`             // Updated audit logging configuration
-	DefaultNetworkPolicy        *KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy,omitempty"`        // Updated default network policy
 }
 
 // KubernetesClusterNetworking represents the network configuration for a Kubernetes cluster.
@@ -199,9 +198,8 @@ type KubernetesNodePool struct {
 
 // CreateKubernetesNodePool represents the configuration for creating a new node pool.
 type CreateKubernetesNodePool struct {
-	Name        string `json:"name"`        // Display name for the node pool
-	Description string `json:"description"` // Detailed description
-
+	Name        string            `json:"name"`        // Display name for the node pool
+	Description string            `json:"description"` // Detailed description
 	Labels      map[string]string `json:"labels"`      // Custom labels
 	Annotations map[string]string `json:"annotations"` // Custom annotations
 
@@ -221,10 +219,9 @@ type CreateKubernetesNodePool struct {
 
 // UpdateKubernetesNodePool represents the configuration for updating an existing node pool.
 type UpdateKubernetesNodePool struct {
-	Description string `json:"description"` // New description
-
-	Labels      map[string]string `json:"labels"`      // Updated labels
-	Annotations map[string]string `json:"annotations"` // Updated annotations
+	Description string            `json:"description"` // New description
+	Labels      map[string]string `json:"labels"`      // Custom labels
+	Annotations map[string]string `json:"annotations"` // Custom annotations
 
 	MachineType               string  `json:"machineType"`               // New machine type
 	Replicas                  *int    `json:"replicas"`                  // New number of nodes
