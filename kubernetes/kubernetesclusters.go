@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/client"
@@ -67,6 +68,41 @@ func (c *Client) CreateKubernetesCluster(ctx context.Context, create CreateKuber
 		return subnet, err
 	}
 	return subnet, nil
+}
+
+// WaitUntilKubernetesClusterReady waits until the KubernetesCluster is ready.
+// It returns the KubernetesCluster when it is ready or an error if the KubernetesCluster is not being ready or if the context is cancelled.
+// You are responsible for providing a context that can be cancelled, and for handling the error case.
+// Example: ctxt, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+// defer cancel()
+// kubernetesCluster, err := c.WaitUntilKubernetesClusterReady(ctxt, "kubernetes-cluster-identity1234")
+//
+//	if err != nil {
+//		log.Fatalf("Failed to wait for KubernetesCluster to be ready: %v", err)
+//	}
+func (c *Client) WaitUntilKubernetesClusterReady(ctx context.Context, identity string) (*KubernetesCluster, error) {
+	kubernetesCluster, err := c.GetKubernetesCluster(ctx, identity)
+	if err != nil {
+		return nil, err
+	}
+	if kubernetesCluster.Status == "ready" {
+		return kubernetesCluster, nil
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-time.After(5 * time.Second):
+			kubernetesCluster, err = c.GetKubernetesCluster(ctx, identity)
+			if err != nil {
+				return nil, err
+			}
+			if kubernetesCluster.Status == "ready" {
+				return kubernetesCluster, nil
+			}
+		}
+	}
 }
 
 // UpdateKubernetesCluster updates an existing KubernetesCluster.

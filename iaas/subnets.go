@@ -93,6 +93,9 @@ func (c *Client) WaitUntilSubnetDeleted(ctx context.Context, identity string) er
 		case <-time.After(DefaultPollIntervalForWaiting):
 			subnet, err := c.GetSubnet(ctx, identity)
 			if err != nil {
+				if errors.Is(err, client.ErrNotFound) {
+					return nil
+				}
 				return err
 			}
 			switch subnet.Status {
