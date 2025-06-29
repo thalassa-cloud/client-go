@@ -2,6 +2,8 @@ package dbaasalphav1
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/client"
@@ -12,9 +14,14 @@ const (
 )
 
 // ListEngineVersions lists all engine versions for a given organisation.
-func (c *Client) ListEngineVersions(ctx context.Context, listRequest *ListEngineVersionsRequest) ([]DbClusterEngineVersion, error) {
+func (c *Client) ListEngineVersions(ctx context.Context, engine DbClusterDatabaseEngine, listRequest *ListEngineVersionsRequest) ([]DbClusterEngineVersion, error) {
+	if strings.TrimSpace(string(engine)) == "" {
+		return nil, errors.New("engine is required")
+	}
+
 	engineVersions := []DbClusterEngineVersion{}
-	req := c.R().SetResult(&engineVersions)
+	req := c.R().SetResult(&engineVersions).
+		SetQueryParam("engine", string(engine))
 
 	if listRequest != nil {
 		for _, filter := range listRequest.Filters {
