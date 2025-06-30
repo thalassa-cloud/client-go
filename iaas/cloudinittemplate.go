@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
 // CloudInitTemplateEndpoint defines the API endpoint for cloud-init template operations
@@ -15,7 +17,9 @@ const (
 // Cloud-init templates contain scripts that run when instances are first booted.
 func (c *Client) CreateCloudInitTemplate(ctx context.Context, create CreateCloudInitTemplateRequest) (*CloudInitTemplate, error) {
 	var cloudInitTemplate CloudInitTemplate
-	resp, err := c.R().SetBody(create).SetResult(&cloudInitTemplate).Post(CloudInitTemplateEndpoint)
+	req := c.R().SetBody(create).SetResult(&cloudInitTemplate)
+
+	resp, err := c.Do(ctx, req, client.POST, CloudInitTemplateEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +35,8 @@ func (c *Client) CreateCloudInitTemplate(ctx context.Context, create CreateCloud
 // Returns a slice of CloudInitTemplate objects that can be used for instance initialization.
 func (c *Client) ListCloudInitTemplates(ctx context.Context) ([]CloudInitTemplate, error) {
 	var cloudInitTemplates []CloudInitTemplate
-	resp, err := c.R().SetResult(&cloudInitTemplates).Get(CloudInitTemplateEndpoint)
+	req := c.R().SetResult(&cloudInitTemplates)
+	resp, err := c.Do(ctx, req, client.GET, CloudInitTemplateEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +52,10 @@ func (c *Client) ListCloudInitTemplates(ctx context.Context) ([]CloudInitTemplat
 // The identity is a UUID that uniquely identifies the template in the system.
 func (c *Client) GetCloudInitTemplate(ctx context.Context, identity string) (*CloudInitTemplate, error) {
 	var cloudInitTemplate CloudInitTemplate
-	resp, err := c.R().SetResult(&cloudInitTemplate).Get(fmt.Sprintf("%s/%s", CloudInitTemplateEndpoint, identity))
+
+	req := c.R().SetResult(&cloudInitTemplate)
+
+	resp, err := c.Do(ctx, req, client.GET, fmt.Sprintf("%s/%s", CloudInitTemplateEndpoint, identity))
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +70,9 @@ func (c *Client) GetCloudInitTemplate(ctx context.Context, identity string) (*Cl
 // DeleteCloudInitTemplate permanently removes a cloud-init template from the system.
 // This operation cannot be undone and will affect any instances using this template.
 func (c *Client) DeleteCloudInitTemplate(ctx context.Context, identity string) error {
-	resp, err := c.R().Delete(fmt.Sprintf("%s/%s", CloudInitTemplateEndpoint, identity))
+	req := c.R()
+
+	resp, err := c.Do(ctx, req, client.DELETE, fmt.Sprintf("%s/%s", CloudInitTemplateEndpoint, identity))
 	if err != nil {
 		return err
 	}
