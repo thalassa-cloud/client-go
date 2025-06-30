@@ -16,6 +16,7 @@ const (
 type DbCluster struct {
 	Identity      string      `json:"identity"`
 	Name          string      `json:"name"`
+	Slug          string      `json:"slug"`
 	Description   string      `json:"description"`
 	CreatedAt     time.Time   `json:"createdAt"`
 	UpdatedAt     time.Time   `json:"updatedAt"`
@@ -62,6 +63,11 @@ type DbCluster struct {
 	EndpointIpv6 string `json:"endpointIpv6"`
 	// Port is the port of the cluster endpoint
 	Port int `json:"port"`
+
+	// PostgresRoles is a list of PostgreSQL roles associated with the cluster
+	PostgresRoles []DbClusterPostgresRole `json:"postgresRoles,omitempty"`
+	// PostgresDatabases is a list of PostgreSQL databases associated with the cluster
+	PostgresDatabases []DbClusterPostgresDatabase `json:"postgresDatabases,omitempty"`
 }
 
 type DbClusterEngineVersion struct {
@@ -90,6 +96,10 @@ type DbClusterEngineVersion struct {
 	Enabled bool `json:"enabled"`
 	// DefaultParameters is a map of parameter name to database engine specific parameter value
 	DefaultParameters map[string]string `json:"defaultParameters"`
+}
+
+type ListDbClusterEngineVersionsResponse struct {
+	Engines map[DbClusterDatabaseEngine][]DbClusterEngineVersion `json:"engines"`
 }
 
 type CreateDbClusterRequest struct {
@@ -324,6 +334,15 @@ type DbClusterBackupSchedule struct {
 	// Name is a human-readable name of the backup schedule
 	Name string `json:"name"`
 
+	// Description is the description of the backup schedule
+	Description *string `json:"description,omitempty"`
+
+	// Annotations is a map of annotations for the backup schedule
+	Annotations Annotations `json:"annotations,omitempty"`
+
+	// Labels is a map of labels for the backup schedule
+	Labels Labels `json:"labels,omitempty"`
+
 	// Status is the status of the role
 	Status ObjectStatus `json:"status"`
 
@@ -495,5 +514,21 @@ type DbClusterPostgresRole struct {
 	// ValidUntil is the date and time the role will expire
 	ValidUntil *time.Time `json:"validUntil,omitempty"`
 	// DeleteScheduledAt is the date and time the role will be deleted
+	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
+}
+
+type DbClusterPostgresDatabase struct {
+	// Identity is a unique identifier for the database
+	Identity string `json:"identity"`
+	// Name is a human-readable name of the database
+	Name string `json:"name"`
+
+	// Owner is the name of the owner role
+	Owner string `json:"owner"`
+
+	// ConnectionLimit is the maximum number of concurrent connections for the database. Default is -1, as per PostgreSQL default.
+	ConnectionLimit int64 `json:"connectionLimit,omitempty"`
+
+	// DeleteScheduledAt is the date and time the database will be deleted
 	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
 }

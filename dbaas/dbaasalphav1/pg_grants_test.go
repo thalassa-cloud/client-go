@@ -15,12 +15,12 @@ func setupGrantTestServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
-		case "/v1/dbaas/dbclusters/cluster-123/postgres-grants":
+		case "/v1/dbaas/clusters/cluster-123/postgres-grants":
 			if r.Method == "POST" {
 				w.WriteHeader(http.StatusCreated)
 				w.Write([]byte(`{"message": "grant created"}`))
 			}
-		case "/v1/dbaas/dbclusters/cluster-123/postgres-grants/testgrant":
+		case "/v1/dbaas/clusters/cluster-123/postgres-grants/testgrant":
 			if r.Method == "PUT" {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"message": "grant updated"}`))

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	DbClusterEndpoint = "/v1/dbaas/dbclusters"
+	DbClusterEndpoint = "/v1/dbaas/clusters"
 )
 
 // ListDbClusters lists all dbClusters for a given organisation.
