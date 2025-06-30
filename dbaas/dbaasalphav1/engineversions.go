@@ -3,6 +3,7 @@ package dbaasalphav1
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/thalassa-cloud/client-go/filters"
@@ -10,7 +11,7 @@ import (
 )
 
 const (
-	EngineVersionEndpoint = "/v1/dbaas/engine-versions"
+	EngineVersionEndpoint = "/v1/dbaas/engines"
 )
 
 // ListEngineVersions lists all engine versions for a given organisation.
@@ -19,7 +20,7 @@ func (c *Client) ListEngineVersions(ctx context.Context, engine DbClusterDatabas
 		return nil, errors.New("engine is required")
 	}
 
-	engineVersions := []DbClusterEngineVersion{}
+	engineVersions := ListDbClusterEngineVersionsResponse{}
 	req := c.R().SetResult(&engineVersions).
 		SetQueryParam("engine", string(engine))
 
@@ -37,10 +38,14 @@ func (c *Client) ListEngineVersions(ctx context.Context, engine DbClusterDatabas
 	}
 
 	if err := c.Check(resp); err != nil {
-		return engineVersions, err
+		return nil, err
 	}
 
-	return engineVersions, nil
+	if e, ok := engineVersions.Engines[engine]; ok {
+		return e, nil
+	}
+
+	return nil, fmt.Errorf("engine version not found for engine %s", engine)
 }
 
 // ListEngineVersionsRequest is the request for the ListEngineVersions function.
