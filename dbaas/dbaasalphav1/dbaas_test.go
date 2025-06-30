@@ -9,31 +9,31 @@ func setupTestServer() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
-		case "/v1/dbaas/dbclusters/cluster-123/postgres-databases":
+		case "/v1/dbaas/clusters/cluster-123/postgres-databases":
 			if r.Method == "POST" {
 				w.WriteHeader(http.StatusCreated)
 				w.Write([]byte(`{"message": "database created"}`))
 			}
-		case "/v1/dbaas/dbclusters/cluster-123/postgres-databases/testdb":
+		case "/v1/dbaas/clusters/cluster-123/postgres-databases/testdb":
 			if r.Method == "PUT" {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"message": "database updated"}`))
 			} else if r.Method == "DELETE" {
 				w.WriteHeader(http.StatusNoContent)
 			}
-		case "/v1/dbaas/dbclusters/cluster-123/postgres-roles":
+		case "/v1/dbaas/clusters/cluster-123/postgres-roles":
 			if r.Method == "POST" {
 				w.WriteHeader(http.StatusCreated)
 				w.Write([]byte(`{"message": "role created"}`))
 			}
-		case "/v1/dbaas/dbclusters/cluster-123/postgres-roles/testrole":
+		case "/v1/dbaas/clusters/cluster-123/postgres-roles/testrole":
 			if r.Method == "PUT" {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"message": "role updated"}`))
 			} else if r.Method == "DELETE" {
 				w.WriteHeader(http.StatusNoContent)
 			}
-		case "/v1/dbaas/dbclusters/cluster-123/backup-schedules":
+		case "/v1/dbaas/clusters/cluster-123/backup-schedules":
 			if r.Method == "POST" {
 				w.WriteHeader(http.StatusCreated)
 				w.Write([]byte(`{
@@ -50,7 +50,7 @@ func setupTestServer() *httptest.Server {
 					"target": "primary"
 				}`))
 			}
-		case "/v1/dbaas/dbclusters/cluster-123/backup-schedules/schedule-123":
+		case "/v1/dbaas/clusters/cluster-123/backup-schedules/schedule-123":
 			if r.Method == "PUT" {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{
