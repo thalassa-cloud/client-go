@@ -270,8 +270,8 @@ func TestClientDo(t *testing.T) {
 		WithBaseURL(server.URL),
 		WithAuthPersonalToken("test-token"),
 	)
-	require.NoError(t, err)
-	require.NotNil(t, client)
+	require.NoError(t, err, "expected no error, got %v", err)
+	require.NotNil(t, client, "expected client, got nil")
 
 	// Create a request
 	req := client.R()
@@ -280,17 +280,17 @@ func TestClientDo(t *testing.T) {
 	// Test successful request
 	ctx := context.Background()
 	resp, err := client.Do(ctx, req, http.MethodGet, "/success")
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-	assert.Equal(t, http.StatusOK, resp.StatusCode())
-	assert.Equal(t, "success", string(resp.Body()))
+	require.NoError(t, err, "expected no error, got %v", err)
+	require.NotNil(t, resp, "expected response, got nil")
+	assert.Equal(t, http.StatusOK, resp.StatusCode(), "expected status ok, got %d", resp.StatusCode())
+	assert.Equal(t, "success", string(resp.Body()), "expected body success, got %s", string(resp.Body()))
 
 	// Test not found request
 	resp, err = client.Do(ctx, req, http.MethodGet, "/not-found")
-	require.NoError(t, err)
-	require.NotNil(t, resp)
-	assert.Equal(t, http.StatusNotFound, resp.StatusCode())
-	assert.Equal(t, "not found", string(resp.Body()))
+	require.NoError(t, err, "expected no error, got %v", err)
+	require.NotNil(t, resp, "expected response, got nil")
+	assert.Equal(t, http.StatusNotFound, resp.StatusCode(), "expected status not found, got %d", resp.StatusCode())
+	assert.Equal(t, "not found", string(resp.Body()), "expected body not found, got %s", string(resp.Body()))
 }
 
 // mockResponse is a mock implementation of resty.Response for testing
@@ -325,16 +325,16 @@ func TestClientCheck(t *testing.T) {
 
 	// Test successful request
 	resp, err := client.R().Get("/success")
-	require.NoError(t, err)
+	require.NoError(t, err, "expected no error, got %v", err)
 	err = client.Check(resp)
-	assert.NoError(t, err)
+	assert.NoError(t, err, "expected no error, got %v", err)
 
 	// Test not found request
 	resp, err = client.R().Get("/not-found")
-	require.NoError(t, err)
+	require.NoError(t, err, "expected no error, got %v", err)
 	err = client.Check(resp)
-	assert.Error(t, err)
-	assert.True(t, IsNotFound(err))
+	assert.Error(t, err, "expected error, got nil")
+	assert.True(t, IsNotFound(err), "expected not found error, got %v", err)
 }
 
 func TestClientDialWebsocket(t *testing.T) {
