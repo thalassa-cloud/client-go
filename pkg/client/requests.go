@@ -105,13 +105,13 @@ func (c *thalassaCloudClient) Check(resp *resty.Response) error {
 		case http.StatusNotFound:
 			var errorMessage ServerErrorMessage
 			if err := json.Unmarshal(resp.Body(), &errorMessage); err != nil {
-				return fmt.Errorf("failed to unmarshal response body: %w", err)
+				return ErrNotFound
 			}
 			return errors.Join(ErrNotFound, errors.New(errorMessage.Message))
 		case http.StatusBadRequest:
 			var errorMessage ServerErrorMessage
 			if err := json.Unmarshal(resp.Body(), &errorMessage); err != nil {
-				return fmt.Errorf("failed to unmarshal response body: %w", err)
+				return ErrBadRequest
 			}
 			return errors.Join(ErrBadRequest, errors.New(errorMessage.Message))
 		default:
