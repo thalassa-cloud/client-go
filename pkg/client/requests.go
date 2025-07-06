@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -100,18 +101,26 @@ func (c *thalassaCloudClient) ExampleAPI(ctx context.Context, param string) (str
 
 func (c *thalassaCloudClient) Check(resp *resty.Response) error {
 	if resp.IsError() {
-		if resp.StatusCode() == 404 {
-			var errorMessage NotFoundErrorMessage
+		switch resp.StatusCode() {
+		case http.StatusNotFound:
+			var errorMessage ServerErrorMessage
 			if err := json.Unmarshal(resp.Body(), &errorMessage); err != nil {
 				return fmt.Errorf("failed to unmarshal response body: %w", err)
 			}
 			return errors.Join(ErrNotFound, errors.New(errorMessage.Message))
+		case http.StatusBadRequest:
+			var errorMessage ServerErrorMessage
+			if err := json.Unmarshal(resp.Body(), &errorMessage); err != nil {
+				return fmt.Errorf("failed to unmarshal response body: %w", err)
+			}
+			return errors.Join(ErrBadRequest, errors.New(errorMessage.Message))
+		default:
+			return fmt.Errorf("server returned status %d: %s", resp.StatusCode(), resp.String())
 		}
-		return fmt.Errorf("server returned status %d: %s", resp.StatusCode(), resp.String())
 	}
 	return nil
 }
 
-type NotFoundErrorMessage struct {
+type ServerErrorMessage struct {
 	Message string `json:"message"`
 }
