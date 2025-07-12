@@ -289,6 +289,11 @@ type NodeTaint struct {
 type KubernetesNodePoolUpgradeStrategy string
 
 const (
+	KubernetesNodePoolUpgradeStrategyManual    KubernetesNodePoolUpgradeStrategy = "manual"
+	KubernetesNodePoolUpgradeStrategyAuto      KubernetesNodePoolUpgradeStrategy = "auto"
+	KubernetesNodePoolUpgradeStrategyMinorOnly KubernetesNodePoolUpgradeStrategy = "minor-only"
+
+	// Backward compatibility
 	KubernetesNodePoolUpgradeStrategyAlways   KubernetesNodePoolUpgradeStrategy = "always"
 	KubernetesNodePoolUpgradeStrategyOnDelete KubernetesNodePoolUpgradeStrategy = "onDelete"
 	KubernetesNodePoolUpgradeStrategyInplace  KubernetesNodePoolUpgradeStrategy = "inPlace"
