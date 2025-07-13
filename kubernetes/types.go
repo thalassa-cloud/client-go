@@ -86,24 +86,54 @@ type KubernetesCluster struct {
 	AuditLogProfile             KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile"`             // Audit logging configuration
 	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`        // Default network policy
 	DeleteProtection            bool                                  `json:"deleteProtection"`            // Whether deletion protection is enabled
+
+	ApiServerACLs      KubernetesApiServerACLs            `json:"apiServerACL"`                 // ApiServerACLs is the ACLs for the API server
+	AutoUpgradePolicy  KubernetesClusterAutoUpgradePolicy `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
+	MaintenanceDay     *uint                              `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
+	MaintenanceStartAt *uint                              `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
 }
 
 // CreateKubernetesCluster represents the configuration for creating a new Kubernetes cluster.
 type CreateKubernetesCluster struct {
-	Name                        string                                `json:"name"`                        // Display name for the new cluster
-	Description                 string                                `json:"description"`                 // Cluster description
-	Labels                      map[string]string                     `json:"labels"`                      // Custom labels
-	Annotations                 map[string]string                     `json:"annotations"`                 // Custom annotations
-	RegionIdentity              string                                `json:"regionIdentity"`              // Target region identifier
-	ClusterType                 KubernetesClusterType                 `json:"clusterType"`                 // Type of cluster deployment
-	KubernetesVersionIdentity   string                                `json:"kubernetesVersionIdentity"`   // Kubernetes version identifier
-	DeleteProtection            bool                                  `json:"deleteProtection"`            // Whether deletion protection is enabled
-	Subnet                      string                                `json:"subnet"`                      // Subnet for cluster deployment
-	Networking                  KubernetesClusterNetworking           `json:"networking"`                  // Network configuration
-	PodSecurityStandardsProfile KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile"` // Pod security standards
-	AuditLogProfile             KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile"`             // Audit logging configuration
-	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`        // Default network policy
+	Name                        string                                `json:"name"`                         // Display name for the new cluster
+	Description                 string                                `json:"description"`                  // Cluster description
+	Labels                      map[string]string                     `json:"labels"`                       // Custom labels
+	Annotations                 map[string]string                     `json:"annotations"`                  // Custom annotations
+	RegionIdentity              string                                `json:"regionIdentity"`               // Target region identifier
+	ClusterType                 KubernetesClusterType                 `json:"clusterType"`                  // Type of cluster deployment
+	KubernetesVersionIdentity   string                                `json:"kubernetesVersionIdentity"`    // Kubernetes version identifier
+	DeleteProtection            bool                                  `json:"deleteProtection"`             // Whether deletion protection is enabled
+	Subnet                      string                                `json:"subnet"`                       // Subnet for cluster deployment
+	Networking                  KubernetesClusterNetworking           `json:"networking"`                   // Network configuration
+	PodSecurityStandardsProfile KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile"`  // Pod security standards
+	AuditLogProfile             KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile"`              // Audit logging configuration
+	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`         // Default network policy
+	ApiServerACLs               KubernetesApiServerACLs               `json:"apiServerACL"`                 // ApiServerACLs is the ACLs for the API server
+	AutoUpgradePolicy           KubernetesClusterAutoUpgradePolicy    `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
+	MaintenanceDay              *uint                                 `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
+	MaintenanceStartAt          *uint                                 `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
 }
+
+type KubernetesApiServerACLs struct {
+	// AllowedCIDRs is a list of allowed CIDRs. Either a CIDR or an IP address.
+	AllowedCIDRs []string `json:"allowedCIDRs"`
+}
+
+type KubernetesClusterAutoUpgradePolicy string
+
+const (
+	// KubernetesClusterAutoUpgradePolicyNone does not perform any auto upgrades. User is expected to manually upgrade the cluster.
+	KubernetesClusterAutoUpgradePolicyNone KubernetesClusterAutoUpgradePolicy = "none"
+	// KubernetesClusterAutoUpgradePolicyLatestVersion is the auto upgrade policy for the cluster.
+	// It will upgrade to the latest release of the latest supported minor version.
+	// This upgrade strategy is recommended for development clusters.
+	KubernetesClusterAutoUpgradePolicyLatestVersion KubernetesClusterAutoUpgradePolicy = "latest-version"
+	// KubernetesClusterAutoUpgradePolicyLatestStable is the auto upgrade policy for the cluster.
+	// It will upgrade to the latest stable version of the current minor version.
+	// Once the current minor version becomes unsupported and no stable version is available, it will perform a minor upgrade.
+	// This upgrade strategy is recommended for production clusters.
+	KubernetesClusterAutoUpgradePolicyLatestStable KubernetesClusterAutoUpgradePolicy = "latest-stable"
+)
 
 // UpdateKubernetesCluster represents the configuration for updating an existing Kubernetes cluster.
 type UpdateKubernetesCluster struct {
@@ -117,6 +147,10 @@ type UpdateKubernetesCluster struct {
 	DefaultNetworkPolicy        *KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy,omitempty"`        // Updated default network policy
 	PodSecurityStandardsProfile *KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile,omitempty"` // Updated pod security standards
 	AuditLogProfile             *KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile,omitempty"`             // Updated audit logging configuration
+	ApiServerACLs               KubernetesApiServerACLs                `json:"apiServerACL"`                          // ApiServerACLs is the ACLs for the API server
+	AutoUpgradePolicy           KubernetesClusterAutoUpgradePolicy     `json:"autoUpgradePolicy"`                     // AutoUpgradePolicy is the auto upgrade policy for the cluster
+	MaintenanceDay              *uint                                  `json:"maintenanceDay,omitempty"`              // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
+	MaintenanceStartAt          *uint                                  `json:"maintenanceStartAt,omitempty"`          // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
 }
 
 // KubernetesClusterNetworking represents the network configuration for a Kubernetes cluster.
@@ -255,6 +289,11 @@ type NodeTaint struct {
 type KubernetesNodePoolUpgradeStrategy string
 
 const (
+	KubernetesNodePoolUpgradeStrategyManual    KubernetesNodePoolUpgradeStrategy = "manual"
+	KubernetesNodePoolUpgradeStrategyAuto      KubernetesNodePoolUpgradeStrategy = "auto"
+	KubernetesNodePoolUpgradeStrategyMinorOnly KubernetesNodePoolUpgradeStrategy = "minor-only"
+
+	// Backward compatibility
 	KubernetesNodePoolUpgradeStrategyAlways   KubernetesNodePoolUpgradeStrategy = "always"
 	KubernetesNodePoolUpgradeStrategyOnDelete KubernetesNodePoolUpgradeStrategy = "onDelete"
 	KubernetesNodePoolUpgradeStrategyInplace  KubernetesNodePoolUpgradeStrategy = "inPlace"
