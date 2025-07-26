@@ -550,8 +550,23 @@ func TestBucketWithFullData(t *testing.T) {
 				UpdatedAt:     time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
 				ObjectVersion: 1,
 			},
-			Policy: json.RawMessage(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"*"},"Action":"s3:GetObject","Resource":"arn:aws:s3:::test-full-bucket/*"}]}`),
-			Usage:  json.RawMessage(`{"size":1024,"objects":10}`),
+			Policy: PolicyDocument{
+				Version: "2012-10-17",
+				Statement: []Statement{
+					{
+						Effect: "Allow",
+						Principal: Principal{
+							AWS: "*",
+						},
+						Action:   "s3:GetObject",
+						Resource: []string{"arn:aws:s3:::test-full-bucket/*"},
+					},
+				},
+			},
+			Usage: map[string]any{
+				"size":    1024,
+				"objects": 10,
+			},
 		}
 
 		w.Header().Set("Content-Type", "application/json")

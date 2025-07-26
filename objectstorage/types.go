@@ -1,7 +1,6 @@
 package objectstorage
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/thalassa-cloud/client-go/iaas"
@@ -17,13 +16,13 @@ type ObjectStorageBucket struct {
 	// Name is the name of the bucket
 	Name string `json:"name"`
 	// Policy is the policy of the bucket
-	Policy json.RawMessage `json:"policy"`
+	Policy PolicyDocument `json:"policy"`
 	// Public is a flag that indicates if the bucket is public
 	Public bool `json:"public"`
 	// Status is the status of the bucket
 	Status string `json:"status"`
 	// Usage is the usage of the bucket
-	Usage json.RawMessage `json:"usage"`
+	Usage any `json:"usage"`
 
 	// Endpoint for the bucket, is collected from the CR
 	Endpoint string `json:"endpoint"`
