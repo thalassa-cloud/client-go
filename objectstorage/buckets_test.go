@@ -550,9 +550,8 @@ func TestBucketWithFullData(t *testing.T) {
 				UpdatedAt:     time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC),
 				ObjectVersion: 1,
 			},
-			ProviderIdentity: "aws-bucket-123",
-			Policy:           json.RawMessage(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"*"},"Action":"s3:GetObject","Resource":"arn:aws:s3:::test-full-bucket/*"}]}`),
-			Usage:            json.RawMessage(`{"size":1024,"objects":10}`),
+			Policy: json.RawMessage(`{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"*"},"Action":"s3:GetObject","Resource":"arn:aws:s3:::test-full-bucket/*"}]}`),
+			Usage:  json.RawMessage(`{"size":1024,"objects":10}`),
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -577,7 +576,6 @@ func TestBucketWithFullData(t *testing.T) {
 	assert.True(t, bucket.Public)
 	assert.Equal(t, "active", bucket.Status)
 	assert.Equal(t, "https://test-full-bucket.s3.thalasascloud.nl", bucket.Endpoint)
-	assert.Equal(t, "aws-bucket-123", bucket.ProviderIdentity)
 
 	// Verify organisation
 	assert.NotNil(t, bucket.Organisation)

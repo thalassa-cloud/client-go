@@ -30,9 +30,6 @@ type ObjectStorageBucket struct {
 
 	// Region is the region of the bucket
 	Region *iaas.Region `json:"cloudRegion,omitempty"`
-
-	// Internal information, not exposed to the user
-	ProviderIdentity string `json:"provider_identity"`
 }
 
 type CreateBucketRequest struct {
