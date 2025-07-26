@@ -563,9 +563,9 @@ func TestBucketWithFullData(t *testing.T) {
 					},
 				},
 			},
-			Usage: map[string]any{
-				"size":    1024,
-				"objects": 10,
+			Usage: Usage{
+				TotalSizeGB:  1024,
+				TotalObjects: 10,
 			},
 		}
 

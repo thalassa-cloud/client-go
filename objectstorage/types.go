@@ -22,13 +22,18 @@ type ObjectStorageBucket struct {
 	// Status is the status of the bucket
 	Status string `json:"status"`
 	// Usage is the usage of the bucket
-	Usage any `json:"usage"`
+	Usage Usage `json:"usage"`
 
 	// Endpoint for the bucket, is collected from the CR
 	Endpoint string `json:"endpoint"`
 
 	// Region is the region of the bucket
 	Region *iaas.Region `json:"cloudRegion,omitempty"`
+}
+
+type Usage struct {
+	TotalSizeGB  int `json:"total_size_gb"`
+	TotalObjects int `json:"total_objects"`
 }
 
 type CreateBucketRequest struct {
