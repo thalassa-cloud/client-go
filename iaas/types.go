@@ -397,13 +397,18 @@ type CreateVpcNatGateway struct {
 	Labels         Labels      `json:"labels"`
 	Annotations    Annotations `json:"annotations"`
 	SubnetIdentity string      `json:"subnetIdentity"`
+	// SecurityGroupAttachments is a list of security group identities to attach to the NAT Gateway
+	SecurityGroupAttachments []string `json:"securityGroupAttachments"`
+	// ConfigureDefaultRoute is a boolean indicating whether to configure the default route for the NAT Gateway for the route table of the subnet
+	ConfigureDefaultRoute bool `json:"configureDefaultRoute"`
 }
 
 type UpdateVpcNatGateway struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Labels      Labels      `json:"labels"`
-	Annotations Annotations `json:"annotations"`
+	Name                     string      `json:"name"`
+	Description              string      `json:"description"`
+	Labels                   Labels      `json:"labels"`
+	Annotations              Annotations `json:"annotations"`
+	SecurityGroupAttachments []string    `json:"securityGroupAttachments"`
 }
 
 type CreateMachine struct {
