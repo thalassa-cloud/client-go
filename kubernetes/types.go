@@ -39,6 +39,10 @@ type KubernetesVersion struct {
 	Annotations map[string]string `json:"annotations"`
 	// Whether this version is available for use
 	Enabled bool `json:"enabled"`
+	// Supported indicates if this version is currently supported / stable. This flag is used for auto upgrade policies and indicates stable versions.
+	// After new versions are released, the old versions are marked as unsupported and cannot be used for auto upgrade policies.
+	// You can still use them for manual upgrades should they be enabled, however it is recommend to upgrade to the next available supported version.
+	Supported bool `json:"supported"`
 
 	// Core Kubernetes version
 	KubernetesVersion string `json:"kubernetesVersion"`
