@@ -39,6 +39,10 @@ type KubernetesVersion struct {
 	Annotations map[string]string `json:"annotations"`
 	// Whether this version is available for use
 	Enabled bool `json:"enabled"`
+	// Supported indicates if this version is currently supported / stable. This flag is used for auto upgrade policies and indicates stable versions.
+	// After new versions are released, the old versions are marked as unsupported and cannot be used for auto upgrade policies.
+	// You can still use them for manual upgrades should they be enabled, however it is recommend to upgrade to the next available supported version.
+	Supported bool `json:"supported"`
 
 	// Core Kubernetes version
 	KubernetesVersion string `json:"kubernetesVersion"`
@@ -91,6 +95,9 @@ type KubernetesCluster struct {
 	AutoUpgradePolicy  KubernetesClusterAutoUpgradePolicy `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
 	MaintenanceDay     *uint                              `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
 	MaintenanceStartAt *uint                              `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
+
+	// SecurityGroups is a list of security groups that are attached to the Control Plane.
+	SecurityGroups []iaas.SecurityGroup `json:"securityGroups,omitempty"`
 }
 
 // CreateKubernetesCluster represents the configuration for creating a new Kubernetes cluster.
@@ -112,6 +119,9 @@ type CreateKubernetesCluster struct {
 	AutoUpgradePolicy           KubernetesClusterAutoUpgradePolicy    `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
 	MaintenanceDay              *uint                                 `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
 	MaintenanceStartAt          *uint                                 `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
+
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the Control Plane.
+	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 type KubernetesApiServerACLs struct {
@@ -151,6 +161,9 @@ type UpdateKubernetesCluster struct {
 	AutoUpgradePolicy           KubernetesClusterAutoUpgradePolicy     `json:"autoUpgradePolicy"`                     // AutoUpgradePolicy is the auto upgrade policy for the cluster
 	MaintenanceDay              *uint                                  `json:"maintenanceDay,omitempty"`              // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
 	MaintenanceStartAt          *uint                                  `json:"maintenanceStartAt,omitempty"`          // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
+
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the Control Plane.
+	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 // KubernetesClusterNetworking represents the network configuration for a Kubernetes cluster.
@@ -228,6 +241,9 @@ type KubernetesNodePool struct {
 	NodeSettings      KubernetesNodeSettings            `json:"nodeSettings"`      // Node-specific settings
 	KubernetesVersion *KubernetesVersion                `json:"kubernetesVersion"` // Kubernetes version for node pool
 	UpgradeStrategy   KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`   // Upgrade strategy for node pool
+
+	// SecurityGroups is a list of security groups that are attached to the nodes / vmi in the node pool.
+	SecurityGroups []iaas.SecurityGroup `json:"securityGroups,omitempty"`
 }
 
 // CreateKubernetesNodePool represents the configuration for creating a new node pool.
@@ -249,6 +265,9 @@ type CreateKubernetesNodePool struct {
 	EnableAutoscaling         bool                               `json:"enableAutoscaling"`         // Whether to enable autoscaling
 	EnableAutoHealing         bool                               `json:"enableAutoHealing"`         // Whether auto-healing is enabled
 	NodeSettings              KubernetesNodeSettings             `json:"nodeSettings"`              // Node-specific settings
+
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the nodes / vmi in the node pool.
+	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 // UpdateKubernetesNodePool represents the configuration for updating an existing node pool.
@@ -269,6 +288,9 @@ type UpdateKubernetesNodePool struct {
 	EnableAutoscaling *bool                              `json:"enableAutoscaling"` // Updated autoscaling setting
 
 	NodeSettings *KubernetesNodeSettings `json:"nodeSettings"` // Updated node settings
+
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the nodes / vmi in the node pool.
+	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 // KubernetesNodeSettings represents the configuration settings for nodes in a node pool.
