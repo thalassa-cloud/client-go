@@ -91,10 +91,11 @@ type KubernetesCluster struct {
 	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`        // Default network policy
 	DeleteProtection            bool                                  `json:"deleteProtection"`            // Whether deletion protection is enabled
 
-	ApiServerACLs      KubernetesApiServerACLs            `json:"apiServerACL"`                 // ApiServerACLs is the ACLs for the API server
-	AutoUpgradePolicy  KubernetesClusterAutoUpgradePolicy `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
-	MaintenanceDay     *uint                              `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
-	MaintenanceStartAt *uint                              `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
+	ApiServerACLs         KubernetesApiServerACLs            `json:"apiServerACL"`                 // ApiServerACLs is the ACLs for the API server
+	DisablePublicEndpoint bool                               `json:"disablePublicEndpoint"`        // Whether public endpoint is disabled
+	AutoUpgradePolicy     KubernetesClusterAutoUpgradePolicy `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
+	MaintenanceDay        *uint                              `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
+	MaintenanceStartAt    *uint                              `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
 
 	// SecurityGroups is a list of security groups that are attached to the Control Plane.
 	SecurityGroups []iaas.SecurityGroup `json:"securityGroups,omitempty"`
@@ -115,6 +116,7 @@ type CreateKubernetesCluster struct {
 	PodSecurityStandardsProfile KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile"`  // Pod security standards
 	AuditLogProfile             KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile"`              // Audit logging configuration
 	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`         // Default network policy
+	DisablePublicEndpoint       bool                                  `json:"disablePublicEndpoint"`        // Whether public endpoint is disabled
 	ApiServerACLs               KubernetesApiServerACLs               `json:"apiServerACL"`                 // ApiServerACLs is the ACLs for the API server
 	AutoUpgradePolicy           KubernetesClusterAutoUpgradePolicy    `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
 	MaintenanceDay              *uint                                 `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
@@ -157,6 +159,7 @@ type UpdateKubernetesCluster struct {
 	DefaultNetworkPolicy        *KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy,omitempty"`        // Updated default network policy
 	PodSecurityStandardsProfile *KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile,omitempty"` // Updated pod security standards
 	AuditLogProfile             *KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile,omitempty"`             // Updated audit logging configuration
+	DisablePublicEndpoint       *bool                                  `json:"disablePublicEndpoint,omitempty"`       // Updated public endpoint setting
 	ApiServerACLs               KubernetesApiServerACLs                `json:"apiServerACL"`                          // ApiServerACLs is the ACLs for the API server
 	AutoUpgradePolicy           KubernetesClusterAutoUpgradePolicy     `json:"autoUpgradePolicy"`                     // AutoUpgradePolicy is the auto upgrade policy for the cluster
 	MaintenanceDay              *uint                                  `json:"maintenanceDay,omitempty"`              // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
