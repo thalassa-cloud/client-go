@@ -7,6 +7,7 @@ import (
 	"github.com/thalassa-cloud/client-go/kubernetes"
 	"github.com/thalassa-cloud/client-go/me"
 	"github.com/thalassa-cloud/client-go/objectstorage"
+	"github.com/thalassa-cloud/client-go/quotas"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
@@ -17,6 +18,7 @@ type Client interface {
 	DbaaSAlphaV1() *dbaasalphav1.Client
 	IAM() *iam.Client
 	ObjectStorage() *objectstorage.Client
+	Quotas() *quotas.Client
 
 	// SetOrganisation sets the organisation for the client
 	SetOrganisation(organisation string)
@@ -90,4 +92,12 @@ func (c *thalassaCloudClient) ObjectStorage() *objectstorage.Client {
 		panic(err)
 	}
 	return objectStorageClient
+}
+
+func (c *thalassaCloudClient) Quotas() *quotas.Client {
+	quotasClient, err := quotas.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return quotasClient
 }
