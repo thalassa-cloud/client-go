@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	OrganisationRoleEndpoint = "/v1/organisation-roles"
+	OrganisationRoleEndpoint = "/v1/iam/roles"
 )
 
 // ListOrganisationRoles lists all organisation roles for a given organisation.
@@ -193,6 +193,12 @@ type CreateRoleBinding struct {
 
 	// TeamIdentity is the identity of the team to bind
 	TeamIdentity *string `json:"teamIdentity"`
+
+	// ServiceAccountIdentity is the identity of the service account to bind
+	ServiceAccountIdentity *string `json:"serviceAccountIdentity"`
+
+	// Scopes is the scopes to bind the role binding to
+	Scopes []string `json:"scopes"`
 }
 
 type OrganisationRole struct {
@@ -262,4 +268,5 @@ type OrganisationRoleBinding struct {
 	OrganisationRole *OrganisationRole `json:"organisationRole,omitempty"`
 	AppUser          *base.AppUser     `json:"user,omitempty"`
 	OrganisationTeam *Team             `json:"team,omitempty"`
+	ServiceAccount   *ServiceAccount   `json:"serviceAccount,omitempty"`
 }
