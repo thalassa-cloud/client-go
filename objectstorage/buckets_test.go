@@ -563,7 +563,7 @@ func TestBucketWithFullData(t *testing.T) {
 					},
 				},
 			},
-			Usage: Usage{
+			Usage: ObjectStorageBucketUsage{
 				TotalSizeGB:  1024,
 				TotalObjects: 10,
 			},
