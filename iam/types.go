@@ -14,7 +14,8 @@ type Team struct {
 	Labels      map[string]string `json:"labels"`
 	Annotations map[string]string `json:"annotations"`
 	CreatedAt   time.Time         `json:"createdAt"`
-	UpdatedAt   *time.Time        `json:"updatedAt"`
+	UpdatedAt   *time.Time        `json:"updatedAt,omitempty"`
+	Members     []TeamMember      `json:"members"`
 }
 
 type CreateTeam struct {
@@ -36,5 +37,5 @@ type TeamMember struct {
 	Role      string       `json:"role"`
 	User      base.AppUser `json:"user"`
 	CreatedAt time.Time    `json:"createdAt"`
-	UpdatedAt *time.Time   `json:"updatedAt"`
+	UpdatedAt *time.Time   `json:"updatedAt,omitempty"`
 }
