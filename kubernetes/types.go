@@ -234,11 +234,12 @@ type KubernetesNodePool struct {
 	Vpc    *iaas.Vpc    `json:"vpc"`    // Associated VPC
 	Subnet *iaas.Subnet `json:"subnet"` // Associated subnet
 
-	EnableAutoscaling bool `json:"enableAutoscaling"` // Whether autoscaling is enabled
-	EnableAutoHealing bool `json:"enableAutoHealing"` // Whether auto-healing is enabled
-	Replicas          int  `json:"replicas"`          // Current number of nodes
-	MinReplicas       int  `json:"minReplicas"`       // Minimum number of nodes for autoscaling
-	MaxReplicas       int  `json:"maxReplicas"`       // Maximum number of nodes for autoscaling
+	EnableAutoscaling     bool `json:"enableAutoscaling"`     // Whether autoscaling is enabled
+	EnableAutoHealing     bool `json:"enableAutoHealing"`     // Whether auto-healing is enabled
+	Replicas              int  `json:"replicas"`              // Current number of nodes
+	MinReplicas           int  `json:"minReplicas"`           // Minimum number of nodes for autoscaling
+	MaxReplicas           int  `json:"maxReplicas"`           // Maximum number of nodes for autoscaling
+	ManageNodeAllocatable bool `json:"manageNodeAllocatable"` // ManageNodeAllocatable is a flag to manage the node allocatable resources.
 
 	MachineType       iaas.MachineType                  `json:"machineType"`       // Type of machine for nodes
 	NodeSettings      KubernetesNodeSettings            `json:"nodeSettings"`      // Node-specific settings
@@ -268,6 +269,7 @@ type CreateKubernetesNodePool struct {
 	EnableAutoscaling         bool                               `json:"enableAutoscaling"`         // Whether to enable autoscaling
 	EnableAutoHealing         bool                               `json:"enableAutoHealing"`         // Whether auto-healing is enabled
 	NodeSettings              KubernetesNodeSettings             `json:"nodeSettings"`              // Node-specific settings
+	ManageNodeAllocatable     bool                               `json:"manageNodeAllocatable"`     // ManageNodeAllocatable is a flag to manage the node allocatable resources.
 
 	// SecurityGroupAttachments is a list of security group identities that will be attached to the nodes / vmi in the node pool.
 	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
@@ -286,9 +288,10 @@ type UpdateKubernetesNodePool struct {
 	KubernetesVersionIdentity *string `json:"kubernetesVersionIdentity"` // Kubernetes version for node pool
 	AvailabilityZone          string  `json:"availabilityZone"`          // Availability zone for the node pool
 
-	UpgradeStrategy   *KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`   // Upgrade strategy for node pool
-	EnableAutoHealing *bool                              `json:"enableAutoHealing"` // Whether auto-healing is enabled
-	EnableAutoscaling *bool                              `json:"enableAutoscaling"` // Updated autoscaling setting
+	UpgradeStrategy       *KubernetesNodePoolUpgradeStrategy `json:"upgradeStrategy"`       // Upgrade strategy for node pool
+	EnableAutoHealing     *bool                              `json:"enableAutoHealing"`     // Whether auto-healing is enabled
+	EnableAutoscaling     *bool                              `json:"enableAutoscaling"`     // Updated autoscaling setting
+	ManageNodeAllocatable bool                               `json:"manageNodeAllocatable"` // ManageNodeAllocatable is a flag to manage the node allocatable resources.
 
 	NodeSettings *KubernetesNodeSettings `json:"nodeSettings"` // Updated node settings
 
@@ -335,3 +338,68 @@ const (
 	KubernetesNodePoolStatusDeleting     KubernetesNodePoolStatus = "deleting"
 	KubernetesNodePoolStatusDeleted      KubernetesNodePoolStatus = "deleted"
 )
+
+type KubernetesNodePoolMachine struct {
+	// CreatedAt is the timestamp when the object was created
+	CreatedAt time.Time `json:"createdAt"`
+	// UpdatedAt is the timestamp when the object was last updated
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+	// Identity is a unique identifier for the Kubernetes Node Pool Machine
+	Identity string `json:"identity"`
+	// MachineName is the name of the machine
+	MachineName string `json:"machineName"`
+
+	Vpc    *iaas.Vpc    `json:"vpc,omitempty"`
+	Subnet *iaas.Subnet `json:"subnet,omitempty"`
+
+	// Conditions is a list of conditions for the Kubernetes Node Pool Machine
+	Conditions []Condition `json:"conditions,omitempty"`
+	// SystemInfo is the system information for the Kubernetes Node Pool Machine
+	SystemInfo NodeSystemInfo `json:"systemInfo"`
+}
+
+type Condition struct {
+	Type               string    `json:"type"`
+	Status             string    `json:"status"`
+	LastTransitionTime time.Time `json:"lastTransitionTime"`
+	Reason             string    `json:"reason"`
+	Message            string    `json:"message"`
+}
+
+type NodeSystemInfo struct {
+	// Architecture is the architecture of the node
+	Architecture string `json:"architecture,omitempty"`
+	// BootID is the boot ID of the node
+	BootID string `json:"bootID,omitempty"`
+	// KernelVersion is the kernel version of the node
+	KernelVersion string `json:"kernelVersion,omitempty"`
+	// OsImage is the operating system image of the node
+	OsImage string `json:"osImage,omitempty"`
+	// ContainerRuntimeVersion is the container runtime version of the node
+	ContainerRuntimeVersion string `json:"containerRuntimeVersion,omitempty"`
+	// KubeletVersion is the kubelet version of the node
+	KubeletVersion string `json:"kubeletVersion,omitempty"`
+	// Addresses is a list of addresses for the node
+	Addresses []NodeAddress `json:"addresses,omitempty"`
+	// Conditions is a list of conditions for the node
+	Conditions []NodeCondition `json:"conditions,omitempty"`
+}
+
+type NodeCondition struct {
+	// Type of node condition.
+	Type string `json:"type"`
+	// Status of the condition, one of True, False, Unknown.
+	Status string `json:"status"`
+	// Last time we got an update on a given condition.
+	LastHeartbeatTime  time.Time `json:"lastHeartbeatTime,omitempty"`
+	LastTransitionTime time.Time `json:"lastTransitionTime,omitempty"`
+	Reason             string    `json:"reason,omitempty"`
+	Message            string    `json:"message,omitempty"`
+}
+
+type NodeAddress struct {
+	// Node address type, one of Hostname, ExternalIP or InternalIP.
+	Type string `json:"type"`
+	// The node address.
+	Address string `json:"address"`
+}
