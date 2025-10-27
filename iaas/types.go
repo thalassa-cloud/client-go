@@ -33,9 +33,6 @@ type Zone struct {
 	CloudRegion         *Region     `json:"CloudRegion"`
 }
 
-type VpcFirewallRule struct {
-}
-
 type Vpc struct {
 	// Identity is the identity of the VPC.
 	Identity string `json:"identity"`
