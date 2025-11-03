@@ -1,14 +1,15 @@
 package thalassa
 
 import (
+	"github.com/thalassa-cloud/client-go/audit"
 	"github.com/thalassa-cloud/client-go/dbaas/dbaasalphav1"
 	"github.com/thalassa-cloud/client-go/iaas"
 	"github.com/thalassa-cloud/client-go/iam"
 	"github.com/thalassa-cloud/client-go/kubernetes"
 	"github.com/thalassa-cloud/client-go/me"
 	"github.com/thalassa-cloud/client-go/objectstorage"
-	"github.com/thalassa-cloud/client-go/quotas"
 	"github.com/thalassa-cloud/client-go/pkg/client"
+	"github.com/thalassa-cloud/client-go/quotas"
 )
 
 type Client interface {
@@ -19,6 +20,7 @@ type Client interface {
 	IAM() *iam.Client
 	ObjectStorage() *objectstorage.Client
 	Quotas() *quotas.Client
+	Audit() *audit.Client
 
 	// SetOrganisation sets the organisation for the client
 	SetOrganisation(organisation string)
@@ -100,4 +102,12 @@ func (c *thalassaCloudClient) Quotas() *quotas.Client {
 		panic(err)
 	}
 	return quotasClient
+}
+
+func (c *thalassaCloudClient) Audit() *audit.Client {
+	auditClient, err := audit.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return auditClient
 }
