@@ -36,11 +36,11 @@ type ObjectStorageBucket struct {
 	// Endpoint for the bucket
 	Endpoint string `json:"endpoint"`
 	// Usage is the usage of the bucket
-	Usage ObjectStorageBucketUsage `json:"usage" bun:"usage,type:jsonb"`
+	Usage ObjectStorageBucketUsage `json:"usage"`
 	// Versioning is the versioning of the bucket
-	Versioning ObjectStorageBucketVersioning `json:"versioning" bun:"versioning"`
+	Versioning ObjectStorageBucketVersioning `json:"versioning"`
 	// ObjectLockEnabled is the object lock of the bucket
-	ObjectLockEnabled bool `json:"objectLockEnabled" bun:"object_lock_enabled"`
+	ObjectLockEnabled bool `json:"objectLockEnabled"`
 	// Region is the region of the bucket
 	Region *iaas.Region `json:"cloudRegion,omitempty"`
 }

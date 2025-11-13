@@ -97,37 +97,65 @@ type KubernetesCluster struct {
 	MaintenanceDay        *uint                              `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
 	MaintenanceStartAt    *uint                              `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
 
+	// ScheduledMaintenances is the list of scheduled maintenances for the cluster
+	ScheduledMaintenances []KubernetesClusterScheduledMaintenance `json:"scheduledMaintenances,omitempty"`
+
+	// AutoscalerConfig is the configuration for the cluster autoscaler
+	// These values can also be configured using annotations on a KubernetesNodePool object
+	// cluster-autoscaler.kubernetes.io/<setting-name>
+	// For more information, see the Cluster Autoscaler documentation: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md
+	AutoscalerConfig *AutoscalerConfig `json:"autoscalerConfig,omitempty"`
+
+	InternalEndpoint *string `json:"internalEndpoint,omitempty"` // VPC-internal endpoint for the cluster
+	AdvertisePort    *int    `json:"advertisePort,omitempty"`    // Advertise port for the cluster within the VPC
+	KonnectivityPort *int    `json:"konnectivityPort,omitempty"` // Konnectivity port for the cluster within the VPC
+
 	// SecurityGroups is a list of security groups that are attached to the Control Plane.
 	SecurityGroups []iaas.SecurityGroup `json:"securityGroups,omitempty"`
 }
 
 // CreateKubernetesCluster represents the configuration for creating a new Kubernetes cluster.
 type CreateKubernetesCluster struct {
-	Name                        string                                `json:"name"`                         // Display name for the new cluster
-	Description                 string                                `json:"description"`                  // Cluster description
-	Labels                      map[string]string                     `json:"labels"`                       // Custom labels
-	Annotations                 map[string]string                     `json:"annotations"`                  // Custom annotations
-	RegionIdentity              string                                `json:"regionIdentity"`               // Target region identifier
-	ClusterType                 KubernetesClusterType                 `json:"clusterType"`                  // Type of cluster deployment
-	KubernetesVersionIdentity   string                                `json:"kubernetesVersionIdentity"`    // Kubernetes version identifier
-	DeleteProtection            bool                                  `json:"deleteProtection"`             // Whether deletion protection is enabled
-	Subnet                      string                                `json:"subnet"`                       // Subnet for cluster deployment
-	Networking                  KubernetesClusterNetworking           `json:"networking"`                   // Network configuration
-	PodSecurityStandardsProfile KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile"`  // Pod security standards
-	AuditLogProfile             KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile"`              // Audit logging configuration
-	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`         // Default network policy
-	DisablePublicEndpoint       bool                                  `json:"disablePublicEndpoint"`        // Whether public endpoint is disabled
-	ApiServerACLs               KubernetesApiServerACLs               `json:"apiServerACL"`                 // ApiServerACLs is the ACLs for the API server
-	AutoUpgradePolicy           KubernetesClusterAutoUpgradePolicy    `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
-	MaintenanceDay              *uint                                 `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
-	MaintenanceStartAt          *uint                                 `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
+	Name                        string                                `json:"name"`                        // Display name for the new cluster
+	Description                 string                                `json:"description"`                 // Cluster description
+	Labels                      map[string]string                     `json:"labels"`                      // Custom labels
+	Annotations                 map[string]string                     `json:"annotations"`                 // Custom annotations
+	RegionIdentity              string                                `json:"regionIdentity"`              // Target region identifier
+	ClusterType                 KubernetesClusterType                 `json:"clusterType"`                 // Type of cluster deployment
+	KubernetesVersionIdentity   string                                `json:"kubernetesVersionIdentity"`   // Kubernetes version identifier
+	DeleteProtection            bool                                  `json:"deleteProtection"`            // Whether deletion protection is enabled
+	Subnet                      string                                `json:"subnet"`                      // Subnet for cluster deployment
+	Networking                  KubernetesClusterNetworking           `json:"networking"`                  // Network configuration
+	PodSecurityStandardsProfile KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile"` // Pod security standards
+	AuditLogProfile             KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile"`             // Audit logging configuration
+	DefaultNetworkPolicy        KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy"`        // Default network policy
+	DisablePublicEndpoint       bool                                  `json:"disablePublicEndpoint"`       // Whether public endpoint is disabled
+	ApiServerACLs               KubernetesApiServerACLs               `json:"apiServerACL"`                // ApiServerACLs is the ACLs for the API server
 
-	// SecurityGroupAttachments is a list of security group identities that will be attached to the Control Plane.
+	// KubeProxyMode is the mode of the kube proxy. Default is ipvs.
+	KubeProxyMode *KubernetesClusterKubeProxyMode `json:"kubeProxyMode,omitempty"`
+	// KubeProxyDeployment is the deployment mode of the kube proxy. Default is managed.
+	KubeProxyDeployment *KubeProxyDeployment `json:"kubeProxyDeployment,omitempty"`
+
+	AutoUpgradePolicy  KubernetesClusterAutoUpgradePolicy `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
+	MaintenanceDay     *uint                              `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
+	MaintenanceStartAt *uint                              `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
+
+	// AutoscalerConfig is the configuration for the cluster autoscaler
+	// These values can also be configured using annotations on a KubernetesNodePool object
+	// cluster-autoscaler.kubernetes.io/<setting-name>
+	// For more information, see the Cluster Autoscaler documentation: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md
+	AutoscalerConfig *AutoscalerConfig `json:"autoscalerConfig,omitempty"`
+
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the Control Plane VPC-internal endpoint.
+	// These do not apply to the public endpoint. If you wish to configure ACLs for the public endpoint, you can use the AllowedCIDRs field.
 	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 type KubernetesApiServerACLs struct {
 	// AllowedCIDRs is a list of allowed CIDRs. Either a CIDR or an IP address.
+	// These CIDRs will be allowed to access the API server on the public endpoint. These ACLs are not applied to the VPC-internal endpoint.
+	// If you wish to configure ACLs for the VPC-internal endpoint, you can use the SecurityGroupAttachments field.
 	AllowedCIDRs []string `json:"allowedCIDRs"`
 }
 
@@ -161,19 +189,40 @@ type UpdateKubernetesCluster struct {
 	AuditLogProfile             *KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile,omitempty"`             // Updated audit logging configuration
 	DisablePublicEndpoint       *bool                                  `json:"disablePublicEndpoint,omitempty"`       // Updated public endpoint setting
 	ApiServerACLs               KubernetesApiServerACLs                `json:"apiServerACL"`                          // ApiServerACLs is the ACLs for the API server
-	AutoUpgradePolicy           KubernetesClusterAutoUpgradePolicy     `json:"autoUpgradePolicy"`                     // AutoUpgradePolicy is the auto upgrade policy for the cluster
-	MaintenanceDay              *uint                                  `json:"maintenanceDay,omitempty"`              // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
-	MaintenanceStartAt          *uint                                  `json:"maintenanceStartAt,omitempty"`          // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
 
-	// SecurityGroupAttachments is a list of security group identities that will be attached to the Control Plane.
+	// KubeProxyMode is the mode of the kube proxy. Default is ipvs.
+	KubeProxyMode *KubernetesClusterKubeProxyMode `json:"kubeProxyMode,omitempty"`
+	// KubeProxyDeployment is the deployment mode of the kube proxy. Default is managed.
+	KubeProxyDeployment *KubeProxyDeployment `json:"kubeProxyDeployment,omitempty"`
+
+	AutoUpgradePolicy  KubernetesClusterAutoUpgradePolicy `json:"autoUpgradePolicy"`            // AutoUpgradePolicy is the auto upgrade policy for the cluster
+	MaintenanceDay     *uint                              `json:"maintenanceDay,omitempty"`     // MaintenanceDay is the day of the week when the cluster will be upgraded. Optional.
+	MaintenanceStartAt *uint                              `json:"maintenanceStartAt,omitempty"` // MaintenanceStartAt is the time of day when the cluster will be upgraded. Optional.
+
+	// AutoscalerConfig is the configuration for the cluster autoscaler
+	// These values can also be configured using annotations on a KubernetesNodePool object
+	// cluster-autoscaler.kubernetes.io/<setting-name>
+	// For more information, see the Cluster Autoscaler documentation: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md
+	AutoscalerConfig *AutoscalerConfig `json:"autoscalerConfig,omitempty"`
+
+	// SecurityGroupAttachments is a list of security group identities that will be attached to the Control Plane VPC-internal endpoint.
+	// These do not apply to the public endpoint. If you wish to configure ACLs for the public endpoint, you can use the AllowedCIDRs field.
 	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 }
 
 // KubernetesClusterNetworking represents the network configuration for a Kubernetes cluster.
 type KubernetesClusterNetworking struct {
-	CNI         string `json:"cni"`         // Container Network Interface type
-	ServiceCIDR string `json:"serviceCIDR"` // CIDR range for Kubernetes services
-	PodCIDR     string `json:"podCIDR"`     // CIDR range for Kubernetes pods
+	CNI string `json:"cni"` // CNI, default is cilium.
+
+	// KubeProxyMode is the mode of the kube proxy. Default is ipvs.
+	KubeProxyMode *KubernetesClusterKubeProxyMode `json:"kubeProxyMode,omitempty"`
+	// KubeProxyDeployment is the deployment mode of the kube proxy. Default is managed.
+	KubeProxyDeployment *KubeProxyDeployment `json:"kubeProxyDeployment,omitempty"`
+
+	// ServiceCidr is the service CIDR for the cluster. Must be a valid CIDR block. Must not overlap with the pod CIDR or the VPC / Subnet CIDRs.
+	ServiceCIDR string `json:"serviceCidr"`
+	// PodCidr is the pod CIDR for the cluster. Must be a valid CIDR block. Must not overlap with the service CIDR or the VPC / Subnet CIDRs.
+	PodCIDR string `json:"podCidr"`
 }
 
 // KubernetesClusterType represents the type of Kubernetes cluster deployment.
@@ -205,6 +254,21 @@ const (
 	KubernetesClusterAuditLoggingProfileNone     KubernetesClusterAuditLoggingProfile = "none"     // No audit logging
 	KubernetesClusterAuditLoggingProfileBasic    KubernetesClusterAuditLoggingProfile = "basic"    // Basic audit logging
 	KubernetesClusterAuditLoggingProfileAdvanced KubernetesClusterAuditLoggingProfile = "advanced" // Advanced audit logging
+)
+
+type KubeProxyDeployment string
+
+const (
+	KubeProxyDeploymentCustom   KubeProxyDeployment = "custom"
+	KubeProxyDeploymentManaged  KubeProxyDeployment = "managed"
+	KubeProxyDeploymentDisabled KubeProxyDeployment = "disabled"
+)
+
+type KubernetesClusterKubeProxyMode string
+
+const (
+	KubernetesClusterKubeProxyModeIPVS     KubernetesClusterKubeProxyMode = "ipvs"
+	KubernetesClusterKubeProxyModeIptables KubernetesClusterKubeProxyMode = "iptables"
 )
 
 // KubernetesDefaultNetworkPolicies represents the default network policy for a cluster.
@@ -402,4 +466,65 @@ type NodeAddress struct {
 	Type string `json:"type"`
 	// The node address.
 	Address string `json:"address"`
+}
+
+type KubernetesClusterScheduledMaintenance struct {
+	Identity    string     `json:"identity"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	ScheduledAt time.Time  `json:"scheduledAt"`
+	StartedAt   *time.Time `json:"startedAt,omitempty"`
+	CompletedAt *time.Time `json:"completedAt,omitempty"`
+	CanceledAt  *time.Time `json:"canceledAt,omitempty"`
+	FailedAt    *time.Time `json:"failedAt,omitempty"`
+
+	Status       KubernetesClusterScheduledMaintenanceStatus `json:"status"`
+	StatusReason string                                      `json:"statusReason,omitempty"`
+
+	CurrentVersion *KubernetesVersion `json:"currentVersion,omitempty"`
+	TargetVersion  *KubernetesVersion `json:"targetVersion,omitempty"`
+}
+
+type KubernetesClusterScheduledMaintenanceStatus string
+
+const (
+	KubernetesClusterScheduledMaintenanceStatusScheduled  KubernetesClusterScheduledMaintenanceStatus = "scheduled"
+	KubernetesClusterScheduledMaintenanceStatusInProgress KubernetesClusterScheduledMaintenanceStatus = "inProgress"
+	KubernetesClusterScheduledMaintenanceStatusCompleted  KubernetesClusterScheduledMaintenanceStatus = "completed"
+	KubernetesClusterScheduledMaintenanceStatusFailed     KubernetesClusterScheduledMaintenanceStatus = "failed"
+	KubernetesClusterScheduledMaintenanceStatusCancelled  KubernetesClusterScheduledMaintenanceStatus = "cancelled"
+	KubernetesClusterScheduledMaintenanceStatusSkipped    KubernetesClusterScheduledMaintenanceStatus = "skipped"
+)
+
+// AutoscalerConfig is the configuration for the cluster autoscaler
+// These values can also be configured using annotations on a KubernetesNodePool object
+// cluster-autoscaler.kubernetes.io/<setting-name>
+// For more information, see the Cluster Autoscaler documentation: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md
+type AutoscalerConfig struct {
+	// ScaleDownDisabled is a flag to disable the scale down of node pools by the cluster autoscaler
+	ScaleDownDisabled bool `json:"scaleDownDisabled"`
+	// ScaleDownDelayAfterAdd is the delay after adding a node to the node pool by the cluster autoscaler
+	ScaleDownDelayAfterAdd string `json:"scaleDownDelayAfterAdd"`
+	// Estimator is the estimator to use for the cluster autoscaler. Available values: binpacking
+	Estimator string `json:"estimator"`
+
+	// Expander is the expander to use for the cluster autoscaler
+	Expander string `json:"expander"`
+	// IgnoreDaemonsetsUtilization is a flag to ignore the utilization of daemonsets by the cluster autoscaler
+	IgnoreDaemonsetsUtilization bool `json:"ignoreDaemonsetsUtilization"`
+	// BalanceSimilarNodeGroups is a flag to balance the utilization of similar node groups by the cluster autoscaler
+	BalanceSimilarNodeGroups bool `json:"balanceSimilarNodeGroups"`
+	// ExpendablePodsPriorityCutoff is the priority cutoff for the expendable pods by the cluster autoscaler
+	ExpendablePodsPriorityCutoff int `json:"expendablePodsPriorityCutoff"`
+	// ScaleDownUnneededTime is the time after which a node can be scaled down by the cluster autoscaler
+	ScaleDownUnneededTime string `json:"scaleDownUnneededTime"`
+	// ScaleDownUtilizationThreshold is the utilization threshold for the cluster autoscaler
+	// The autoscaler might scale down non-empty nodes with utilization below a threshold. To prevent this behavior, set the utilization threshold to 0
+	ScaleDownUtilizationThreshold float64 `json:"scaleDownUtilizationThreshold"`
+	// MaxGracefulTerminationSec is the maximum graceful termination time for the cluster autoscaler.
+	// If the pod is not stopped within these 10 min then the node is terminated anyway. Earlier versions of CA gave 1 minute or didn't respect graceful termination at all.
+	MaxGracefulTerminationSec int `json:"maxGracefulTerminationSec"`
+
+	// EnableProactiveScaleUp is a flag to enable the proactive scale up of the cluster autoscaler.
+	// Whether to enable/disable proactive scale-ups, defaults to false
+	EnableProactiveScaleUp bool `json:"enableProactiveScaleUp"`
 }
