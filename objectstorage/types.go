@@ -102,8 +102,8 @@ type Statement struct {
 
 // Principal defines which user(s) the statement applies to.
 type Principal struct {
-	AWS      interface{} `json:"AWS"`      // can be string or []string
-	Thalassa interface{} `json:"Thalassa"` // can be string or []string
+	AWS      interface{} `json:"AWS,omitempty"`      // can be string or []string
+	Thalassa interface{} `json:"Thalassa,omitempty"` // can be string or []string
 }
 
 type PrincipalARN string
