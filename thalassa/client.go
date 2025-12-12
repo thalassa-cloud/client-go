@@ -10,18 +10,19 @@ import (
 	"github.com/thalassa-cloud/client-go/objectstorage"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 	"github.com/thalassa-cloud/client-go/quotas"
+	"github.com/thalassa-cloud/client-go/tfs"
 )
 
 type Client interface {
+	Audit() *audit.Client
+	DbaaSAlphaV1() *dbaasalphav1.Client
 	IaaS() *iaas.Client
+	IAM() *iam.Client
 	Kubernetes() *kubernetes.Client
 	Me() *me.Client
-	DbaaSAlphaV1() *dbaasalphav1.Client
-	IAM() *iam.Client
 	ObjectStorage() *objectstorage.Client
 	Quotas() *quotas.Client
-	Audit() *audit.Client
-
+	Tfs() *tfs.Client
 	// SetOrganisation sets the organisation for the client
 	SetOrganisation(organisation string)
 }
@@ -110,4 +111,12 @@ func (c *thalassaCloudClient) Audit() *audit.Client {
 		panic(err)
 	}
 	return auditClient
+}
+
+func (c *thalassaCloudClient) Tfs() *tfs.Client {
+	tfsClient, err := tfs.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return tfsClient
 }
