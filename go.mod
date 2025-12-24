@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.1
 
 require (
-	github.com/go-resty/resty/v2 v2.17.0
+	github.com/go-resty/resty/v2 v2.17.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/sony/gobreaker v1.0.0
 	github.com/stretchr/testify v1.11.1
