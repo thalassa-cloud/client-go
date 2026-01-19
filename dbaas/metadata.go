@@ -1,4 +1,4 @@
-package dbaasalphav1
+package dbaas
 
 // Labels are key-value pairs that can be used to label resources.
 // Keys and values must be RFC 1123 compliant.

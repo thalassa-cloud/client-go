@@ -236,7 +236,7 @@ type Machine struct {
 type VirtualMachineInterfaces []VirtualMachineInterface
 type VirtualMachineInterface struct {
 	// Name is the name of the interface
-	Name string `json:"name" validate:"required"`
+	Name string `json:"name"`
 	// MacAddress is the MAC address of the interface
 	MacAddress string `json:"macAddress"`
 	// IPAddresses is a list of IP addresses that are assigned to the interface

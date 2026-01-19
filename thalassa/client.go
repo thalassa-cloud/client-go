@@ -2,7 +2,7 @@ package thalassa
 
 import (
 	"github.com/thalassa-cloud/client-go/audit"
-	"github.com/thalassa-cloud/client-go/dbaas/dbaasalphav1"
+	"github.com/thalassa-cloud/client-go/dbaas"
 	"github.com/thalassa-cloud/client-go/iaas"
 	"github.com/thalassa-cloud/client-go/iam"
 	"github.com/thalassa-cloud/client-go/kubernetes"
@@ -15,7 +15,7 @@ import (
 
 type Client interface {
 	Audit() *audit.Client
-	DbaaSAlphaV1() *dbaasalphav1.Client
+	dbaas() *dbaas.Client
 	IaaS() *iaas.Client
 	IAM() *iam.Client
 	Kubernetes() *kubernetes.Client
@@ -73,8 +73,8 @@ func (c *thalassaCloudClient) Me() *me.Client {
 	return meClient
 }
 
-func (c *thalassaCloudClient) DbaaSAlphaV1() *dbaasalphav1.Client {
-	dbaasClient, err := dbaasalphav1.New(c.client)
+func (c *thalassaCloudClient) dbaas() *dbaas.Client {
+	dbaasClient, err := dbaas.New(c.client)
 	if err != nil {
 		panic(err)
 	}

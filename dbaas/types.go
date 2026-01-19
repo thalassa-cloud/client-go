@@ -1,9 +1,11 @@
-package dbaasalphav1
+package dbaas
 
 import (
 	"time"
 
 	"github.com/thalassa-cloud/client-go/iaas"
+	"github.com/thalassa-cloud/client-go/iam"
+	"github.com/thalassa-cloud/client-go/objectstorage"
 	"github.com/thalassa-cloud/client-go/pkg/base"
 )
 
@@ -103,10 +105,12 @@ type ListDbClusterEngineVersionsResponse struct {
 }
 
 type CreateDbClusterRequest struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Labels      Labels      `json:"labels"`
-	Annotations Annotations `json:"annotations"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// Annotations is a map of key-value pairs used for storing additional information
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// Labels is a map of key-value pairs used for filtering and grouping objects
+	Labels map[string]string `json:"labels,omitempty"`
 	// Subnet is the subnet identity of the cloud subnet
 	SubnetIdentity           string   `json:"subnetIdentity"`
 	SecurityGroupAttachments []string `json:"securityGroupAttachments"`
@@ -125,14 +129,66 @@ type CreateDbClusterRequest struct {
 	DatabaseInstanceTypeIdentity string `json:"databaseInstanceTypeIdentity"`
 	// AutoMinorVersionUpgrade is a flag indicating if the cluster should automatically upgrade to the latest minor version
 	AutoMinorVersionUpgrade bool `json:"autoMinorVersionUpgrade"`
-	// Instances is the number of instances in the cluster
-	Instances int `json:"replicas"`
+	// AutoUpgradePolicy is the auto upgrade policy for the cluster
+	AutoUpgradePolicy *DbClusterAutoUpgradePolicy `json:"autoUpgradePolicy,omitempty"`
+	// MaintenanceDay is the day of the week for the maintenance window. 0 is Sunday, 6 is Saturday.
+	MaintenanceDay *uint `json:"maintenanceDay,omitempty"`
+	// MaintenanceStartAt is the start time of the maintenance window on the maintenance day in UTC. 0 is 00:00, 23 is 23:00.
+	MaintenanceStartAt *uint `json:"maintenanceStartAt,omitempty"`
+	// Replicas is the number of instances in the cluster
+	Replicas int `json:"replicas"`
 	// PostgresInitDb is the initial database to create on the cluster
 	PostgresInitDb *PostgresInitDb `json:"postgresInitDb,omitempty"`
 
 	// RestoreFromBackupIdentity is the identity of the backup to restore from
 	RestoreFromBackupIdentity *string `json:"restoreFromBackupIdentity,omitempty"`
+	// RestoreRecoveryTarget is the recovery target for Point-In-Time Recovery (PITR)
+	// Only used when RestoreFromBackupIdentity is specified
+	RestoreRecoveryTarget *RestoreRecoveryTarget `json:"restoreRecoveryTarget,omitempty"`
+	// DbObjectStoreIdentity is the identity of the DB object store used for barman backups (optional)
+	DbObjectStoreIdentity *string `json:"dbObjectStoreIdentity,omitempty"`
+	// ProvisionDbObjectStore is a flag to indicate if the DB object store should be provisioned for the cluster. Defaults to false.
+	// if true, the DbObjectStoreIdentity will be ignored.
+	ProvisionDbObjectStore bool `json:"provisionDbObjectStore,omitempty"`
+	// InitialPgBackupSchedule is the initial PostgreSQL backup schedule to create for the cluster.
+	// Only for clusters with engine `postgres` using barman backups.
+	InitialPgBackupSchedule *CreatePgBackupScheduleRequest `json:"initialPgBackupSchedule,omitempty"`
 }
+
+// RestoreRecoveryTarget specifies the recovery target for Point-In-Time Recovery
+type RestoreRecoveryTarget struct {
+	// TargetTime is the timestamp to restore to (RFC3339 format)
+	// Example: "2023-12-25T10:00:00Z"
+	TargetTime *string `json:"targetTime,omitempty"`
+	// TargetLSN is the Log Sequence Number to restore to
+	// Example: "0/1234567"
+	TargetLSN *string `json:"targetLSN,omitempty"`
+}
+
+type DbClusterAutoUpgradePolicy string //@name DbClusterAutoUpgradePolicy
+
+const (
+	// DbClusterAutoUpgradePolicyNone does not perform any auto upgrades. User is expected to manually upgrade the cluster.
+	DbClusterAutoUpgradePolicyNone DbClusterAutoUpgradePolicy = "none"
+	// DbClusterAutoUpgradePolicyLatestVersion is the auto upgrade policy for the cluster.
+	// It will upgrade to the latest release of the latest supported minor version.
+	// This upgrade strategy is recommended for development clusters.
+	DbClusterAutoUpgradePolicyLatestVersion DbClusterAutoUpgradePolicy = "latest-version"
+	// DbClusterAutoUpgradePolicyLatestStable is the auto upgrade policy for the cluster.
+	// It will upgrade only when the current version is not supported anymore, and then only to supported versions.
+	// This upgrade strategy is recommended for production clusters that want minimal changes.
+	DbClusterAutoUpgradePolicyLatestStable DbClusterAutoUpgradePolicy = "latest-stable"
+	// DbClusterAutoUpgradePolicyLatestPatch is the auto upgrade policy for the cluster.
+	// It will stay in the same minor version, only upgrading to the highest available minor if no new patches
+	// are available and the version isn't supported anymore.
+	DbClusterAutoUpgradePolicyLatestPatch DbClusterAutoUpgradePolicy = "latest-patch"
+	// DbClusterAutoUpgradePolicyLatestMinor is the auto upgrade policy for the cluster.
+	// It will attempt to stay in the same major version, only updating to the next major once it's not supported anymore.
+	DbClusterAutoUpgradePolicyLatestMinor DbClusterAutoUpgradePolicy = "latest-minor"
+	// DbClusterAutoUpgradePolicyLatestMajor is the auto upgrade policy for the cluster.
+	// It will update to the highest available and supported major version.
+	DbClusterAutoUpgradePolicyLatestMajor DbClusterAutoUpgradePolicy = "latest-major"
+)
 
 type PostgresInitDb struct {
 	// DataChecksums is a flag to indicate if data checksums should be enabled
@@ -194,14 +250,18 @@ type UpdateDbClusterRequest struct {
 	Parameters map[string]string `json:"parameters"`
 	// AllocatedStorage is the amount of storage allocated to the cluster in GB
 	AllocatedStorage uint64 `json:"allocatedStorage"`
-	// AutoMinorVersionUpgrade is a flag indicating if the cluster should automatically upgrade to the latest minor version
-	AutoMinorVersionUpgrade bool `json:"autoMinorVersionUpgrade"`
-	// DatabaseName is the name of the database on the cluster. Optional name. If provided, it will be used as the name of the database on the cluster.
-	DatabaseName *string `json:"databaseName"`
+	// AutoUpgradePolicy is the auto upgrade policy for the cluster
+	AutoUpgradePolicy *DbClusterAutoUpgradePolicy `json:"autoUpgradePolicy,omitempty"`
+	// MaintenanceDay is the day of the week for the maintenance window. 0 is Sunday, 6 is Saturday.
+	MaintenanceDay *uint `json:"maintenanceDay,omitempty"`
+	// MaintenanceStartAt is the start time of the maintenance window on the maintenance day in UTC. 0 is 00:00, 23 is 23:00.
+	MaintenanceStartAt *uint `json:"maintenanceStartAt,omitempty"`
 	// Replicas is the number of instances in the cluster
 	Replicas int `json:"replicas"`
 	// DatabaseInstanceTypeIdentity is the identity of the database instance type. Optional identity. If provided, it will be used as the database instance type for the cluster.
 	DatabaseInstanceTypeIdentity *string `json:"databaseInstanceTypeIdentity,omitempty"`
+	// DbObjectStoreIdentity is the identity of the DB object store used for barman backups (optional)
+	DbObjectStoreIdentity *string `json:"dbObjectStoreIdentity,omitempty"`
 }
 
 type DbClusterStatus string
@@ -295,6 +355,8 @@ type CreatePgBackupScheduleRequest struct {
 	RetentionPolicy string `json:"retentionPolicy"`
 	// Target is the target of the backup schedule. Primary or prefer-standby.
 	Target DbClusterBackupScheduleTarget `json:"target,omitempty"`
+	// Method is the method of the backup schedule
+	Method DbClusterBackupScheduleMethod `json:"method"`
 }
 
 type UpdatePgBackupScheduleRequest struct {
@@ -410,9 +472,9 @@ type DbClusterBackup struct {
 	// Organisation is the organisation the backup belongs to
 	Organisation *base.Organisation `json:"organisation,omitempty"`
 	// Labels is a map of labels for the backup
-	Labels map[string]string `json:"labels,omitempty"`
+	Labels Labels `json:"labels,omitempty"`
 	// Annotations is a map of annotations for the backup
-	Annotations map[string]string `json:"annotations,omitempty"`
+	Annotations Annotations `json:"annotations,omitempty"`
 	// Region is the region the backup belongs to
 	Region *iaas.Region `json:"region,omitempty"`
 	// BackupSchedule is the backup schedule the backup belongs to
@@ -422,9 +484,13 @@ type DbClusterBackup struct {
 	BackupTrigger DbClusterBackupTrigger `json:"backupTrigger"`
 	// EngineType is the type of the database engine, used for back-up restore purposes
 	EngineType DbClusterDatabaseEngine `json:"engineType"`
+	// DbObjectStore is the object store the backup belongs to. Only set for type barman backups.
+	DbObjectStore *DbObjectStore `json:"dbObjectStore,omitempty"`
+
 	// EngineVersion is the version of the database engine, used for back-up restore purposes
 	EngineVersion string `json:"engineVersion"`
-
+	// DeleteProtection is a flag to indicate if the backup is protected from deletion. The backup cannot be deleted if this is true.
+	DeleteProtection bool `json:"deleteProtection"`
 	// BackupType is the type of the backup
 	BackupType string `json:"backupType"`
 
@@ -531,4 +597,83 @@ type DbClusterPostgresDatabase struct {
 
 	// DeleteScheduledAt is the date and time the database will be deleted
 	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
+}
+
+type DbClusterScheduledMaintenance struct {
+	// Identity is a unique identifier for the scheduled maintenance
+	Identity string `json:"identity"`
+	// CreatedAt is the date and time the scheduled maintenance was created
+	CreatedAt time.Time `json:"createdAt"`
+	// ScheduledAt is the date and time the scheduled maintenance was scheduled
+	ScheduledAt time.Time `json:"scheduledAt"`
+	// StartedAt is the date and time the scheduled maintenance started
+	StartedAt *time.Time `json:"startedAt,omitempty"`
+	// CompletedAt is the date and time the scheduled maintenance completed
+	CompletedAt *time.Time `json:"completedAt,omitempty"`
+	// CanceledAt is the date and time the scheduled maintenance was canceled
+	CanceledAt *time.Time `json:"canceledAt,omitempty"`
+	// FailedAt is the date and time the scheduled maintenance failed
+	FailedAt *time.Time `json:"failedAt,omitempty"`
+	// DbCluster is the cluster the scheduled maintenance belongs to
+	DbCluster *DbCluster `json:"dbCluster"`
+	// Status is the status of the scheduled maintenance
+	Status DbClusterScheduledMaintenanceStatus `json:"status"`
+	// StatusReason is the reason for the status of the scheduled maintenance
+	StatusReason string `json:"statusReason,omitempty"`
+	// CurrentVersion is the current version of the engine
+	CurrentVersion *DbClusterEngineVersion `json:"currentVersion,omitempty"`
+	// TargetVersion is the target version of the engine
+	TargetVersion *DbClusterEngineVersion `json:"targetVersion,omitempty"`
+} //@name DbClusterScheduledMaintenance
+
+type DbClusterScheduledMaintenanceStatus string
+
+const (
+	DbClusterScheduledMaintenanceStatusScheduled  DbClusterScheduledMaintenanceStatus = "scheduled"
+	DbClusterScheduledMaintenanceStatusInProgress DbClusterScheduledMaintenanceStatus = "inProgress"
+	DbClusterScheduledMaintenanceStatusCompleted  DbClusterScheduledMaintenanceStatus = "completed"
+	DbClusterScheduledMaintenanceStatusFailed     DbClusterScheduledMaintenanceStatus = "failed"
+	DbClusterScheduledMaintenanceStatusCancelled  DbClusterScheduledMaintenanceStatus = "cancelled"
+	DbClusterScheduledMaintenanceStatusSkipped    DbClusterScheduledMaintenanceStatus = "skipped"
+)
+
+// DbObjectStore represents an object storage location for database backups.
+// When created, it provisions an object storage bucket with correct policies
+// and a service account with object storage access credentials.
+type DbObjectStore struct {
+	// Identity is a unique identifier for the object store
+	Identity string `json:"identity"`
+	Name     string `json:"name"`
+	// Description is the description of the object store
+	Description string `json:"description"`
+	// CreatedAt is the date and time the object store was created
+	CreatedAt time.Time `json:"createdAt"`
+	// UpdatedAt is the date and time the object store was last updated
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+	// ObjectVersion is the version of the object store
+	ObjectVersion int `json:"objectVersion"`
+	// Labels is a map of labels for the object store
+	Labels Labels `json:"labels,omitempty"`
+	// Annotations is a map of annotations for the object store
+	Annotations Annotations `json:"annotations,omitempty"`
+	// Organisation is the organisation the object store belongs to
+	Organisation *base.Organisation `json:"organisation,omitempty"`
+	// Region is the region of the object store
+	Region *iaas.Region `json:"region,omitempty"`
+	// Status is the status of the object store
+	Status ObjectStatus `json:"status"`
+	// StatusMessage is the message of the object store status
+	StatusMessage string `json:"statusMessage,omitempty"`
+	// DeleteProtection is a flag to indicate if the object store is protected from deletion
+	// This is used to prevent the object store from being deleted accidentally
+	// It is set to true when the object store is created and remains true until the object store is deleted
+	DeleteProtection bool `json:"deleteProtection"`
+	// ObjectStorageBucket is the underlying object storage bucket
+	ObjectStorageBucket *objectstorage.ObjectStorageBucket `json:"objectStorageBucket,omitempty"`
+	// ServiceAccount is the service account with object storage access credentials
+	ServiceAccount *iam.ServiceAccount `json:"serviceAccount,omitempty"`
+	// RetentionPolicy is the retention policy for backups in the format "<number>d" where d is days.
+	// For example, "30d" means backups will be retained for 30 days.
+	// This is used with barman-cloud-backup-delete command: --retention-policy "RECOVERY WINDOW OF <number> days"
+	RetentionPolicy string `json:"retentionPolicy,omitempty"`
 }
