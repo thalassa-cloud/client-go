@@ -1,4 +1,4 @@
-package dbaasalphav1
+package dbaas
 
 import (
 	"github.com/thalassa-cloud/client-go/pkg/client"

@@ -1,4 +1,4 @@
-package dbaasalphav1
+package dbaas
 
 import (
 	"context"
@@ -113,6 +113,24 @@ func (c *Client) DeleteDbCluster(ctx context.Context, dbClusterIdentity string) 
 		return err
 	}
 	return nil
+}
+
+// GetUpgradableVersionsForCluster retrieves the list of upgradeable versions for a specific dbCluster.
+func (c *Client) GetUpgradableVersionsForCluster(ctx context.Context, dbClusterIdentity string) ([]DbClusterEngineVersion, error) {
+	if dbClusterIdentity == "" {
+		return nil, fmt.Errorf("identity is required")
+	}
+
+	upgradableVersions := []DbClusterEngineVersion{}
+	req := c.R().SetResult(&upgradableVersions)
+	resp, err := c.Do(ctx, req, client.GET, fmt.Sprintf("%s/%s/upgradeable-versions", DbClusterEndpoint, dbClusterIdentity))
+	if err != nil {
+		return nil, err
+	}
+	if err := c.Check(resp); err != nil {
+		return upgradableVersions, err
+	}
+	return upgradableVersions, nil
 }
 
 type ListDbClustersRequest struct {

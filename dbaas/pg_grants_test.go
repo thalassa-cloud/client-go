@@ -1,4 +1,4 @@
-package dbaasalphav1
+package dbaas
 
 import (
 	"context"
@@ -154,7 +154,7 @@ func TestUpdatePgGrant(t *testing.T) {
 			dbClusterIdentity: "cluster-123",
 			grantName:         "",
 			request:           UpdatePgGrantRequest{},
-			expectedError:     "grant name is required",
+			expectedError:     "postgres grant identity is required",
 		},
 	}
 
@@ -202,7 +202,7 @@ func TestDeletePgGrant(t *testing.T) {
 			name:              "missing grant name",
 			dbClusterIdentity: "cluster-123",
 			grantName:         "",
-			expectedError:     "grant name is required",
+			expectedError:     "postgres grant identity is required",
 		},
 	}
 

@@ -1,4 +1,4 @@
-package dbaasalphav1
+package dbaas
 
 import (
 	"context"
@@ -31,16 +31,16 @@ func (c *Client) CreatePgGrant(ctx context.Context, dbClusterIdentity string, cr
 }
 
 // UpdatePgGrant updates an existing PostgreSQL grant for a role on a database in a database cluster.
-func (c *Client) UpdatePgGrant(ctx context.Context, dbClusterIdentity string, grantName string, update UpdatePgGrantRequest) error {
+func (c *Client) UpdatePgGrant(ctx context.Context, dbClusterIdentity string, grantIdentity string, update UpdatePgGrantRequest) error {
 	if dbClusterIdentity == "" {
 		return fmt.Errorf("database cluster identity is required")
 	}
-	if grantName == "" {
-		return fmt.Errorf("grant name is required")
+	if grantIdentity == "" {
+		return fmt.Errorf("postgres grant identity is required")
 	}
 
 	req := c.R().SetBody(update)
-	resp, err := c.Do(ctx, req, client.PUT, fmt.Sprintf("%s/%s/postgres-grants/%s", DbClusterEndpoint, dbClusterIdentity, grantName))
+	resp, err := c.Do(ctx, req, client.PUT, fmt.Sprintf("%s/%s/postgres-grants/%s", DbClusterEndpoint, dbClusterIdentity, grantIdentity))
 	if err != nil {
 		return err
 	}
@@ -48,16 +48,16 @@ func (c *Client) UpdatePgGrant(ctx context.Context, dbClusterIdentity string, gr
 }
 
 // DeletePgGrant deletes a PostgreSQL grant from a database cluster.
-func (c *Client) DeletePgGrant(ctx context.Context, dbClusterIdentity string, grantName string) error {
+func (c *Client) DeletePgGrant(ctx context.Context, dbClusterIdentity string, grantIdentity string) error {
 	if dbClusterIdentity == "" {
 		return fmt.Errorf("database cluster identity is required")
 	}
-	if grantName == "" {
-		return fmt.Errorf("grant name is required")
+	if grantIdentity == "" {
+		return fmt.Errorf("postgres grant identity is required")
 	}
 
 	req := c.R()
-	resp, err := c.Do(ctx, req, client.DELETE, fmt.Sprintf("%s/%s/postgres-grants/%s", DbClusterEndpoint, dbClusterIdentity, grantName))
+	resp, err := c.Do(ctx, req, client.DELETE, fmt.Sprintf("%s/%s/postgres-grants/%s", DbClusterEndpoint, dbClusterIdentity, grantIdentity))
 	if err != nil {
 		return err
 	}

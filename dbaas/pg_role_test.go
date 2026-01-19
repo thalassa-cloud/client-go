@@ -1,4 +1,4 @@
-package dbaasalphav1
+package dbaas
 
 import (
 	"context"
@@ -102,7 +102,7 @@ func TestUpdatePgRole(t *testing.T) {
 			dbClusterIdentity: "cluster-123",
 			roleName:          "",
 			request:           UpdatePgRoleRequest{},
-			expectedError:     "role name is required",
+			expectedError:     "postgres role identity is required",
 		},
 	}
 
@@ -132,31 +132,31 @@ func TestDeletePgRole(t *testing.T) {
 	tests := []struct {
 		name              string
 		dbClusterIdentity string
-		roleName          string
+		roleIdentity      string
 		expectedError     string
 	}{
 		{
 			name:              "successful role deletion",
 			dbClusterIdentity: "cluster-123",
-			roleName:          "testrole",
+			roleIdentity:      "testrole",
 		},
 		{
 			name:              "missing cluster identity",
 			dbClusterIdentity: "",
-			roleName:          "testrole",
+			roleIdentity:      "testrole",
 			expectedError:     "database cluster identity is required",
 		},
 		{
-			name:              "missing role name",
+			name:              "missing role identity",
 			dbClusterIdentity: "cluster-123",
-			roleName:          "",
-			expectedError:     "role name is required",
+			roleIdentity:      "",
+			expectedError:     "postgres role identity is required",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := dbaasClient.DeletePgRole(context.Background(), tt.dbClusterIdentity, tt.roleName)
+			err := dbaasClient.DeletePgRole(context.Background(), tt.dbClusterIdentity, tt.roleIdentity)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)

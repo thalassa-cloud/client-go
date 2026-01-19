@@ -1,4 +1,4 @@
-package dbaasalphav1
+package dbaas
 
 import (
 	"context"
@@ -108,11 +108,11 @@ func TestUpdatePgDatabase(t *testing.T) {
 			expectedError:     "database cluster identity is required",
 		},
 		{
-			name:              "missing database name",
+			name:              "missing database identity",
 			dbClusterIdentity: "cluster-123",
 			databaseName:      "",
 			request:           UpdatePgDatabaseRequest{},
-			expectedError:     "database name is required",
+			expectedError:     "postgres database identity is required",
 		},
 	}
 
@@ -143,30 +143,34 @@ func TestDeletePgDatabase(t *testing.T) {
 		name              string
 		dbClusterIdentity string
 		databaseName      string
+		immediate         bool
 		expectedError     string
 	}{
 		{
 			name:              "successful database deletion",
 			dbClusterIdentity: "cluster-123",
 			databaseName:      "testdb",
+			immediate:         false,
 		},
 		{
 			name:              "missing cluster identity",
 			dbClusterIdentity: "",
 			databaseName:      "testdb",
 			expectedError:     "database cluster identity is required",
+			immediate:         false,
 		},
 		{
-			name:              "missing database name",
+			name:              "missing database identity",
 			dbClusterIdentity: "cluster-123",
 			databaseName:      "",
-			expectedError:     "database name is required",
+			expectedError:     "postgres database identity is required",
+			immediate:         false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := dbaasClient.DeletePgDatabase(context.Background(), tt.dbClusterIdentity, tt.databaseName)
+			err := dbaasClient.DeletePgDatabase(context.Background(), tt.dbClusterIdentity, tt.databaseName, tt.immediate)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)
