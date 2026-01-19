@@ -2,12 +2,14 @@ package thalassa
 
 import (
 	"github.com/thalassa-cloud/client-go/audit"
+	"github.com/thalassa-cloud/client-go/containerregistry"
 	"github.com/thalassa-cloud/client-go/dbaas"
 	"github.com/thalassa-cloud/client-go/iaas"
 	"github.com/thalassa-cloud/client-go/iam"
 	"github.com/thalassa-cloud/client-go/kubernetes"
 	"github.com/thalassa-cloud/client-go/me"
 	"github.com/thalassa-cloud/client-go/objectstorage"
+	"github.com/thalassa-cloud/client-go/observability/prometheus"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 	"github.com/thalassa-cloud/client-go/quotas"
 	"github.com/thalassa-cloud/client-go/tfs"
@@ -23,6 +25,8 @@ type Client interface {
 	ObjectStorage() *objectstorage.Client
 	Quotas() *quotas.Client
 	Tfs() *tfs.Client
+	ObservabilityPrometheus() *prometheus.Client
+	ContainerRegistry() *containerregistry.Client
 	// SetOrganisation sets the organisation for the client
 	SetOrganisation(organisation string)
 }
@@ -119,4 +123,21 @@ func (c *thalassaCloudClient) Tfs() *tfs.Client {
 		panic(err)
 	}
 	return tfsClient
+}
+
+func (c *thalassaCloudClient) ObservabilityPrometheus() *prometheus.Client {
+	prometheusClient, err := prometheus.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return prometheusClient
+}
+
+// container registry
+func (c *thalassaCloudClient) ContainerRegistry() *containerregistry.Client {
+	containerRegistryClient, err := containerregistry.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return containerRegistryClient
 }
