@@ -17,7 +17,7 @@ import (
 
 type Client interface {
 	Audit() *audit.Client
-	dbaas() *dbaas.Client
+	DBaaS() *dbaas.Client
 	IaaS() *iaas.Client
 	IAM() *iam.Client
 	Kubernetes() *kubernetes.Client
@@ -77,7 +77,7 @@ func (c *thalassaCloudClient) Me() *me.Client {
 	return meClient
 }
 
-func (c *thalassaCloudClient) dbaas() *dbaas.Client {
+func (c *thalassaCloudClient) DBaaS() *dbaas.Client {
 	dbaasClient, err := dbaas.New(c.client)
 	if err != nil {
 		panic(err)
