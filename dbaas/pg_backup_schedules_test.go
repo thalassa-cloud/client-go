@@ -9,7 +9,7 @@ import (
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
-func TestCreatePgBackupSchedule(t *testing.T) {
+func TestCreateDbBackupSchedule(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
@@ -22,14 +22,14 @@ func TestCreatePgBackupSchedule(t *testing.T) {
 	tests := []struct {
 		name              string
 		dbClusterIdentity string
-		request           CreatePgBackupScheduleRequest
+		request           CreateDbBackupScheduleRequest
 		expectedError     string
 		expectedResult    *DbClusterBackupSchedule
 	}{
 		{
 			name:              "successful backup schedule creation",
 			dbClusterIdentity: "cluster-123",
-			request: CreatePgBackupScheduleRequest{
+			request: CreateDbBackupScheduleRequest{
 				Name:            "daily-backup",
 				Schedule:        "0 2 * * *",
 				RetentionPolicy: "30d",
@@ -43,7 +43,7 @@ func TestCreatePgBackupSchedule(t *testing.T) {
 		{
 			name:              "missing cluster identity",
 			dbClusterIdentity: "",
-			request: CreatePgBackupScheduleRequest{
+			request: CreateDbBackupScheduleRequest{
 				Name:            "daily-backup",
 				Schedule:        "0 2 * * *",
 				RetentionPolicy: "30d",
@@ -53,7 +53,7 @@ func TestCreatePgBackupSchedule(t *testing.T) {
 		{
 			name:              "missing schedule name",
 			dbClusterIdentity: "cluster-123",
-			request: CreatePgBackupScheduleRequest{
+			request: CreateDbBackupScheduleRequest{
 				Name:            "",
 				Schedule:        "0 2 * * *",
 				RetentionPolicy: "30d",
@@ -63,7 +63,7 @@ func TestCreatePgBackupSchedule(t *testing.T) {
 		{
 			name:              "missing schedule",
 			dbClusterIdentity: "cluster-123",
-			request: CreatePgBackupScheduleRequest{
+			request: CreateDbBackupScheduleRequest{
 				Name:            "daily-backup",
 				Schedule:        "",
 				RetentionPolicy: "30d",
@@ -73,7 +73,7 @@ func TestCreatePgBackupSchedule(t *testing.T) {
 		{
 			name:              "missing retention policy",
 			dbClusterIdentity: "cluster-123",
-			request: CreatePgBackupScheduleRequest{
+			request: CreateDbBackupScheduleRequest{
 				Name:            "daily-backup",
 				Schedule:        "0 2 * * *",
 				RetentionPolicy: "",
@@ -84,7 +84,7 @@ func TestCreatePgBackupSchedule(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := dbaasClient.CreatePgBackupSchedule(context.Background(), tt.dbClusterIdentity, tt.request)
+			result, err := dbaasClient.CreateDbBackupSchedule(context.Background(), tt.dbClusterIdentity, tt.request)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)
@@ -102,7 +102,7 @@ func TestCreatePgBackupSchedule(t *testing.T) {
 	}
 }
 
-func TestUpdatePgBackupSchedule(t *testing.T) {
+func TestUpdateDbBackupSchedule(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
@@ -116,7 +116,7 @@ func TestUpdatePgBackupSchedule(t *testing.T) {
 		name                   string
 		dbClusterIdentity      string
 		backupScheduleIdentity string
-		request                UpdatePgBackupScheduleRequest
+		request                UpdateDbBackupScheduleRequest
 		expectedError          string
 		expectedResult         *DbClusterBackupSchedule
 	}{
@@ -124,7 +124,7 @@ func TestUpdatePgBackupSchedule(t *testing.T) {
 			name:                   "successful backup schedule update",
 			dbClusterIdentity:      "cluster-123",
 			backupScheduleIdentity: "schedule-123",
-			request: UpdatePgBackupScheduleRequest{
+			request: UpdateDbBackupScheduleRequest{
 				Name:            "updated-backup",
 				Schedule:        "0 3 * * *",
 				RetentionPolicy: "60d",
@@ -139,7 +139,7 @@ func TestUpdatePgBackupSchedule(t *testing.T) {
 			name:                   "missing cluster identity",
 			dbClusterIdentity:      "",
 			backupScheduleIdentity: "schedule-123",
-			request: UpdatePgBackupScheduleRequest{
+			request: UpdateDbBackupScheduleRequest{
 				Name:            "updated-backup",
 				Schedule:        "0 3 * * *",
 				RetentionPolicy: "60d",
@@ -150,7 +150,7 @@ func TestUpdatePgBackupSchedule(t *testing.T) {
 			name:                   "missing backup schedule identity",
 			dbClusterIdentity:      "cluster-123",
 			backupScheduleIdentity: "",
-			request: UpdatePgBackupScheduleRequest{
+			request: UpdateDbBackupScheduleRequest{
 				Name:            "updated-backup",
 				Schedule:        "0 3 * * *",
 				RetentionPolicy: "60d",
@@ -161,7 +161,7 @@ func TestUpdatePgBackupSchedule(t *testing.T) {
 			name:                   "missing schedule name",
 			dbClusterIdentity:      "cluster-123",
 			backupScheduleIdentity: "schedule-123",
-			request: UpdatePgBackupScheduleRequest{
+			request: UpdateDbBackupScheduleRequest{
 				Name:            "",
 				Schedule:        "0 3 * * *",
 				RetentionPolicy: "60d",
@@ -172,7 +172,7 @@ func TestUpdatePgBackupSchedule(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := dbaasClient.UpdatePgBackupSchedule(context.Background(), tt.dbClusterIdentity, tt.backupScheduleIdentity, tt.request)
+			result, err := dbaasClient.UpdateDbBackupSchedule(context.Background(), tt.dbClusterIdentity, tt.backupScheduleIdentity, tt.request)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)
@@ -190,7 +190,7 @@ func TestUpdatePgBackupSchedule(t *testing.T) {
 	}
 }
 
-func TestDeletePgBackupSchedule(t *testing.T) {
+func TestDeleteDbBackupSchedule(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()
 
@@ -227,7 +227,7 @@ func TestDeletePgBackupSchedule(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := dbaasClient.DeletePgBackupSchedule(context.Background(), tt.dbClusterIdentity, tt.backupScheduleIdentity)
+			err := dbaasClient.DeleteDbBackupSchedule(context.Background(), tt.dbClusterIdentity, tt.backupScheduleIdentity)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)

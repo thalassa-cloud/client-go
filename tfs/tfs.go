@@ -21,7 +21,7 @@ func (c *Client) ListTfsInstances(ctx context.Context, request *ListTfsInstances
 	if request != nil {
 		for _, filter := range request.Filters {
 			for k, v := range filter.ToParams() {
-				req.SetQueryParam(k, v)
+				req = req.SetQueryParam(k, v)
 			}
 		}
 	}

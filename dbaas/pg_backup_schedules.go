@@ -9,8 +9,8 @@ import (
 
 // PostgreSQL Backup Schedule Operations
 
-// ListPgBackupSchedules lists all PostgreSQL backup schedules for a database cluster.
-func (c *Client) ListPgBackupSchedules(ctx context.Context, dbClusterIdentity string) ([]DbClusterBackupSchedule, error) {
+// ListDbBackupSchedules lists all PostgreSQL backup schedules for a database cluster.
+func (c *Client) ListDbBackupSchedules(ctx context.Context, dbClusterIdentity string) ([]DbClusterBackupSchedule, error) {
 	if dbClusterIdentity == "" {
 		return nil, fmt.Errorf("database cluster identity is required")
 	}
@@ -27,8 +27,8 @@ func (c *Client) ListPgBackupSchedules(ctx context.Context, dbClusterIdentity st
 	return backupSchedules, nil
 }
 
-// CreatePgBackupSchedule creates a new PostgreSQL backup schedule for a database cluster.
-func (c *Client) CreatePgBackupSchedule(ctx context.Context, dbClusterIdentity string, create CreatePgBackupScheduleRequest) (*DbClusterBackupSchedule, error) {
+// CreateDbBackupSchedule creates a new PostgreSQL backup schedule for a database cluster.
+func (c *Client) CreateDbBackupSchedule(ctx context.Context, dbClusterIdentity string, create CreateDbBackupScheduleRequest) (*DbClusterBackupSchedule, error) {
 	if dbClusterIdentity == "" {
 		return nil, fmt.Errorf("database cluster identity is required")
 	}
@@ -54,8 +54,8 @@ func (c *Client) CreatePgBackupSchedule(ctx context.Context, dbClusterIdentity s
 	return backupSchedule, nil
 }
 
-// UpdatePgBackupSchedule updates an existing PostgreSQL backup schedule for a database cluster.
-func (c *Client) UpdatePgBackupSchedule(ctx context.Context, dbClusterIdentity string, backupScheduleIdentity string, update UpdatePgBackupScheduleRequest) (*DbClusterBackupSchedule, error) {
+// UpdateDbBackupSchedule updates an existing PostgreSQL backup schedule for a database cluster.
+func (c *Client) UpdateDbBackupSchedule(ctx context.Context, dbClusterIdentity string, backupScheduleIdentity string, update UpdateDbBackupScheduleRequest) (*DbClusterBackupSchedule, error) {
 	if dbClusterIdentity == "" {
 		return nil, fmt.Errorf("database cluster identity is required")
 	}
@@ -84,8 +84,8 @@ func (c *Client) UpdatePgBackupSchedule(ctx context.Context, dbClusterIdentity s
 	return backupSchedule, nil
 }
 
-// GetPgBackupSchedule retrieves a specific PostgreSQL backup schedule for a database cluster.
-func (c *Client) GetPgBackupSchedule(ctx context.Context, dbClusterIdentity string, backupScheduleIdentity string) (*DbClusterBackupSchedule, error) {
+// GetDbBackupSchedule retrieves a specific PostgreSQL backup schedule for a database cluster.
+func (c *Client) GetDbBackupSchedule(ctx context.Context, dbClusterIdentity string, backupScheduleIdentity string) (*DbClusterBackupSchedule, error) {
 	if dbClusterIdentity == "" {
 		return nil, fmt.Errorf("database cluster identity is required")
 	}
@@ -105,8 +105,8 @@ func (c *Client) GetPgBackupSchedule(ctx context.Context, dbClusterIdentity stri
 	return backupSchedule, nil
 }
 
-// DeletePgBackupSchedule deletes a PostgreSQL backup schedule from a database cluster.
-func (c *Client) DeletePgBackupSchedule(ctx context.Context, dbClusterIdentity string, backupScheduleIdentity string) error {
+// DeleteDbBackupSchedule deletes a PostgreSQL backup schedule from a database cluster.
+func (c *Client) DeleteDbBackupSchedule(ctx context.Context, dbClusterIdentity string, backupScheduleIdentity string) error {
 	if dbClusterIdentity == "" {
 		return fmt.Errorf("database cluster identity is required")
 	}
@@ -122,8 +122,8 @@ func (c *Client) DeletePgBackupSchedule(ctx context.Context, dbClusterIdentity s
 	return c.Check(resp)
 }
 
-// ListPgBackupSchedulesForOrganisation lists all PostgreSQL backup schedules for the organisation.
-func (c *Client) ListPgBackupSchedulesForOrganisation(ctx context.Context) ([]DbClusterBackupSchedule, error) {
+// ListDbBackupSchedulesForOrganisation lists all PostgreSQL backup schedules for the organisation.
+func (c *Client) ListDbBackupSchedulesForOrganisation(ctx context.Context) ([]DbClusterBackupSchedule, error) {
 	backupSchedules := []DbClusterBackupSchedule{}
 	req := c.R().SetResult(&backupSchedules)
 	resp, err := c.Do(ctx, req, client.GET, "/v1/dbaas/backup-schedules")
