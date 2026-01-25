@@ -353,8 +353,8 @@ type CreateDbBackupScheduleRequest struct {
 	Schedule string `json:"schedule"`
 	// RetentionPolicy is the retention policy of the backup
 	RetentionPolicy string `json:"retentionPolicy"`
-	// Target is the target of the backup schedule. Primary or prefer-standby.
-	Target DbClusterBackupScheduleTarget `json:"target,omitempty"`
+	// // Target is the target of the backup schedule. Primary or prefer-standby.
+	// Target DbClusterBackupScheduleTarget `json:"target,omitempty"`
 	// Method is the method of the backup schedule
 	Method DbClusterBackupScheduleMethod `json:"method"`
 }
@@ -372,14 +372,15 @@ type UpdateDbBackupScheduleRequest struct {
 	Schedule string `json:"schedule"`
 	// RetentionPolicy is the retention policy of the backup
 	RetentionPolicy string `json:"retentionPolicy"`
-	// Target is the target of the backup schedule
-	Target DbClusterBackupScheduleTarget `json:"target,omitempty"`
+	// // Target is the target of the backup schedule
+	// Target DbClusterBackupScheduleTarget `json:"target,omitempty"`
 }
 
 type DbClusterBackupScheduleMethod string
 
 const (
 	DbClusterBackupScheduleMethodSnapshot DbClusterBackupScheduleMethod = "snapshot"
+	DbClusterBackupScheduleMethodBarman   DbClusterBackupScheduleMethod = "barman"
 )
 
 type DbClusterBackupScheduleTarget string
@@ -460,8 +461,6 @@ type CreateDbClusterBackupRequest struct {
 	Annotations Annotations `json:"annotations"`
 	// RetentionPolicy is the retention policy of the backup
 	RetentionPolicy *string `json:"retentionPolicy,omitempty"`
-	// Target is the target of the backup. Primary or prefer-standby.
-	Target string `json:"target"`
 }
 
 type DbClusterBackup struct {
