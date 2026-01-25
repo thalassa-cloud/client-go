@@ -150,9 +150,9 @@ type CreateDbClusterRequest struct {
 	// ProvisionDbObjectStore is a flag to indicate if the DB object store should be provisioned for the cluster. Defaults to false.
 	// if true, the DbObjectStoreIdentity will be ignored.
 	ProvisionDbObjectStore bool `json:"provisionDbObjectStore,omitempty"`
-	// InitialPgBackupSchedule is the initial PostgreSQL backup schedule to create for the cluster.
+	// InitialDbBackupSchedule is the initial PostgreSQL backup schedule to create for the cluster.
 	// Only for clusters with engine `postgres` using barman backups.
-	InitialPgBackupSchedule *CreatePgBackupScheduleRequest `json:"initialPgBackupSchedule,omitempty"`
+	InitialDbBackupSchedule *CreateDbBackupScheduleRequest `json:"initialDbBackupSchedule,omitempty"`
 }
 
 // RestoreRecoveryTarget specifies the recovery target for Point-In-Time Recovery
@@ -340,7 +340,7 @@ type UpdatePgRoleRequest struct {
 	Password *string `json:"password,omitempty"`
 }
 
-type CreatePgBackupScheduleRequest struct {
+type CreateDbBackupScheduleRequest struct {
 	// Name is the name of the backup schedule
 	Name string `json:"name"`
 	// Description is the description of the backup schedule
@@ -359,7 +359,7 @@ type CreatePgBackupScheduleRequest struct {
 	Method DbClusterBackupScheduleMethod `json:"method"`
 }
 
-type UpdatePgBackupScheduleRequest struct {
+type UpdateDbBackupScheduleRequest struct {
 	// Name is the name of the backup schedule
 	Name string `json:"name"`
 	// Description is the description of the backup schedule
