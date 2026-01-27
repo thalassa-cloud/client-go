@@ -7,9 +7,9 @@ import (
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
-// PostgreSQL Backup Schedule Operations
+// DBaaS Cluster Backup Schedule Operations
 
-// ListDbBackupSchedules lists all PostgreSQL backup schedules for a database cluster.
+// ListDbBackupSchedules lists all DBaaS Cluster backup schedules for a database cluster.
 func (c *Client) ListDbBackupSchedules(ctx context.Context, dbClusterIdentity string) ([]DbClusterBackupSchedule, error) {
 	if dbClusterIdentity == "" {
 		return nil, fmt.Errorf("database cluster identity is required")
@@ -27,7 +27,7 @@ func (c *Client) ListDbBackupSchedules(ctx context.Context, dbClusterIdentity st
 	return backupSchedules, nil
 }
 
-// CreateDbBackupSchedule creates a new PostgreSQL backup schedule for a database cluster.
+// CreateDbBackupSchedule creates a new DBaaS Cluster backup schedule for a database cluster.
 func (c *Client) CreateDbBackupSchedule(ctx context.Context, dbClusterIdentity string, create CreateDbBackupScheduleRequest) (*DbClusterBackupSchedule, error) {
 	if dbClusterIdentity == "" {
 		return nil, fmt.Errorf("database cluster identity is required")
@@ -54,7 +54,7 @@ func (c *Client) CreateDbBackupSchedule(ctx context.Context, dbClusterIdentity s
 	return backupSchedule, nil
 }
 
-// UpdateDbBackupSchedule updates an existing PostgreSQL backup schedule for a database cluster.
+// UpdateDbBackupSchedule updates an existing DBaaS Cluster backup schedule for a database cluster.
 func (c *Client) UpdateDbBackupSchedule(ctx context.Context, dbClusterIdentity string, backupScheduleIdentity string, update UpdateDbBackupScheduleRequest) (*DbClusterBackupSchedule, error) {
 	if dbClusterIdentity == "" {
 		return nil, fmt.Errorf("database cluster identity is required")
@@ -84,7 +84,7 @@ func (c *Client) UpdateDbBackupSchedule(ctx context.Context, dbClusterIdentity s
 	return backupSchedule, nil
 }
 
-// GetDbBackupSchedule retrieves a specific PostgreSQL backup schedule for a database cluster.
+// GetDbBackupSchedule retrieves a specific DBaaS Cluster backup schedule for a database cluster.
 func (c *Client) GetDbBackupSchedule(ctx context.Context, dbClusterIdentity string, backupScheduleIdentity string) (*DbClusterBackupSchedule, error) {
 	if dbClusterIdentity == "" {
 		return nil, fmt.Errorf("database cluster identity is required")
@@ -105,7 +105,7 @@ func (c *Client) GetDbBackupSchedule(ctx context.Context, dbClusterIdentity stri
 	return backupSchedule, nil
 }
 
-// DeleteDbBackupSchedule deletes a PostgreSQL backup schedule from a database cluster.
+// DeleteDbBackupSchedule deletes a DBaaS Cluster backup schedule from a database cluster.
 func (c *Client) DeleteDbBackupSchedule(ctx context.Context, dbClusterIdentity string, backupScheduleIdentity string) error {
 	if dbClusterIdentity == "" {
 		return fmt.Errorf("database cluster identity is required")
@@ -122,7 +122,7 @@ func (c *Client) DeleteDbBackupSchedule(ctx context.Context, dbClusterIdentity s
 	return c.Check(resp)
 }
 
-// ListDbBackupSchedulesForOrganisation lists all PostgreSQL backup schedules for the organisation.
+// ListDbBackupSchedulesForOrganisation lists all DBaaS Cluster backup schedules for the organisation.
 func (c *Client) ListDbBackupSchedulesForOrganisation(ctx context.Context) ([]DbClusterBackupSchedule, error) {
 	backupSchedules := []DbClusterBackupSchedule{}
 	req := c.R().SetResult(&backupSchedules)
