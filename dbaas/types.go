@@ -66,6 +66,10 @@ type DbCluster struct {
 	// Port is the port of the cluster endpoint
 	Port int `json:"port"`
 
+	// Endpoint registration
+	InternalEndpointIpv4 *iaas.Endpoint `json:"internalEndpointIpv4,omitempty"`
+	InternalEndpointIpv6 *iaas.Endpoint `json:"internalEndpointIpv6,omitempty"`
+
 	// PostgresRoles is a list of PostgreSQL roles associated with the cluster
 	PostgresRoles []DbClusterPostgresRole `json:"postgresRoles,omitempty"`
 	// PostgresDatabases is a list of PostgreSQL databases associated with the cluster
