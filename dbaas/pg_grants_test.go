@@ -105,7 +105,7 @@ func TestCreatePgGrant(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := dbaasClient.CreatePgGrant(context.Background(), tt.dbClusterIdentity, tt.request)
+			_, err := dbaasClient.CreatePgGrant(context.Background(), tt.dbClusterIdentity, tt.request)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)
@@ -160,7 +160,7 @@ func TestUpdatePgGrant(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := dbaasClient.UpdatePgGrant(context.Background(), tt.dbClusterIdentity, tt.grantName, tt.request)
+			_, err := dbaasClient.UpdatePgGrant(context.Background(), tt.dbClusterIdentity, tt.grantName, tt.request)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)
