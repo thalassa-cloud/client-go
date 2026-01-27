@@ -4,19 +4,32 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
 // DBaaS Cluster Backup Schedule Operations
 
+type ListDbBackupSchedulesRequest struct {
+	Filters []filters.Filter
+}
+
 // ListDbBackupSchedules lists all DBaaS Cluster backup schedules for a database cluster.
-func (c *Client) ListDbBackupSchedules(ctx context.Context, dbClusterIdentity string) ([]DbClusterBackupSchedule, error) {
+func (c *Client) ListDbBackupSchedules(ctx context.Context, dbClusterIdentity string, listRequest *ListDbBackupSchedulesRequest) ([]DbClusterBackupSchedule, error) {
 	if dbClusterIdentity == "" {
 		return nil, fmt.Errorf("database cluster identity is required")
 	}
 
 	backupSchedules := []DbClusterBackupSchedule{}
 	req := c.R().SetResult(&backupSchedules)
+	if listRequest != nil {
+		for _, filter := range listRequest.Filters {
+			for k, v := range filter.ToParams() {
+				req = req.SetQueryParam(k, v)
+			}
+		}
+	}
+
 	resp, err := c.Do(ctx, req, client.GET, fmt.Sprintf("%s/%s/backup-schedules", DbClusterEndpoint, dbClusterIdentity))
 	if err != nil {
 		return nil, err
