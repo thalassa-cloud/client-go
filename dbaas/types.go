@@ -539,6 +539,29 @@ const (
 	DbClusterBackupTriggerSystem   DbClusterBackupTrigger = "system"
 )
 
+type DbClusterPostgresGrant struct {
+	// Identity is a unique identifier for the grant
+	Identity string `json:"identity"`
+	// Name is the name of the grant
+	Name string `json:"name"`
+	// Status is the status of the grant
+	Status ObjectStatus `json:"status"`
+	// StatusMessage is the message of the grant status
+	StatusMessage string `json:"statusMessage,omitempty"`
+	// CreatedAt is the date and time the object was created
+	CreatedAt time.Time `json:"createdAt"`
+	// DbCluster is the cluster the grant belongs to
+	DbCluster *DbCluster `json:"dbCluster,omitempty"`
+	// Database is the database the grant belongs to
+	Database *DbClusterPostgresDatabase `json:"database,omitempty"`
+	// Role is the role the grant belongs to
+	Role *DbClusterPostgresRole `json:"role,omitempty"`
+	// Read is a flag to indicate if the role can read from the database
+	Read bool `json:"read"`
+	// Write is a flag to indicate if the role can write to the database
+	Write bool `json:"write"`
+}
+
 type CreatePgGrantRequest struct {
 	// Name is the name of the grant
 	Name string `json:"name"`

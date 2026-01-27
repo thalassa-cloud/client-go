@@ -4,10 +4,38 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
 // PostgreSQL Database Operations
+func (c *Client) ListPgDatabases(ctx context.Context, dbClusterIdentity string, listRequest *ListPgDatabasesRequest) ([]DbClusterPostgresDatabase, error) {
+	if dbClusterIdentity == "" {
+		return nil, fmt.Errorf("database cluster identity is required")
+	}
+
+	databases := []DbClusterPostgresDatabase{}
+	req := c.R().SetResult(&databases)
+	if listRequest != nil {
+		for _, filter := range listRequest.Filters {
+			for k, v := range filter.ToParams() {
+				req = req.SetQueryParam(k, v)
+			}
+		}
+	}
+	resp, err := c.Do(ctx, req, client.GET, fmt.Sprintf("%s/%s/postgres-databases", DbClusterEndpoint, dbClusterIdentity))
+	if err != nil {
+		return nil, err
+	}
+	if err := c.Check(resp); err != nil {
+		return nil, err
+	}
+	return databases, nil
+}
+
+type ListPgDatabasesRequest struct {
+	Filters []filters.Filter
+}
 
 // CreatePgDatabase creates a new PostgreSQL database in a database cluster.
 func (c *Client) CreatePgDatabase(ctx context.Context, dbClusterIdentity string, create CreatePgDatabaseRequest) error {

@@ -54,7 +54,7 @@ func TestCreatePgRole(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := dbaasClient.CreatePgRole(context.Background(), tt.dbClusterIdentity, tt.request)
+			_, err := dbaasClient.CreatePgRole(context.Background(), tt.dbClusterIdentity, tt.request)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)
@@ -108,7 +108,7 @@ func TestUpdatePgRole(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := dbaasClient.UpdatePgRole(context.Background(), tt.dbClusterIdentity, tt.roleName, tt.request)
+			_, err := dbaasClient.UpdatePgRole(context.Background(), tt.dbClusterIdentity, tt.roleName, tt.request)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)
