@@ -52,7 +52,7 @@ type ContainerRegistryNamespace struct {
 	TotalSizeBytes int64                                    `json:"total_size_bytes"`
 	Repositories   []ContainerRegistryRepository            `json:"repositories,omitempty"`
 	Configuration  *ContainerRegistryNamespaceConfiguration `json:"configuration,omitempty"`
-} //@name ContainerRegistryNamespace
+}
 
 type ContainerRegistryType string
 
@@ -70,7 +70,7 @@ type ContainerRegistryNamespaceConfiguration struct {
 	Visibility    NamespaceVisibility         `json:"visibility"`
 	// RetentionPolicy stores retention policy configuration
 	RetentionPolicy *RetentionPolicy `json:"retention_policy,omitempty"`
-} //@name ContainerRegistryNamespaceConfiguration
+}
 
 // RetentionPolicyScope defines what resources are covered by the retention policy
 type RetentionPolicyScope string
@@ -113,7 +113,7 @@ type RetentionPolicyRule struct {
 	// Can be one of: tags
 	// If not set, defaults to "tags"
 	Scope RetentionPolicyScope `json:"scope,omitempty"`
-} //@name RetentionPolicyRule
+}
 
 // RetentionPolicy defines the retention policy configuration similar to Harbor's retention policies
 // It supports multiple rules that are evaluated together
@@ -125,7 +125,7 @@ type RetentionPolicy struct {
 	// Rules is a list of retention rules. Rules are evaluated in order, and resources matching any rule
 	// will be subject to retention according to that rule's criteria.
 	Rules []RetentionPolicyRule `json:"rules"`
-} //@name RetentionPolicy
+}
 
 type ContainerRegistryRepository struct {
 	Identity      string                      `json:"identity"`
