@@ -173,7 +173,7 @@ type CreateOrganisationRoleRequest struct {
 
 	// Labels for the organisationRole
 	Labels map[string]string `json:"labels"`
-} //@name CreateOrganisationRole is the request for creating a organisationRole
+}
 
 type CreateRoleBinding struct {
 	// Name of the organisationRole

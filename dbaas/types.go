@@ -299,6 +299,8 @@ type CreatePgDatabaseRequest struct {
 	// `ALTER DATABASE`. How many concurrent connections can be made to
 	// this database. -1 (the default) means no limit.
 	ConnectionLimit *int `json:"connectionLimit,omitempty"`
+	// Extensions for the database
+	Extensions *PgDatabaseExtensions `json:"extensions,omitempty"`
 }
 
 type UpdatePgDatabaseRequest struct {
@@ -310,6 +312,18 @@ type UpdatePgDatabaseRequest struct {
 	// `ALTER DATABASE`. How many concurrent connections can be made to
 	// this database. -1 (the default) means no limit.
 	ConnectionLimit *int `json:"connectionLimit,omitempty"`
+	// Extensions for the database
+	Extensions *PgDatabaseExtensions `json:"extensions,omitempty"`
+}
+
+type PgDatabaseExtensions struct {
+	// Extensions to install
+	Extensions []DatabasePostgresExtension `json:"extensions"`
+}
+
+type DatabasePostgresExtension struct {
+	// Name is the name of the extension
+	Name string `json:"name"`
 }
 
 type CreatePgRoleRequest struct {
@@ -650,7 +664,7 @@ type DbClusterScheduledMaintenance struct {
 	CurrentVersion *DbClusterEngineVersion `json:"currentVersion,omitempty"`
 	// TargetVersion is the target version of the engine
 	TargetVersion *DbClusterEngineVersion `json:"targetVersion,omitempty"`
-} //@name DbClusterScheduledMaintenance
+}
 
 type DbClusterScheduledMaintenanceStatus string
 
