@@ -2,6 +2,8 @@ package client
 
 import (
 	"context"
+	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -450,4 +452,137 @@ func TestClientWithInsecure(t *testing.T) {
 	clientStruct := client.(*thalassaCloudClient)
 	transport := clientStruct.resty.GetClient().Transport.(*http.Transport)
 	assert.True(t, transport.TLSClientConfig.InsecureSkipVerify)
+}
+
+func TestParseHTTPMethod(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     string
+		want      httpMethod
+		expectErr bool
+	}{
+		{"GET uppercase", "GET", GET, false},
+		{"get lowercase", "get", GET, false},
+		{"Post mixed", "Post", POST, false},
+		{"POST", "POST", POST, false},
+		{"PUT", "PUT", PUT, false},
+		{"PATCH", "PATCH", PATCH, false},
+		{"DELETE", "DELETE", DELETE, false},
+		{"with spaces", "  GET  ", GET, false},
+		{"invalid", "INVALID", "", true},
+		{"empty", "", "", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseHTTPMethod(tt.input)
+			if tt.expectErr {
+				require.Error(t, err)
+				assert.True(t, errors.Is(err, ErrUnsupportedHTTPMethod))
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestRawRequest(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/success":
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("success"))
+		case "/echo":
+			if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodPatch {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				body, _ := io.ReadAll(r.Body)
+				w.Write(body)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("ok"))
+		default:
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("not found"))
+		}
+	}))
+	defer server.Close()
+
+	client, err := NewClient(
+		WithBaseURL(server.URL),
+		WithAuthNone(),
+	)
+	require.NoError(t, err)
+	require.NotNil(t, client)
+
+	ctx := context.Background()
+
+	tests := []struct {
+		name       string
+		method     string
+		path       string
+		body       []byte
+		wantStatus int
+		wantBody   string
+		expectErr  bool
+	}{
+		{
+			name:       "GET without body",
+			method:     "GET",
+			path:       "/success",
+			body:       nil,
+			wantStatus: http.StatusOK,
+			wantBody:   "success",
+			expectErr:  false,
+		},
+		{
+			name:       "GET with path",
+			method:     "get",
+			path:       "/success",
+			body:       nil,
+			wantStatus: http.StatusOK,
+			wantBody:   "success",
+			expectErr:  false,
+		},
+		{
+			name:       "POST with JSON body",
+			method:     "POST",
+			path:       "/echo",
+			body:       []byte(`{"key":"value"}`),
+			wantStatus: http.StatusOK,
+			wantBody:   `{"key":"value"}`,
+			expectErr:  false,
+		},
+		{
+			name:       "DELETE without body",
+			method:     "DELETE",
+			path:       "/echo",
+			body:       nil,
+			wantStatus: http.StatusOK,
+			wantBody:   "ok",
+			expectErr:  false,
+		},
+		{
+			name:      "invalid method",
+			method:    "INVALID",
+			path:      "/success",
+			body:      nil,
+			expectErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resp, err := client.RawRequest(ctx, tt.method, tt.path, tt.body)
+			if tt.expectErr {
+				require.Error(t, err)
+				assert.Nil(t, resp)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, resp)
+			assert.Equal(t, tt.wantStatus, resp.StatusCode(), "status code")
+			assert.Equal(t, tt.wantBody, resp.String(), "response body")
+		})
+	}
 }
