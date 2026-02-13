@@ -637,6 +637,8 @@ type DbClusterPostgresDatabase struct {
 
 	// DeleteScheduledAt is the date and time the database will be deleted
 	DeleteScheduledAt *time.Time `json:"deleteScheduledAt,omitempty"`
+
+	Status string `json:"status"`
 }
 
 type DbClusterScheduledMaintenance struct {
