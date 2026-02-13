@@ -29,6 +29,7 @@ type Client interface {
 	ContainerRegistry() *containerregistry.Client
 	// SetOrganisation sets the organisation for the client
 	SetOrganisation(organisation string)
+	GetClient() client.Client
 }
 
 type thalassaCloudClient struct {
@@ -140,4 +141,8 @@ func (c *thalassaCloudClient) ContainerRegistry() *containerregistry.Client {
 		panic(err)
 	}
 	return containerRegistryClient
+}
+
+func (c *thalassaCloudClient) GetClient() client.Client {
+	return c.client
 }
