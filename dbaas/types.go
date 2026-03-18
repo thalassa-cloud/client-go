@@ -47,6 +47,8 @@ type DbCluster struct {
 	Parameters map[string]string `json:"parameters"`
 	// AllocatedStorage is the amount of storage allocated to the cluster in GB
 	AllocatedStorage uint64 `json:"allocatedStorage"`
+	// DatabaseSize is the size of the database in bytes. This is the total size of all databases on the cluster.
+	DatabaseSizeBytes uint64 `json:"databaseSize"`
 	// VolumeTypeClass is the storage type used to determine the size of the cluster storage
 	VolumeTypeClass *iaas.VolumeType `json:"volume_type_class,omitempty"`
 	// AutoMinorVersionUpgrade is a flag indicating if the cluster should automatically upgrade to the latest minor version
