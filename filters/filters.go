@@ -74,6 +74,11 @@ const (
 	FilterSubnetIdentity       FilterKey = "subnet"
 	FilterMachineIdentity      FilterKey = "machine"
 	FilterLoadbalancerIdentity FilterKey = "loadbalancer"
+	FilterFloatingIp           FilterKey = "floatingIp"
+	FilterName                 FilterKey = "name"
+	FilterIdentity             FilterKey = "identity"
+	FilterSlug                 FilterKey = "slug"
+	FilterStatus               FilterKey = "status"
 )
 
 type LabelFilter struct {

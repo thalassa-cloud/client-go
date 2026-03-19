@@ -99,6 +99,71 @@ type Subnet struct {
 	V6availableIPs int `json:"v6availableIPs"`
 }
 
+// FloatingIP is a public IPv4/IPv6 address that can be attached to a load balancer or NAT gateway.
+type FloatingIP struct {
+	Identity    string      `json:"identity"`
+	Name        string      `json:"name"`
+	Slug        string      `json:"slug"`
+	Description string      `json:"description"`
+	Labels      Labels      `json:"labels,omitempty"`
+	Annotations Annotations `json:"annotations,omitempty"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	UpdatedAt   *time.Time  `json:"updatedAt,omitempty"`
+
+	Region *Region          `json:"region,omitempty"`
+	Status FloatingIpStatus `json:"status"`
+
+	IPv4Address string `json:"ipv4Address,omitempty"`
+	IPv6Address string `json:"ipv6Address,omitempty"`
+
+	AttachedToResourceType     FloatingIpAttachedResource `json:"attachedToResourceType,omitempty"`
+	AttachedToResourceIdentity string                     `json:"attachedToResourceIdentity,omitempty"`
+}
+
+// FloatingIpStatus is the provisioning/attachment state of a floating IP.
+type FloatingIpStatus string
+
+const (
+	FloatingIpStatusCreating  FloatingIpStatus = "creating"
+	FloatingIpStatusAvailable FloatingIpStatus = "available"
+	FloatingIpStatusAttached  FloatingIpStatus = "attached"
+	FloatingIpStatusDeleting  FloatingIpStatus = "deleting"
+	FloatingIpStatusDeleted   FloatingIpStatus = "deleted"
+	FloatingIpStatusFailed    FloatingIpStatus = "failed"
+)
+
+// Attached resource types for FloatingIP (API values).
+type FloatingIpAttachedResource string
+
+const (
+	FloatingIpAttachedLoadBalancer FloatingIpAttachedResource = "cloud_vpc_loadbalancer"
+	FloatingIpAttachedNatGateway   FloatingIpAttachedResource = "cloud_vpc_nat_gateway"
+)
+
+// CreateFloatingIpRequest is the body for POST /v1/floating-ips.
+type CreateFloatingIpRequest struct {
+	Name        string      `json:"name"`
+	Description string      `json:"description,omitempty"`
+	Labels      Labels      `json:"labels,omitempty"`
+	Annotations Annotations `json:"annotations,omitempty"`
+	Region      string      `json:"region"`
+}
+
+// UpdateFloatingIpRequest is the body for PUT /v1/floating-ips/{identity}.
+type UpdateFloatingIpRequest struct {
+	Name        string      `json:"name"`
+	Description string      `json:"description,omitempty"`
+	Labels      Labels      `json:"labels,omitempty"`
+	Annotations Annotations `json:"annotations,omitempty"`
+}
+
+// AssociateFloatingIpRequest is the body for POST /v1/floating-ips/{identity}/associate.
+// Exactly one of LoadbalancerIdentity or NatGatewayIdentity must be set.
+type AssociateFloatingIpRequest struct {
+	LoadbalancerIdentity *string `json:"loadbalancerIdentity,omitempty"`
+	NatGatewayIdentity   *string `json:"natGatewayIdentity,omitempty"`
+}
+
 type VpcNatGateway struct {
 	Identity      string    `json:"identity"`
 	Name          string    `json:"name"`
@@ -121,6 +186,10 @@ type VpcNatGateway struct {
 
 	V4IP string `json:"v4IP"`
 	V6IP string `json:"v6IP"`
+
+	// FloatingIpID is the attached floating IP identity when provisioned via FIP API.
+	FloatingIpID string      `json:"floatingIpId,omitempty"`
+	FloatingIp   *FloatingIP `json:"floatingIp,omitempty"`
 
 	// SecurityGroups is a list of security groups that are attached to the NAT Gateway.
 	SecurityGroups []SecurityGroup `json:"securityGroups"`
@@ -155,6 +224,10 @@ type VpcLoadbalancer struct {
 
 	// SecurityGroups is a list of security groups that are attached to the Loadbalancer.
 	SecurityGroups []SecurityGroup `json:"securityGroups"`
+
+	// FloatingIpIdentity is set when a floating IP is attached to this load balancer.
+	FloatingIpIdentity string      `json:"floatingIpIdentity,omitempty"`
+	FloatingIp         *FloatingIP `json:"floatingIp,omitempty"`
 }
 
 type Volume struct {
@@ -421,6 +494,8 @@ type CreateVpcNatGateway struct {
 	SecurityGroupAttachments []string `json:"securityGroupAttachments"`
 	// ConfigureDefaultRoute is a boolean indicating whether to configure the default route for the NAT Gateway for the route table of the subnet
 	ConfigureDefaultRoute bool `json:"configureDefaultRoute"`
+	// FloatingIpID, if set, attaches this floating IP after the NAT gateway is created (must be available, same region).
+	FloatingIpID *string `json:"floatingIpId,omitempty"`
 }
 
 type UpdateVpcNatGateway struct {
@@ -429,6 +504,8 @@ type UpdateVpcNatGateway struct {
 	Labels                   Labels      `json:"labels"`
 	Annotations              Annotations `json:"annotations"`
 	SecurityGroupAttachments []string    `json:"securityGroupAttachments"`
+	// FloatingIpID: nil = unchanged, empty string = detach, non-empty = attach/replace.
+	FloatingIpID *string `json:"floatingIpId,omitempty"`
 }
 
 type CreateMachine struct {
