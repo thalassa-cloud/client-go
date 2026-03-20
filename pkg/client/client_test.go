@@ -7,6 +7,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -235,6 +237,19 @@ func TestClientWithAuthOptions(t *testing.T) {
 			expectError: true,
 			errorMsg:    ErrOIDCTokenExchangeConfig.Error(),
 		},
+		{
+			name: "OIDC token exchange missing subject token and file",
+			options: []Option{
+				WithBaseURL(server.URL),
+				WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+					TokenURL:         server.URL + "/oidc/token",
+					OrganisationID:   "org-1",
+					ServiceAccountID: "sa-1",
+				}),
+			},
+			expectError: true,
+			errorMsg:    ErrOIDCTokenExchangeConfig.Error(),
+		},
 	}
 
 		for _, tt := range tests {
@@ -312,6 +327,105 @@ func TestOIDCTokenExchangeExchangesAndSetsBearer(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp2.StatusCode())
 	assert.Equal(t, 1, tokenCalls)
 	assert.Equal(t, "exchanged-access-token", cl.GetAuthToken())
+}
+
+func TestOIDCTokenExchangeSubjectTokenFile(t *testing.T) {
+	dir := t.TempDir()
+	tokenPath := filepath.Join(dir, "idtoken")
+	require.NoError(t, os.WriteFile(tokenPath, []byte("jwt-from-mounted-file\n"), 0o600))
+
+	var gotSubject string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/oidc/token" && r.Method == http.MethodPost:
+			require.NoError(t, r.ParseForm())
+			gotSubject = r.FormValue("subject_token")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_ = json.NewEncoder(w).Encode(map[string]any{"access_token": "tok", "expires_in": 60})
+		case r.URL.Path == "/ok":
+			w.WriteHeader(http.StatusOK)
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+
+	cl, err := NewClient(
+		WithBaseURL(srv.URL),
+		WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+			TokenURL:         srv.URL + "/oidc/token",
+			SubjectTokenFile: tokenPath,
+			OrganisationID:   "o",
+			ServiceAccountID: "s",
+		}),
+	)
+	require.NoError(t, err)
+
+	_, err = cl.Do(context.Background(), cl.R(), GET, "/ok")
+	require.NoError(t, err)
+	assert.Equal(t, "jwt-from-mounted-file", gotSubject)
+}
+
+func TestOIDCTokenExchangeSubjectTokenFilePrecedenceOverString(t *testing.T) {
+	dir := t.TempDir()
+	tokenPath := filepath.Join(dir, "idtoken")
+	require.NoError(t, os.WriteFile(tokenPath, []byte("from-file"), 0o600))
+
+	var gotSubject string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/oidc/token" && r.Method == http.MethodPost {
+			require.NoError(t, r.ParseForm())
+			gotSubject = r.FormValue("subject_token")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_ = json.NewEncoder(w).Encode(map[string]any{"access_token": "t", "expires_in": 60})
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	cl, err := NewClient(
+		WithBaseURL(srv.URL),
+		WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+			TokenURL:         srv.URL + "/oidc/token",
+			SubjectToken:     "from-string-should-not-be-used",
+			SubjectTokenFile: tokenPath,
+			OrganisationID:   "o",
+			ServiceAccountID: "s",
+		}),
+	)
+	require.NoError(t, err)
+	_, err = cl.Do(context.Background(), cl.R(), GET, "/x")
+	require.NoError(t, err)
+	assert.Equal(t, "from-file", gotSubject)
+}
+
+func TestOIDCTokenExchangeSubjectTokenFileEmpty(t *testing.T) {
+	dir := t.TempDir()
+	tokenPath := filepath.Join(dir, "empty")
+	require.NoError(t, os.WriteFile(tokenPath, []byte("   \n"), 0o600))
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	cl, err := NewClient(
+		WithBaseURL(srv.URL),
+		WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+			TokenURL:         srv.URL + "/oidc/token",
+			SubjectTokenFile: tokenPath,
+			OrganisationID:   "o",
+			ServiceAccountID: "s",
+		}),
+	)
+	require.NoError(t, err)
+
+	_, err = cl.Do(context.Background(), cl.R(), GET, "/x")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "empty")
 }
 
 func TestOIDCTokenExchangeErrorResponse(t *testing.T) {

@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -27,20 +28,26 @@ const (
 type OIDCTokenExchangeConfig struct {
 	TokenURL         string
 	SubjectToken     string
+	SubjectTokenFile string
 	OrganisationID   string
 	ServiceAccountID string
 	// AccessTokenLifetime is optional (e.g. "39600s"); sent as access_token_lifetime when non-empty.
 	AccessTokenLifetime string
 }
 
-// WithAuthOIDCTokenExchange exchanges SubjectToken for an API access token before each request
+// WithAuthOIDCTokenExchange exchanges a subject JWT for an API access token before each request
 // when the cached token is missing or expired. The resulting bearer token is used like AuthOIDC.
+//
+// Provide the subject JWT via SubjectToken, or SubjectTokenFile (contents read at each exchange;
+// use for mounted tokens in Kubernetes so rotation is picked up on refresh).
 func WithAuthOIDCTokenExchange(cfg OIDCTokenExchangeConfig) Option {
 	return func(c *thalassaCloudClient) error {
+		hasSubject := strings.TrimSpace(cfg.SubjectToken) != ""
+		hasFile := strings.TrimSpace(cfg.SubjectTokenFile) != ""
 		if strings.TrimSpace(cfg.TokenURL) == "" ||
-			strings.TrimSpace(cfg.SubjectToken) == "" ||
 			strings.TrimSpace(cfg.OrganisationID) == "" ||
-			strings.TrimSpace(cfg.ServiceAccountID) == "" {
+			strings.TrimSpace(cfg.ServiceAccountID) == "" ||
+			(!hasSubject && !hasFile) {
 			return ErrOIDCTokenExchangeConfig
 		}
 		c.authType = AuthOIDCTokenExchange
@@ -204,11 +211,33 @@ func (c *thalassaCloudClient) tokenExchangeHTTPClient() *http.Client {
 	return http.DefaultClient
 }
 
+func resolveOIDCSubjectToken(cfg *OIDCTokenExchangeConfig) (string, error) {
+	if fp := strings.TrimSpace(cfg.SubjectTokenFile); fp != "" {
+		b, err := os.ReadFile(fp)
+		if err != nil {
+			return "", fmt.Errorf("OIDC token exchange: read subject token file: %w", err)
+		}
+		t := strings.TrimSpace(string(b))
+		if t == "" {
+			return "", fmt.Errorf("OIDC token exchange: subject token file %q is empty", fp)
+		}
+		return t, nil
+	}
+	if t := strings.TrimSpace(cfg.SubjectToken); t != "" {
+		return t, nil
+	}
+	return "", fmt.Errorf("OIDC token exchange: no subject token configured")
+}
+
 func (c *thalassaCloudClient) fetchOIDCTokenExchange(ctx context.Context) (*oauth2.Token, error) {
 	cfg := c.oidcTokenExchange
+	subjectToken, err := resolveOIDCSubjectToken(cfg)
+	if err != nil {
+		return nil, err
+	}
 	form := url.Values{}
 	form.Set("grant_type", oidcGrantTypeTokenExchange)
-	form.Set("subject_token", cfg.SubjectToken)
+	form.Set("subject_token", subjectToken)
 	form.Set("subject_token_type", oidcTokenTypeJWT)
 	form.Set("organisation_id", cfg.OrganisationID)
 	form.Set("service_account_id", cfg.ServiceAccountID)

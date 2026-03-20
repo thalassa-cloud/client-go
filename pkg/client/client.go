@@ -29,7 +29,7 @@ var (
 	ErrEmptyPersonalToken      = errors.New("personal access token cannot be empty")
 	ErrMissingToken            = errors.New("token cannot be empty")
 	ErrMissingBasicCredentials = errors.New("basic auth requires username/password")
-	ErrOIDCTokenExchangeConfig = errors.New("OIDC token exchange requires token URL, subject token, organisation ID, and service account ID")
+	ErrOIDCTokenExchangeConfig = errors.New("OIDC token exchange requires token URL, organisation ID, service account ID, and either SubjectToken or SubjectTokenFile")
 	ErrUnsupportedHTTPMethod   = errors.New("unsupported HTTP method")
 	ErrNotFound                = errors.New("not found")
 	ErrBadRequest              = errors.New("bad request")
