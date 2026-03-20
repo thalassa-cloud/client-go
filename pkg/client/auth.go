@@ -3,13 +3,52 @@ package client
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
+	"strings"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
+
+const (
+	oidcGrantTypeTokenExchange = "urn:ietf:params:oauth:grant-type:token-exchange"
+	oidcTokenTypeJWT           = "urn:ietf:params:oauth:token-type:jwt"
+)
+
+// OIDCTokenExchangeConfig configures exchanging an external OIDC JWT (e.g. GitLab ID token)
+// for a Thalassa Cloud API bearer token via POST application/x-www-form-urlencoded
+// to TokenURL (typically {api}/oidc/token).
+type OIDCTokenExchangeConfig struct {
+	TokenURL         string
+	SubjectToken     string
+	OrganisationID   string
+	ServiceAccountID string
+	// AccessTokenLifetime is optional (e.g. "39600s"); sent as access_token_lifetime when non-empty.
+	AccessTokenLifetime string
+}
+
+// WithAuthOIDCTokenExchange exchanges SubjectToken for an API access token before each request
+// when the cached token is missing or expired. The resulting bearer token is used like AuthOIDC.
+func WithAuthOIDCTokenExchange(cfg OIDCTokenExchangeConfig) Option {
+	return func(c *thalassaCloudClient) error {
+		if strings.TrimSpace(cfg.TokenURL) == "" ||
+			strings.TrimSpace(cfg.SubjectToken) == "" ||
+			strings.TrimSpace(cfg.OrganisationID) == "" ||
+			strings.TrimSpace(cfg.ServiceAccountID) == "" {
+			return ErrOIDCTokenExchangeConfig
+		}
+		c.authType = AuthOIDCTokenExchange
+		cfgCopy := cfg
+		c.oidcTokenExchange = &cfgCopy
+		return nil
+	}
+}
 
 // WithAuthOIDC uses client credentials for service-to-service flows.
 func WithAuthOIDC(clientID, clientSecret, tokenURL string, scopes ...string) Option {
@@ -104,6 +143,18 @@ func (c *thalassaCloudClient) configureAuth() error {
 			return nil
 		})
 
+	case AuthOIDCTokenExchange:
+		if c.oidcTokenExchange == nil {
+			return ErrOIDCTokenExchangeConfig
+		}
+		c.resty.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
+			if err := c.ensureOIDCTokenExchange(req.Context()); err != nil {
+				return err
+			}
+			req.SetAuthToken(c.oidcToken.AccessToken)
+			return nil
+		})
+
 	case AuthPersonalAccessToken:
 		if c.personalToken == "" {
 			return ErrEmptyPersonalToken
@@ -126,4 +177,84 @@ func (c *thalassaCloudClient) configureAuth() error {
 		// Should not occur. No special action.
 	}
 	return nil
+}
+
+func (c *thalassaCloudClient) ensureOIDCTokenExchange(ctx context.Context) error {
+	c.oidcTokenExchangeMu.Lock()
+	defer c.oidcTokenExchangeMu.Unlock()
+	if c.oidcToken != nil && c.oidcToken.Valid() {
+		return nil
+	}
+	tok, err := c.fetchOIDCTokenExchange(ctx)
+	if err != nil {
+		return err
+	}
+	c.oidcToken = tok
+	return nil
+}
+
+func (c *thalassaCloudClient) tokenExchangeHTTPClient() *http.Client {
+	if c.insecure {
+		return &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // dev-only, matches WithInsecure
+			},
+		}
+	}
+	return http.DefaultClient
+}
+
+func (c *thalassaCloudClient) fetchOIDCTokenExchange(ctx context.Context) (*oauth2.Token, error) {
+	cfg := c.oidcTokenExchange
+	form := url.Values{}
+	form.Set("grant_type", oidcGrantTypeTokenExchange)
+	form.Set("subject_token", cfg.SubjectToken)
+	form.Set("subject_token_type", oidcTokenTypeJWT)
+	form.Set("organisation_id", cfg.OrganisationID)
+	form.Set("service_account_id", cfg.ServiceAccountID)
+	if strings.TrimSpace(cfg.AccessTokenLifetime) != "" {
+		form.Set("access_token_lifetime", cfg.AccessTokenLifetime)
+	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, cfg.TokenURL, strings.NewReader(form.Encode()))
+	if err != nil {
+		return nil, fmt.Errorf("OIDC token exchange: build request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := c.tokenExchangeHTTPClient().Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("OIDC token exchange: request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("OIDC token exchange: read body: %w", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("OIDC token exchange: %s (body: %s)", resp.Status, strings.TrimSpace(string(body)))
+	}
+
+	var tr struct {
+		AccessToken string `json:"access_token"`
+		TokenType   string `json:"token_type"`
+		ExpiresIn   int64  `json:"expires_in"`
+	}
+	if err := json.Unmarshal(body, &tr); err != nil {
+		return nil, fmt.Errorf("OIDC token exchange: decode response: %w", err)
+	}
+	if tr.AccessToken == "" {
+		return nil, fmt.Errorf("OIDC token exchange: empty access_token in response")
+	}
+
+	tok := &oauth2.Token{AccessToken: tr.AccessToken, TokenType: tr.TokenType}
+	switch {
+	case tr.ExpiresIn > 0:
+		tok.Expiry = time.Now().Add(time.Duration(tr.ExpiresIn) * time.Second)
+	default:
+		// Without expires_in the token is treated as valid until process restart; prefer the API to return expires_in.
+		tok.Expiry = time.Now().Add(time.Hour)
+	}
+	return tok, nil
 }

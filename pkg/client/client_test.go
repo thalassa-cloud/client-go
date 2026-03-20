@@ -2,10 +2,12 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -206,20 +208,137 @@ func TestClientWithAuthOptions(t *testing.T) {
 			},
 			expectError: false,
 		},
+		{
+			name: "with OIDC token exchange",
+			options: []Option{
+				WithBaseURL(server.URL),
+				WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+					TokenURL:         server.URL + "/oidc/token",
+					SubjectToken:     "sub.jwt",
+					OrganisationID:   "org-1",
+					ServiceAccountID: "sa-1",
+					AccessTokenLifetime: "39600s",
+				}),
+			},
+			expectError: false,
+		},
+		{
+			name: "OIDC token exchange missing token URL",
+			options: []Option{
+				WithBaseURL(server.URL),
+				WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+					SubjectToken:     "sub.jwt",
+					OrganisationID:   "org-1",
+					ServiceAccountID: "sa-1",
+				}),
+			},
+			expectError: true,
+			errorMsg:    ErrOIDCTokenExchangeConfig.Error(),
+		},
 	}
 
-	for _, tt := range tests {
+		for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client, err := NewClient(tt.options...)
 			if tt.expectError {
 				require.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errorMsg)
+				if tt.errorMsg != "" {
+					assert.Contains(t, err.Error(), tt.errorMsg)
+				}
 				return
 			}
 			require.NoError(t, err)
 			require.NotNil(t, client)
 		})
 	}
+}
+
+func TestOIDCTokenExchangeExchangesAndSetsBearer(t *testing.T) {
+	var sawAuth string
+	tokenCalls := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/oidc/token" && r.Method == http.MethodPost:
+			tokenCalls++
+			require.Equal(t, "application/x-www-form-urlencoded", r.Header.Get("Content-Type"))
+			require.NoError(t, r.ParseForm())
+			assert.Equal(t, "urn:ietf:params:oauth:grant-type:token-exchange", r.FormValue("grant_type"))
+			assert.Equal(t, "gitlab-id-token", r.FormValue("subject_token"))
+			assert.Equal(t, "urn:ietf:params:oauth:token-type:jwt", r.FormValue("subject_token_type"))
+			assert.Equal(t, "org-42", r.FormValue("organisation_id"))
+			assert.Equal(t, "sa-99", r.FormValue("service_account_id"))
+			assert.Equal(t, "39600s", r.FormValue("access_token_lifetime"))
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"access_token": "exchanged-access-token",
+				"token_type":   "Bearer",
+				"expires_in":   3600,
+			})
+		case r.URL.Path == "/success" && r.Method == http.MethodGet:
+			sawAuth = r.Header.Get("Authorization")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("ok"))
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer srv.Close()
+
+	cl, err := NewClient(
+		WithBaseURL(srv.URL),
+		WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+			TokenURL:            srv.URL + "/oidc/token",
+			SubjectToken:        "gitlab-id-token",
+			OrganisationID:      "org-42",
+			ServiceAccountID:    "sa-99",
+			AccessTokenLifetime: "39600s",
+		}),
+	)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	resp, err := cl.Do(ctx, cl.R(), GET, "/success")
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Equal(t, http.StatusOK, resp.StatusCode())
+	assert.Equal(t, "Bearer exchanged-access-token", sawAuth)
+	assert.Equal(t, 1, tokenCalls)
+
+	// Cached token: second request should not hit token endpoint again.
+	resp2, err := cl.Do(ctx, cl.R(), GET, "/success")
+	require.NoError(t, err)
+	require.NotNil(t, resp2)
+	assert.Equal(t, http.StatusOK, resp2.StatusCode())
+	assert.Equal(t, 1, tokenCalls)
+	assert.Equal(t, "exchanged-access-token", cl.GetAuthToken())
+}
+
+func TestOIDCTokenExchangeErrorResponse(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/oidc/token" {
+			w.WriteHeader(http.StatusUnauthorized)
+			_, _ = w.Write([]byte(`{"error":"invalid_grant"}`))
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	cl, err := NewClient(
+		WithBaseURL(srv.URL),
+		WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+			TokenURL:         srv.URL + "/oidc/token",
+			SubjectToken:     "jwt",
+			OrganisationID:   "o",
+			ServiceAccountID: "s",
+		}),
+	)
+	require.NoError(t, err)
+
+	_, err = cl.Do(context.Background(), cl.R(), GET, "/nope")
+	require.Error(t, err)
+	assert.True(t, strings.Contains(err.Error(), "401"))
 }
 
 func TestClientWithOptions(t *testing.T) {
