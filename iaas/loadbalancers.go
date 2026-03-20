@@ -218,8 +218,8 @@ type CreateLoadbalancer struct {
 
 	// SecurityGroupAttachments is a list of security group identities that will be attached to the loadbalancer.
 	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
-	// FloatingIpID, if set, attaches this floating IP after create (must be available, same region as subnet).
-	FloatingIpID *string `json:"floatingIpId,omitempty"`
+	// ReservedIpID, if set, attaches this reserved IP after create (must be available, same region as subnet).
+	ReservedIpID *string `json:"reservedIpId,omitempty"`
 }
 
 type UpdateLoadbalancer struct {
@@ -238,6 +238,6 @@ type UpdateLoadbalancer struct {
 	Subnet *string `json:"subnet,omitempty"`
 	// SecurityGroupAttachments is a list of security group identities that will be attached to the loadbalancer.
 	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
-	// FloatingIpID: nil = leave attachment unchanged, empty string = detach, non-empty = attach/replace.
-	FloatingIpID *string `json:"floatingIpId,omitempty"`
+	// ReservedIpID: nil = leave attachment unchanged, empty string = detach, non-empty = attach/replace.
+	ReservedIpID *string `json:"reservedIpId,omitempty"`
 }

@@ -8,28 +8,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAssociateFloatingIpRequest_JSON(t *testing.T) {
+func TestAssociateReservedIpRequest_JSON(t *testing.T) {
 	lb := "lb-abc"
 	nat := "nat-xyz"
 
 	tests := []struct {
 		name string
-		req  AssociateFloatingIpRequest
+		req  AssociateReservedIpRequest
 		want map[string]any
 	}{
 		{
 			name: "load balancer only",
-			req:  AssociateFloatingIpRequest{LoadbalancerIdentity: &lb},
+			req:  AssociateReservedIpRequest{LoadbalancerIdentity: &lb},
 			want: map[string]any{"loadbalancerIdentity": "lb-abc"},
 		},
 		{
 			name: "nat gateway only",
-			req:  AssociateFloatingIpRequest{NatGatewayIdentity: &nat},
+			req:  AssociateReservedIpRequest{NatGatewayIdentity: &nat},
 			want: map[string]any{"natGatewayIdentity": "nat-xyz"},
 		},
 		{
 			name: "empty struct omits both",
-			req:  AssociateFloatingIpRequest{},
+			req:  AssociateReservedIpRequest{},
 			want: map[string]any{},
 		},
 	}
@@ -45,7 +45,7 @@ func TestAssociateFloatingIpRequest_JSON(t *testing.T) {
 	}
 }
 
-func TestCreateLoadbalancer_floatingIpIdJSON(t *testing.T) {
+func TestCreateLoadbalancer_reservedIpIdJSON(t *testing.T) {
 	fip := "fip-123"
 	b, err := json.Marshal(CreateLoadbalancer{
 		Name:                 "x",
@@ -53,39 +53,39 @@ func TestCreateLoadbalancer_floatingIpIdJSON(t *testing.T) {
 		InternalLoadbalancer: false,
 		DeleteProtection:     false,
 		Listeners:            nil,
-		FloatingIpID:         &fip,
+		ReservedIpID:         &fip,
 	})
 	require.NoError(t, err)
 	var m map[string]any
 	require.NoError(t, json.Unmarshal(b, &m))
-	assert.Equal(t, "fip-123", m["floatingIpId"])
+	assert.Equal(t, "fip-123", m["reservedIpId"])
 }
 
-func TestUpdateLoadbalancer_floatingIpIdPointerSemantics(t *testing.T) {
+func TestUpdateLoadbalancer_reservedIpIdPointerSemantics(t *testing.T) {
 	t.Run("empty string detaches", func(t *testing.T) {
 		empty := ""
 		b, err := json.Marshal(UpdateLoadbalancer{
 			Name:             "n",
 			Description:      "",
 			DeleteProtection: false,
-			FloatingIpID:     &empty,
+			ReservedIpID:     &empty,
 		})
 		require.NoError(t, err)
-		assert.Contains(t, string(b), `"floatingIpId":""`)
+		assert.Contains(t, string(b), `"reservedIpId":""`)
 	})
 	t.Run("nil omits field", func(t *testing.T) {
 		b, err := json.Marshal(UpdateLoadbalancer{
 			Name:             "n",
 			Description:      "",
 			DeleteProtection: false,
-			FloatingIpID:     nil,
+			ReservedIpID:     nil,
 		})
 		require.NoError(t, err)
-		assert.NotContains(t, string(b), "floatingIpId")
+		assert.NotContains(t, string(b), "reservedIpId")
 	})
 }
 
-func TestFloatingIP_unmarshal(t *testing.T) {
+func TestReservedIP_unmarshal(t *testing.T) {
 	raw := `{
 		"identity": "fip-test",
 		"name": "pub",
@@ -95,9 +95,9 @@ func TestFloatingIP_unmarshal(t *testing.T) {
 		"status": "available",
 		"ipv4Address": "203.0.113.1"
 	}`
-	var f FloatingIP
+	var f ReservedIP
 	require.NoError(t, json.Unmarshal([]byte(raw), &f))
 	assert.Equal(t, "fip-test", f.Identity)
-	assert.Equal(t, FloatingIpStatusAvailable, f.Status)
+	assert.Equal(t, ReservedIpStatusAvailable, f.Status)
 	assert.Equal(t, "203.0.113.1", f.IPv4Address)
 }
