@@ -250,6 +250,9 @@ func (c *thalassaCloudClient) fetchOIDCTokenExchange(ctx context.Context) (*oaut
 		return nil, fmt.Errorf("OIDC token exchange: build request: %w", err)
 	}
 	httpReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if ua := strings.TrimSpace(c.userAgent); ua != "" {
+		httpReq.Header.Set("User-Agent", ua)
+	}
 
 	resp, err := c.tokenExchangeHTTPClient().Do(httpReq)
 	if err != nil {
