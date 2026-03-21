@@ -276,6 +276,7 @@ func TestOIDCTokenExchangeExchangesAndSetsBearer(t *testing.T) {
 		case r.URL.Path == "/oidc/token" && r.Method == http.MethodPost:
 			tokenCalls++
 			require.Equal(t, "application/x-www-form-urlencoded", r.Header.Get("Content-Type"))
+			assert.Equal(t, DefaultUserAgent, r.Header.Get("User-Agent"))
 			require.NoError(t, r.ParseForm())
 			assert.Equal(t, "urn:ietf:params:oauth:grant-type:token-exchange", r.FormValue("grant_type"))
 			assert.Equal(t, "gitlab-id-token", r.FormValue("subject_token"))
@@ -365,6 +366,37 @@ func TestOIDCTokenExchangeSubjectTokenFile(t *testing.T) {
 	_, err = cl.Do(context.Background(), cl.R(), GET, "/ok")
 	require.NoError(t, err)
 	assert.Equal(t, "jwt-from-mounted-file", gotSubject)
+}
+
+func TestOIDCTokenExchangeUsesCustomUserAgent(t *testing.T) {
+	const customUA = "my-app/2 token-exchange"
+	var gotUA string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/oidc/token" && r.Method == http.MethodPost {
+			gotUA = r.Header.Get("User-Agent")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_ = json.NewEncoder(w).Encode(map[string]any{"access_token": "t", "expires_in": 60})
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	cl, err := NewClient(
+		WithBaseURL(srv.URL),
+		WithUserAgent(customUA),
+		WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+			TokenURL:         srv.URL + "/oidc/token",
+			SubjectToken:     "jwt",
+			OrganisationID:   "o",
+			ServiceAccountID: "s",
+		}),
+	)
+	require.NoError(t, err)
+	_, err = cl.Do(context.Background(), cl.R(), GET, "/any")
+	require.NoError(t, err)
+	assert.Equal(t, customUA, gotUA)
 }
 
 func TestOIDCTokenExchangeSubjectTokenFilePrecedenceOverString(t *testing.T) {
