@@ -76,6 +76,62 @@ type DbCluster struct {
 	PostgresRoles []DbClusterPostgresRole `json:"postgresRoles,omitempty"`
 	// PostgresDatabases is a list of PostgreSQL databases associated with the cluster
 	PostgresDatabases []DbClusterPostgresDatabase `json:"postgresDatabases,omitempty"`
+	// DatabaseInstancesStatus is the status of the database instances in the cluster
+	DatabaseInstancesStatus DatabaseInstancesStatus `json:"databaseInstancesStatus"`
+
+	// AutoUpgradePolicy is the auto upgrade policy for the cluster
+	AutoUpgradePolicy DbClusterAutoUpgradePolicy `json:"autoUpgradePolicy,omitempty"`
+	// MaintenanceDay is the day of the week for the maintenance window. 0 is Sunday, 6 is Saturday.
+	MaintenanceDay *uint `json:"maintenanceDay,omitempty"`
+	// MaintenanceStartAt is the start time of the maintenance window on the maintenance day in UTC. 0 is 00:00, 23 is 23:00.
+	MaintenanceStartAt *uint `json:"maintenanceStartAt,omitempty"`
+
+	// ScheduledMaintenances is the list of scheduled maintenances for the cluster
+	ScheduledMaintenances []DbClusterScheduledMaintenance `json:"scheduledMaintenances"`
+	// DbObjectStore is the DB object store used for barman backups
+	DbObjectStore *DbObjectStore `json:"dbObjectStore,omitempty"`
+}
+
+type DatabaseInstancesStatus struct {
+	Instances []DatabaseInstanceStatus `json:"instances,omitempty"`
+}
+
+type DatabaseInstanceStatus struct {
+	// Name is the name of the instance.
+	// +optional
+	Name string `json:"name,omitempty"`
+	// IsPrimary is a flag to indicate if the instance is the primary instance.
+	// +optional
+	IsPrimary bool `json:"isPrimary,omitempty"`
+	// IsPrimaryTarget is a flag to indicate if the instance is the target primary instance.
+	// +optional
+	IsPrimaryTarget bool `json:"isPrimaryTarget,omitempty"`
+	// Replicating is a flag to indicate if the instance is replicating.
+	// +optional
+	Replicating bool `json:"replicating,omitempty"`
+	// TimeLineID is the timeline ID of the instance.
+	// +optional
+	TimeLineID string `json:"timeLineID,omitempty"`
+	// Healthy is a flag to indicate if the instance is healthy.
+	// +optional
+	Healthy bool `json:"healthy,omitempty"`
+	// Joining is a flag to indicate if the instance is joining the cluster.
+	// +optional
+	Joining bool `json:"joining,omitempty"`
+	// AvailabilityZone is the availability zone of the instance.
+	// +optional
+	AvailabilityZone string `json:"availabilityZone,omitempty"`
+	// Version is the version of the instance.
+	Version string `json:"version,omitempty"`
+	// AllocatedStorage is the amount of storage allocated to the instance in GB.
+	AllocatedStorage int `json:"allocatedStorage,omitempty"`
+	// UsedStorage is the amount of storage used by the instance in GB.
+	// May not always be available - feature gated functionality.
+	UsedStorage int `json:"usedStorage,omitempty"`
+	// Memory is the memory of the instance in MB.
+	Memory int `json:"memory,omitempty"`
+	// Cpu is the cpu of the instance in cores.
+	Cpu int `json:"cpu,omitempty"`
 }
 
 type DbClusterEngineVersion struct {
@@ -720,4 +776,35 @@ type DbObjectStore struct {
 	// For example, "30d" means backups will be retained for 30 days.
 	// This is used with barman-cloud-backup-delete command: --retention-policy "RECOVERY WINDOW OF <number> days"
 	RetentionPolicy string `json:"retentionPolicy,omitempty"`
+}
+
+// CreateDbObjectStoreRequest is the request body for creating a DB object store.
+type CreateDbObjectStoreRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// Annotations is a map of key-value pairs used for storing additional information
+	Annotations Annotations `json:"annotations,omitempty"`
+	// Labels is a map of key-value pairs used for filtering and grouping objects
+	Labels Labels `json:"labels,omitempty"`
+	// Region is the identity or slug of the cloud region where the object store will be created
+	Region string `json:"region"`
+	// RetentionPolicy is the retention policy for backups in the format "<number>d" where d is days.
+	// For example, "30d" means backups will be retained for 30 days.
+	RetentionPolicy string `json:"retentionPolicy,omitempty"`
+	// DeleteProtection is a flag to indicate if the object store is protected from deletion
+	DeleteProtection bool `json:"deleteProtection"`
+}
+
+// UpdateDbObjectStoreRequest is the request body for updating a DB object store.
+type UpdateDbObjectStoreRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// Annotations is a map of key-value pairs used for storing additional information
+	Annotations Annotations `json:"annotations,omitempty"`
+	// Labels is a map of key-value pairs used for filtering and grouping objects
+	Labels Labels `json:"labels,omitempty"`
+	// RetentionPolicy is the retention policy for backups in the format "<number>d" where d is days.
+	RetentionPolicy string `json:"retentionPolicy,omitempty"`
+	// DeleteProtection is a flag to indicate if the object store is protected from deletion
+	DeleteProtection bool `json:"deleteProtection"`
 }
