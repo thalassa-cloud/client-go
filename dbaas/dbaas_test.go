@@ -69,6 +69,51 @@ func setupTestServer() *httptest.Server {
 			} else if r.Method == "DELETE" {
 				w.WriteHeader(http.StatusNoContent)
 			}
+		case "/v1/dbaas/object-stores":
+			if r.Method == "GET" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`[]`))
+			} else if r.Method == "POST" {
+				w.WriteHeader(http.StatusCreated)
+				w.Write([]byte(`{
+					"identity": "os-1",
+					"name": "backup-store",
+					"description": "",
+					"createdAt": "2023-01-01T00:00:00Z",
+					"objectVersion": 1,
+					"status": "creating",
+					"deleteProtection": true,
+					"retentionPolicy": "30d"
+				}`))
+			}
+		case "/v1/dbaas/object-stores/os-1":
+			if r.Method == "GET" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{
+					"identity": "os-1",
+					"name": "backup-store",
+					"description": "",
+					"createdAt": "2023-01-01T00:00:00Z",
+					"objectVersion": 1,
+					"status": "ready",
+					"deleteProtection": true,
+					"retentionPolicy": "30d"
+				}`))
+			} else if r.Method == "PUT" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{
+					"identity": "os-1",
+					"name": "backup-store",
+					"description": "updated",
+					"createdAt": "2023-01-01T00:00:00Z",
+					"objectVersion": 2,
+					"status": "ready",
+					"deleteProtection": false,
+					"retentionPolicy": "60d"
+				}`))
+			} else if r.Method == "DELETE" {
+				w.WriteHeader(http.StatusNoContent)
+			}
 		default:
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte(`{"error": "not found"}`))
