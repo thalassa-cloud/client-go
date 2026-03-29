@@ -12,6 +12,7 @@ import (
 	"github.com/thalassa-cloud/client-go/observability/prometheus"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 	"github.com/thalassa-cloud/client-go/quotas"
+	"github.com/thalassa-cloud/client-go/quicklaunch"
 	"github.com/thalassa-cloud/client-go/tfs"
 )
 
@@ -24,6 +25,7 @@ type Client interface {
 	Me() *me.Client
 	ObjectStorage() *objectstorage.Client
 	Quotas() *quotas.Client
+	QuickLaunch() *quicklaunch.Client
 	Tfs() *tfs.Client
 	ObservabilityPrometheus() *prometheus.Client
 	ContainerRegistry() *containerregistry.Client
@@ -108,6 +110,14 @@ func (c *thalassaCloudClient) Quotas() *quotas.Client {
 		panic(err)
 	}
 	return quotasClient
+}
+
+func (c *thalassaCloudClient) QuickLaunch() *quicklaunch.Client {
+	ql, err := quicklaunch.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return ql
 }
 
 func (c *thalassaCloudClient) Audit() *audit.Client {
