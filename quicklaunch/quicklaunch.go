@@ -44,16 +44,16 @@ func (c *Client) CreateQuickLaunch(ctx context.Context, body QuickLaunchRequest)
 	if body.CloudRegionIdentity == "" {
 		return nil, fmt.Errorf("cloudRegionIdentity is required")
 	}
-	var out *QuickLaunch
+	var out QuickLaunch
 	req := c.R().SetBody(body).SetResult(&out)
 	resp, err := c.Do(ctx, req, client.POST, QuickLaunchEndpoint)
 	if err != nil {
 		return nil, err
 	}
 	if err := c.Check(resp); err != nil {
-		return out, err
+		return &out, err
 	}
-	return out, nil
+	return &out, nil
 }
 
 // GetQuickLaunch returns a quick launch job by identity.
@@ -61,16 +61,16 @@ func (c *Client) GetQuickLaunch(ctx context.Context, identity string) (*QuickLau
 	if identity == "" {
 		return nil, fmt.Errorf("identity is required")
 	}
-	var out *QuickLaunch
+	var out QuickLaunch
 	req := c.R().SetResult(&out)
 	resp, err := c.Do(ctx, req, client.GET, fmt.Sprintf("%s/%s", QuickLaunchEndpoint, identity))
 	if err != nil {
 		return nil, err
 	}
 	if err := c.Check(resp); err != nil {
-		return out, err
+		return &out, err
 	}
-	return out, nil
+	return &out, nil
 }
 
 // GetQuickLaunchLogs returns the response body from the logs endpoint (typically JSON).

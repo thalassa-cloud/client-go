@@ -64,7 +64,7 @@ func TestCreatePgDatabase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := dbaasClient.CreatePgDatabase(context.Background(), tt.dbClusterIdentity, tt.request)
+			_, err := dbaasClient.CreatePgDatabase(context.Background(), tt.dbClusterIdentity, tt.request)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)
@@ -118,7 +118,7 @@ func TestUpdatePgDatabase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := dbaasClient.UpdatePgDatabase(context.Background(), tt.dbClusterIdentity, tt.databaseName, tt.request)
+			_, err := dbaasClient.UpdatePgDatabase(context.Background(), tt.dbClusterIdentity, tt.databaseName, tt.request)
 
 			if tt.expectedError != "" {
 				assert.EqualError(t, err, tt.expectedError)
