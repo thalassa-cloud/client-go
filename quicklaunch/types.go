@@ -28,10 +28,12 @@ type QuickLaunchRequest struct {
 	// CloudRegionIdentity is the identity of the cloud region where resources will be created.
 	CloudRegionIdentity string `json:"cloudRegionIdentity"`
 	// VpcCidr is an optional CIDR block for the VPC (e.g., "10.0.0.0/16").
+	// If not provided, a default CIDR will be auto-generated on the server.
 	VpcCidr string `json:"vpcCidr,omitempty"`
-	// SubnetCidrs is an optional list of subnet CIDRs.
+	// SubnetCidrs is an optional list of subnet CIDRs. If not provided, default subnets will be created.
 	SubnetCidrs []string `json:"subnetCidrs,omitempty"`
 	// MachineType is an optional machine type identity or slug for Kubernetes node pools.
+	// Only used when template is "kubernetes".
 	MachineType string `json:"machineType,omitempty"`
 	// Labels is a map of key-value pairs used for filtering and grouping objects.
 	Labels map[string]string `json:"labels,omitempty"`
@@ -41,7 +43,7 @@ type QuickLaunchRequest struct {
 
 // QuickLaunchResource represents a created resource in the quick launch response.
 type QuickLaunchResource struct {
-	// Type is the resource type (e.g., "vpc", "subnet", "natgateway", "kubernetes_cluster").
+	// Type is the resource type (e.g., "vpc", "subnet", "natgateway", "kubernetes_cluster", "kubernetes_node_pool").
 	Type string `json:"type"`
 	// Name is the name of the resource.
 	Name string `json:"name"`

@@ -38,40 +38,48 @@ type ListPgDatabasesRequest struct {
 }
 
 // CreatePgDatabase creates a new PostgreSQL database in a database cluster.
-func (c *Client) CreatePgDatabase(ctx context.Context, dbClusterIdentity string, create CreatePgDatabaseRequest) error {
+func (c *Client) CreatePgDatabase(ctx context.Context, dbClusterIdentity string, create CreatePgDatabaseRequest) (*DbClusterPostgresDatabase, error) {
 	if dbClusterIdentity == "" {
-		return fmt.Errorf("database cluster identity is required")
+		return nil, fmt.Errorf("database cluster identity is required")
 	}
 	if create.Name == "" {
-		return fmt.Errorf("database name is required")
+		return nil, fmt.Errorf("database name is required")
 	}
 	if create.Owner == "" {
-		return fmt.Errorf("database owner is required")
+		return nil, fmt.Errorf("database owner is required")
 	}
 
-	req := c.R().SetBody(create)
+	var database *DbClusterPostgresDatabase
+	req := c.R().SetBody(create).SetResult(&database)
 	resp, err := c.Do(ctx, req, client.POST, fmt.Sprintf("%s/%s/postgres-databases", DbClusterEndpoint, dbClusterIdentity))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return c.Check(resp)
+	if err := c.Check(resp); err != nil {
+		return database, err
+	}
+	return database, nil
 }
 
 // UpdatePgDatabase updates an existing PostgreSQL database in a database cluster.
-func (c *Client) UpdatePgDatabase(ctx context.Context, dbClusterIdentity string, postgresDatabaseIdentity string, update UpdatePgDatabaseRequest) error {
+func (c *Client) UpdatePgDatabase(ctx context.Context, dbClusterIdentity string, postgresDatabaseIdentity string, update UpdatePgDatabaseRequest) (*DbClusterPostgresDatabase, error) {
 	if dbClusterIdentity == "" {
-		return fmt.Errorf("database cluster identity is required")
+		return nil, fmt.Errorf("database cluster identity is required")
 	}
 	if postgresDatabaseIdentity == "" {
-		return fmt.Errorf("postgres database identity is required")
+		return nil, fmt.Errorf("postgres database identity is required")
 	}
 
-	req := c.R().SetBody(update)
+	var database *DbClusterPostgresDatabase
+	req := c.R().SetBody(update).SetResult(&database)
 	resp, err := c.Do(ctx, req, client.PUT, fmt.Sprintf("%s/%s/postgres-databases/%s", DbClusterEndpoint, dbClusterIdentity, postgresDatabaseIdentity))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return c.Check(resp)
+	if err := c.Check(resp); err != nil {
+		return database, err
+	}
+	return database, nil
 }
 
 // DeletePgDatabase deletes a PostgreSQL database from a database cluster.
