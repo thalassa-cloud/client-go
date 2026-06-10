@@ -6,6 +6,7 @@ import (
 	"github.com/thalassa-cloud/client-go/dbaas"
 	"github.com/thalassa-cloud/client-go/iaas"
 	"github.com/thalassa-cloud/client-go/iam"
+	"github.com/thalassa-cloud/client-go/kms"
 	"github.com/thalassa-cloud/client-go/kubernetes"
 	"github.com/thalassa-cloud/client-go/me"
 	"github.com/thalassa-cloud/client-go/objectstorage"
@@ -29,6 +30,8 @@ type Client interface {
 	Tfs() *tfs.Client
 	ObservabilityPrometheus() *prometheus.Client
 	ContainerRegistry() *containerregistry.Client
+	// KMS returns a client for the Key Management Service.
+	KMS() *kms.Client
 	// SetOrganisation sets the organisation for the client
 	SetOrganisation(organisation string)
 	GetClient() client.Client
@@ -151,6 +154,14 @@ func (c *thalassaCloudClient) ContainerRegistry() *containerregistry.Client {
 		panic(err)
 	}
 	return containerRegistryClient
+}
+
+func (c *thalassaCloudClient) KMS() *kms.Client {
+	kmsClient, err := kms.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return kmsClient
 }
 
 func (c *thalassaCloudClient) GetClient() client.Client {
