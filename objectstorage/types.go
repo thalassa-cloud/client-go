@@ -43,6 +43,8 @@ type ObjectStorageBucket struct {
 	ObjectLockEnabled bool `json:"objectLockEnabled"`
 	// Region is the region of the bucket
 	Region *iaas.Region `json:"cloudRegion,omitempty"`
+	// Lifecycle is the bucket lifecycle configuration.
+	Lifecycle *BucketLifecycle `json:"lifecycle,omitempty"`
 }
 
 type ObjectStorageBucketUsage struct {
@@ -68,6 +70,8 @@ type CreateBucketRequest struct {
 	Versioning ObjectStorageBucketVersioning `json:"versioning"`
 	// ObjectLockEnabled is the object lock enabled of the bucket.
 	ObjectLockEnabled bool `json:"objectLockEnabled"`
+	// Lifecycle optionally sets lifecycle rules at bucket creation.
+	Lifecycle *SetBucketLifecycleRequest `json:"lifecycle,omitempty"`
 }
 
 type UpdateBucketRequest struct {
@@ -113,4 +117,76 @@ func (p PrincipalARN) Validate() error {
 		return fmt.Errorf("principal ARN is required")
 	}
 	return nil
+}
+
+type BucketLifecycle struct {
+	Rules []BucketLifecycleRule `json:"rules"`
+}
+
+type BucketLifecycleRule struct {
+	ID                             string                                             `json:"id"`
+	Prefix                         string                                             `json:"prefix,omitempty"`
+	Filter                         *BucketLifecycleRuleFilter                         `json:"filter,omitempty"`
+	Status                         BucketLifecycleRuleStatus                          `json:"status,omitempty"`
+	Expiration                     *BucketLifecycleRuleExpiration                     `json:"expiration,omitempty"`
+	Transitions                    []BucketLifecycleRuleTransition                    `json:"transitions,omitempty"`
+	NoncurrentVersionExpiration    *BucketLifecycleRuleNoncurrentVersionExpiration    `json:"noncurrentVersionExpiration,omitempty"`
+	NoncurrentVersionTransitions   []BucketLifecycleRuleNoncurrentVersionTransition   `json:"noncurrentVersionTransitions,omitempty"`
+	AbortIncompleteMultipartUpload *BucketLifecycleRuleAbortIncompleteMultipartUpload `json:"abortIncompleteMultipartUpload,omitempty"`
+}
+
+type BucketLifecycleRuleStatus string
+
+const (
+	BucketLifecycleRuleStatusEnabled  BucketLifecycleRuleStatus = "Enabled"
+	BucketLifecycleRuleStatusDisabled BucketLifecycleRuleStatus = "Disabled"
+)
+
+type BucketLifecycleRuleFilter struct {
+	Prefix                string                          `json:"prefix,omitempty"`
+	Tag                   *BucketLifecycleRuleTag         `json:"tag,omitempty"`
+	And                   *BucketLifecycleRuleAndOperator `json:"and,omitempty"`
+	ObjectSizeGreaterThan *int64                          `json:"objectSizeGreaterThan,omitempty"`
+	ObjectSizeLessThan    *int64                          `json:"objectSizeLessThan,omitempty"`
+}
+
+type BucketLifecycleRuleTag struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+type BucketLifecycleRuleAndOperator struct {
+	Prefix                string                   `json:"prefix,omitempty"`
+	Tags                  []BucketLifecycleRuleTag `json:"tags,omitempty"`
+	ObjectSizeGreaterThan *int64                   `json:"objectSizeGreaterThan,omitempty"`
+	ObjectSizeLessThan    *int64                   `json:"objectSizeLessThan,omitempty"`
+}
+
+type BucketLifecycleRuleExpiration struct {
+	Days                      *int64     `json:"days,omitempty"`
+	Date                      *time.Time `json:"date,omitempty"`
+	ExpiredObjectDeleteMarker *bool      `json:"expiredObjectDeleteMarker,omitempty"`
+}
+
+type BucketLifecycleRuleTransition struct {
+	Days         *int64     `json:"days,omitempty"`
+	Date         *time.Time `json:"date,omitempty"`
+	StorageClass string     `json:"storageClass"`
+}
+
+type BucketLifecycleRuleNoncurrentVersionExpiration struct {
+	NoncurrentDays *int64 `json:"noncurrentDays,omitempty"`
+}
+
+type BucketLifecycleRuleNoncurrentVersionTransition struct {
+	NoncurrentDays *int64 `json:"noncurrentDays,omitempty"`
+	StorageClass   string `json:"storageClass"`
+}
+
+type BucketLifecycleRuleAbortIncompleteMultipartUpload struct {
+	DaysAfterInitiation *int64 `json:"daysAfterInitiation,omitempty"`
+}
+
+type SetBucketLifecycleRequest struct {
+	Rules []BucketLifecycleRule `json:"rules"`
 }
