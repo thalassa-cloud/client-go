@@ -117,7 +117,7 @@ type DnsZoneDnssecStatus struct {
 	Region         string            `json:"region,omitempty"`
 }
 
-type UpsertDnssecRequest struct {
+type SetDnssecRequest struct {
 	Region         string `json:"region"`
 	KmsKeyIdentity string `json:"kmsKeyIdentity,omitempty"`
 }
