@@ -20,10 +20,10 @@ func (c *Client) GetDnssec(ctx context.Context, zoneIdentity string) (*DnsZoneDn
 	return &status, nil
 }
 
-// UpsertDnssec enables or updates DNSSEC signing for a zone.
-func (c *Client) UpsertDnssec(ctx context.Context, zoneIdentity string, upsert UpsertDnssecRequest) (*DnsZoneDnssecStatus, error) {
+// SetDnssec enables or updates DNSSEC signing for a zone.
+func (c *Client) SetDnssec(ctx context.Context, zoneIdentity string, set SetDnssecRequest) (*DnsZoneDnssecStatus, error) {
 	var status DnsZoneDnssecStatus
-	r := c.R().SetBody(upsert).SetResult(&status)
+	r := c.R().SetBody(set).SetResult(&status)
 	resp, err := c.Do(ctx, r, client.PUT, zonePath(zoneIdentity, "dnssec"))
 	if err != nil {
 		return nil, err
