@@ -12,8 +12,9 @@ import (
 	"github.com/thalassa-cloud/client-go/objectstorage"
 	"github.com/thalassa-cloud/client-go/observability/prometheus"
 	"github.com/thalassa-cloud/client-go/pkg/client"
-	"github.com/thalassa-cloud/client-go/quotas"
 	"github.com/thalassa-cloud/client-go/quicklaunch"
+	"github.com/thalassa-cloud/client-go/quotas"
+	"github.com/thalassa-cloud/client-go/secrets"
 	"github.com/thalassa-cloud/client-go/tfs"
 )
 
@@ -32,6 +33,8 @@ type Client interface {
 	ContainerRegistry() *containerregistry.Client
 	// KMS returns a client for the Key Management Service.
 	KMS() *kms.Client
+	// Secrets returns a client for the Secrets Manager.
+	Secrets() *secrets.Client
 	// SetOrganisation sets the organisation for the client
 	SetOrganisation(organisation string)
 	GetClient() client.Client
@@ -162,6 +165,14 @@ func (c *thalassaCloudClient) KMS() *kms.Client {
 		panic(err)
 	}
 	return kmsClient
+}
+
+func (c *thalassaCloudClient) Secrets() *secrets.Client {
+	secretsClient, err := secrets.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return secretsClient
 }
 
 func (c *thalassaCloudClient) GetClient() client.Client {
