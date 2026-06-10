@@ -4,6 +4,7 @@ import (
 	"github.com/thalassa-cloud/client-go/audit"
 	"github.com/thalassa-cloud/client-go/containerregistry"
 	"github.com/thalassa-cloud/client-go/dbaas"
+	"github.com/thalassa-cloud/client-go/dns"
 	"github.com/thalassa-cloud/client-go/iaas"
 	"github.com/thalassa-cloud/client-go/iam"
 	"github.com/thalassa-cloud/client-go/kms"
@@ -35,6 +36,8 @@ type Client interface {
 	KMS() *kms.Client
 	// Secrets returns a client for the Secrets Manager.
 	Secrets() *secrets.Client
+	// DNS returns a client for DNS zones and records.
+	DNS() *dns.Client
 	// SetOrganisation sets the organisation for the client
 	SetOrganisation(organisation string)
 	GetClient() client.Client
@@ -173,6 +176,14 @@ func (c *thalassaCloudClient) Secrets() *secrets.Client {
 		panic(err)
 	}
 	return secretsClient
+}
+
+func (c *thalassaCloudClient) DNS() *dns.Client {
+	dnsClient, err := dns.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return dnsClient
 }
 
 func (c *thalassaCloudClient) GetClient() client.Client {
