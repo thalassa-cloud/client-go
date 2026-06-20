@@ -10,10 +10,15 @@ import (
 
 // PutSecretValue stores a new secret version.
 func (c *Client) PutSecretValue(ctx context.Context, region, path string, put PutSecretValueRequest) (*PutSecretValueResponse, error) {
-	url, err := SecretResourceURL(region, path, "/versions")
+	normalized, err := NormalizePath(path)
 	if err != nil {
 		return nil, err
 	}
+	url, err := SecretResourceURL(region, normalized, "/versions")
+	if err != nil {
+		return nil, err
+	}
+	put.Path = normalized
 	var result PutSecretValueResponse
 	req := c.R().SetBody(put).SetResult(&result)
 	resp, err := c.Do(ctx, req, client.POST, url)
@@ -36,11 +41,15 @@ func (c *Client) PutSecretString(ctx context.Context, region, path string, plain
 // GetSecretValue retrieves a secret value.
 // Callers must not log or persist decrypted secret material from the response.
 func (c *Client) GetSecretValue(ctx context.Context, region, path string, version *int) (*GetSecretValueResponse, error) {
-	url, err := SecretResourceURL(region, path, "/value")
+	normalized, err := NormalizePath(path)
 	if err != nil {
 		return nil, err
 	}
-	body := GetSecretValueRequest{}
+	url, err := SecretResourceURL(region, normalized, "/value")
+	if err != nil {
+		return nil, err
+	}
+	body := GetSecretValueRequest{Path: normalized}
 	if version != nil {
 		body.Version = version
 	}

@@ -179,7 +179,6 @@ func TestCreateSecret(t *testing.T) {
 		w.WriteHeader(http.StatusCreated)
 		require.NoError(t, json.NewEncoder(w).Encode(Secret{
 			Path:           body.Path,
-			KmsKeyIdentity: body.KmsKeyIdentity,
 			CurrentVersion: 1,
 		}))
 	}))
@@ -249,12 +248,16 @@ func TestPutAndGetSecretString(t *testing.T) {
 		case r.Method == http.MethodPost && r.URL.Path == "/v1/secrets/nl-01/secret/app/prod/db/password/versions":
 			var body PutSecretValueRequest
 			require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+			assert.Equal(t, "/app/prod/db/password", body.Path)
 			assert.Equal(t, EncodeBytes([]byte("super-secret")), body.SecretString)
 			require.NoError(t, json.NewEncoder(w).Encode(PutSecretValueResponse{
 				Path:    "/app/prod/db/password",
 				Version: 2,
 			}))
 		case r.Method == http.MethodPost && r.URL.Path == "/v1/secrets/nl-01/secret/app/prod/db/password/value":
+			var body GetSecretValueRequest
+			require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+			assert.Equal(t, "/app/prod/db/password", body.Path)
 			require.NoError(t, json.NewEncoder(w).Encode(GetSecretValueResponse{
 				Path:           "/app/prod/db/password",
 				Version:        2,

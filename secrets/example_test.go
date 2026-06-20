@@ -31,7 +31,6 @@ func ExampleClient_CreateSecret() {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusCreated, secrets.Secret{
 			Path:           "/app/prod/db/password",
-			KmsKeyIdentity: "kms-abc123",
 			CurrentVersion: 1,
 		})
 	}))
