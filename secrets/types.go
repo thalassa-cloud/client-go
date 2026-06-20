@@ -3,6 +3,7 @@ package secrets
 import (
 	"time"
 
+	"github.com/thalassa-cloud/client-go/iaas"
 	"github.com/thalassa-cloud/client-go/kms"
 )
 
@@ -24,23 +25,28 @@ type SecretPolicy struct {
 }
 
 type GenerateSecret struct {
-	Length       int    `json:"length,omitempty"`
-	CharacterSet string `json:"characterSet,omitempty"`
+	ByteLength int `json:"byteLength"`
 }
 
 type Secret struct {
-	Path           string            `json:"path"`
-	Description    string            `json:"description,omitempty"`
-	Labels         map[string]string `json:"labels,omitempty"`
-	Annotations    map[string]string `json:"annotations,omitempty"`
-	KmsKey         *kms.KmsKey       `json:"kmsKey,omitempty"`
-	KmsKeyIdentity string            `json:"kmsKeyIdentity,omitempty"`
-	CurrentVersion int               `json:"currentVersion"`
-	LastAccessedAt *time.Time        `json:"lastAccessedAt,omitempty"`
-	AccessPolicy   *SecretPolicy     `json:"accessPolicy,omitempty"`
-	Versions       []SecretVersion   `json:"versions,omitempty"`
-	CreatedAt      time.Time         `json:"createdAt,omitempty"`
-	UpdatedAt      time.Time         `json:"updatedAt,omitempty"`
+	Path        string            `json:"path"`
+	Description string            `json:"description,omitempty"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+	CreatedAt   time.Time         `json:"createdAt,omitempty"`
+	UpdatedAt   time.Time         `json:"updatedAt,omitempty"`
+
+	KmsKey         *kms.KmsKey `json:"kmsKey,omitempty"`
+	CurrentVersion int         `json:"currentVersion"`
+
+	ObjectVersion  int        `json:"objectVersion"`
+	LastAccessedAt *time.Time `json:"lastAccessedAt,omitempty"`
+
+	Region *iaas.Region `json:"region,omitempty"`
+
+	AccessPolicy *SecretPolicy `json:"accessPolicy,omitempty"`
+
+	Versions []SecretVersion `json:"versions,omitempty"`
 }
 
 type BrowseSecretsResponse struct {
@@ -62,20 +68,20 @@ type CreateSecretRequest struct {
 }
 
 type PutSecretValueRequest struct {
+	Path            string            `json:"path"`
 	SecretString    string            `json:"secretString,omitempty"`
 	SecretKeyValues map[string]string `json:"secretKeyValues,omitempty"`
 	GenerateSecret  *GenerateSecret   `json:"generateSecret,omitempty"`
 }
 
 type PutSecretValueResponse struct {
-	Path           string `json:"path"`
-	Version        int    `json:"version"`
-	KmsKeyIdentity string `json:"kmsKeyIdentity,omitempty"`
-	KmsKeyVersion  string `json:"kmsKeyVersion,omitempty"`
+	Path    string `json:"path"`
+	Version int    `json:"version"`
 }
 
 type GetSecretValueRequest struct {
-	Version *int `json:"version,omitempty"`
+	Path    string `json:"path"`
+	Version *int   `json:"version,omitempty"`
 }
 
 type GetSecretValueResponse struct {

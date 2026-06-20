@@ -3,6 +3,7 @@ package kms
 import (
 	"time"
 
+	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/base"
 )
 
@@ -17,18 +18,42 @@ const (
 type KmsKeyType string
 
 const (
-	KmsKeyTypeAES256GCM96 KmsKeyType = "aes256-gcm96"
-	KmsKeyTypeRSA2048     KmsKeyType = "rsa-2048"
-	KmsKeyTypeRSA3072     KmsKeyType = "rsa-3072"
-	KmsKeyTypeRSA4096     KmsKeyType = "rsa-4096"
-	KmsKeyTypeECP256      KmsKeyType = "ec-p256"
-	KmsKeyTypeECP384      KmsKeyType = "ec-p384"
-	KmsKeyTypeECP521      KmsKeyType = "ec-p521"
-	KmsKeyTypeEd25519     KmsKeyType = "ed25519"
-	KmsKeyTypeHMACSHA256  KmsKeyType = "hmac-sha256"
-	KmsKeyTypeHMACSHA384  KmsKeyType = "hmac-sha384"
-	KmsKeyTypeHMACSHA512  KmsKeyType = "hmac-sha512"
+	KmsKeyTypeAES128GCM96      KmsKeyType = "aes128-gcm96"
+	KmsKeyTypeAES256GCM96      KmsKeyType = "aes256-gcm96"
+	KmsKeyTypeChaCha20Poly1305 KmsKeyType = "chacha20-poly1305"
+	KmsKeyTypeEd25519          KmsKeyType = "ed25519"
+	KmsKeyTypeECDSAP256        KmsKeyType = "ecdsa-p256"
+	KmsKeyTypeECDSAP384        KmsKeyType = "ecdsa-p384"
+	KmsKeyTypeECDSAP521        KmsKeyType = "ecdsa-p521"
+	KmsKeyTypeRSA2048          KmsKeyType = "rsa-2048"
+	KmsKeyTypeRSA3072          KmsKeyType = "rsa-3072"
+	KmsKeyTypeRSA4096          KmsKeyType = "rsa-4096"
+	KmsKeyTypeHMAC             KmsKeyType = "hmac"
+	KmsKeyTypeHMACSHA256       KmsKeyType = "hmac-sha256"
+	KmsKeyTypeHMACSHA512       KmsKeyType = "hmac-sha512"
 )
+
+// IsValid reports whether the key type is supported.
+func (t KmsKeyType) IsValid() bool {
+	switch t {
+	case KmsKeyTypeAES128GCM96,
+		KmsKeyTypeAES256GCM96,
+		KmsKeyTypeChaCha20Poly1305,
+		KmsKeyTypeEd25519,
+		KmsKeyTypeECDSAP256,
+		KmsKeyTypeECDSAP384,
+		KmsKeyTypeECDSAP521,
+		KmsKeyTypeRSA2048,
+		KmsKeyTypeRSA3072,
+		KmsKeyTypeRSA4096,
+		KmsKeyTypeHMAC,
+		KmsKeyTypeHMACSHA256,
+		KmsKeyTypeHMACSHA512:
+		return true
+	default:
+		return false
+	}
+}
 
 type KmsKeyVersion struct {
 	Version   int       `json:"version"`
@@ -59,11 +84,14 @@ type KmsKey struct {
 }
 
 type KmsSummaryRegion struct {
-	Identity         string `json:"identity"`
-	Name             string `json:"name,omitempty"`
-	Slug             string `json:"slug"`
-	KmsAvailable     bool   `json:"kmsAvailable"`
-	SecretsAvailable bool   `json:"secretsAvailable,omitempty"`
+	Identity            string `json:"identity"`
+	Name                string `json:"name"`
+	Slug                string `json:"slug"`
+	KmsAvailable        bool   `json:"kmsAvailable"`
+	TotalKeys           int64  `json:"totalKeys"`
+	ActiveKeys          int64  `json:"activeKeys"`
+	DisabledKeys        int64  `json:"disabledKeys"`
+	PendingDeletionKeys int64  `json:"pendingDeletionKeys"`
 }
 
 type KmsSummary struct {
@@ -72,11 +100,7 @@ type KmsSummary struct {
 }
 
 type ListKeysRequest struct {
-	Filters []ListKeysFilter
-}
-
-type ListKeysFilter interface {
-	ToParams() map[string]string
+	Filters []filters.Filter
 }
 
 type CreateKmsKeyRequest struct {
@@ -110,7 +134,6 @@ type EncryptResponse struct {
 
 type DecryptRequest struct {
 	Ciphertext string `json:"ciphertext"`
-	KeyVersion string `json:"keyVersion,omitempty"`
 }
 
 type DecryptResponse struct {
@@ -119,9 +142,11 @@ type DecryptResponse struct {
 }
 
 type SignRequest struct {
-	Message    string `json:"message"`
-	KeyVersion string `json:"keyVersion,omitempty"`
-	Hash       string `json:"hash,omitempty"`
+	Input         string `json:"input" validate:"required"`
+	KeyVersion    string `json:"keyVersion,omitempty"`
+	HashAlgorithm string `json:"hashAlgorithm,omitempty"`
+	Prehashed     bool   `json:"prehashed,omitempty"`
+	Context       string `json:"context,omitempty"`
 }
 
 type SignResponse struct {
@@ -130,31 +155,30 @@ type SignResponse struct {
 }
 
 type VerifySignatureRequest struct {
-	Message    string `json:"message"`
-	Signature  string `json:"signature"`
-	Hash       string `json:"hash,omitempty"`
-	KeyVersion string `json:"keyVersion,omitempty"`
+	Input         string `json:"input" validate:"required"`
+	Signature     string `json:"signature" validate:"required"`
+	HashAlgorithm string `json:"hashAlgorithm,omitempty"`
 }
 
 type VerifySignatureResponse struct {
-	Valid      bool   `json:"valid"`
-	KeyVersion string `json:"keyVersion,omitempty"`
+	Valid bool `json:"valid"`
 }
 
 type HMACRequest struct {
-	Message    string `json:"message"`
+	Input      string `json:"input" validate:"required"`
 	KeyVersion string `json:"keyVersion,omitempty"`
+	Algorithm  string `json:"algorithm,omitempty"`
 }
 
 type HMACResponse struct {
-	MAC        string `json:"mac"`
+	HMAC       string `json:"hmac"`
 	KeyVersion string `json:"keyVersion,omitempty"`
 }
 
 type VerifyHMACRequest struct {
-	Message    string `json:"message"`
-	MAC        string `json:"mac"`
-	KeyVersion string `json:"keyVersion,omitempty"`
+	Input         string `json:"input" validate:"required"`
+	HMAC          string `json:"hmac" validate:"required"`
+	HashAlgorithm string `json:"hashAlgorithm,omitempty"`
 }
 
 type VerifyHMACResponse struct {
@@ -163,9 +187,7 @@ type VerifyHMACResponse struct {
 }
 
 type GetPublicKeyResponse struct {
-	PublicKey  string `json:"publicKey"`
-	KeyVersion string `json:"keyVersion,omitempty"`
-	KeyType    string `json:"keyType,omitempty"`
+	Keys map[string]string `json:"keys"`
 }
 
 type ExportKeyRequest struct {
