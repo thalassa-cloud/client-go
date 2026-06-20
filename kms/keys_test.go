@@ -228,11 +228,11 @@ func TestListKeys(t *testing.T) {
 	require.NoError(t, err)
 
 	keys, err := kmsClient.ListKeys(context.Background(), "nl-01", &ListKeysRequest{
-		Filters: []ListKeysFilter{
-			ListKeysFilterFromFilter(&filters.FilterKeyValue{
+		Filters: []filters.Filter{
+			&filters.FilterKeyValue{
 				Key:   filters.FilterName,
 				Value: "app-secrets",
-			}),
+			},
 		},
 	})
 	require.NoError(t, err)

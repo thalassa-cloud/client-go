@@ -3,7 +3,6 @@ package kms
 import (
 	"context"
 
-	"github.com/thalassa-cloud/client-go/filters"
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
@@ -142,18 +141,4 @@ func (c *Client) EnableKey(ctx context.Context, region, identity string) (*KmsKe
 		return &key, err
 	}
 	return &key, nil
-}
-
-// listKeysFilter adapts filters.Filter for ListKeys.
-type listKeysFilter struct {
-	filter filters.Filter
-}
-
-func (f listKeysFilter) ToParams() map[string]string {
-	return f.filter.ToParams()
-}
-
-// ListKeysFilterFromFilter wraps a shared filter for ListKeys.
-func ListKeysFilterFromFilter(filter filters.Filter) ListKeysFilter {
-	return listKeysFilter{filter: filter}
 }
