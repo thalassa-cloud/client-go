@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"net/http"
@@ -147,6 +148,7 @@ type thalassaCloudClient struct {
 	breaker *gobreaker.CircuitBreaker
 
 	insecure bool
+	rootCAs  *x509.CertPool
 }
 
 func (c *thalassaCloudClient) WithOptions(opts ...Option) Client {
