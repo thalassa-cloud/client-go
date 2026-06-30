@@ -133,12 +133,8 @@ func (c *thalassaCloudClient) configureAuth() error {
 		c.resty.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
 			if c.oidcToken == nil || !c.oidcToken.Valid() {
 				ctx := req.Context()
-				if c.allowInsecureOIDC {
-					ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
-						Transport: &http.Transport{
-							TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-						},
-					})
+				if c.allowInsecureOIDC || c.rootCAs != nil {
+					ctx = context.WithValue(ctx, oauth2.HTTPClient, c.httpClientWithTLS())
 				}
 				tok, err := c.oidcConfig.Token(ctx)
 				if err != nil {
@@ -201,14 +197,23 @@ func (c *thalassaCloudClient) ensureOIDCTokenExchange(ctx context.Context) error
 }
 
 func (c *thalassaCloudClient) tokenExchangeHTTPClient() *http.Client {
-	if c.insecure {
-		return &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec // dev-only, matches WithInsecure
-			},
-		}
+	if c.insecure || c.rootCAs != nil {
+		return c.httpClientWithTLS()
 	}
 	return http.DefaultClient
+}
+
+func (c *thalassaCloudClient) httpClientWithTLS() *http.Client {
+	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12}
+	if c.insecure {
+		tlsConfig.InsecureSkipVerify = true //nolint:gosec // dev-only, matches WithInsecure
+	}
+	if c.rootCAs != nil {
+		tlsConfig.RootCAs = c.rootCAs
+	}
+	return &http.Client{
+		Transport: &http.Transport{TLSClientConfig: tlsConfig},
+	}
 }
 
 func resolveOIDCSubjectToken(cfg *OIDCTokenExchangeConfig) (string, error) {
