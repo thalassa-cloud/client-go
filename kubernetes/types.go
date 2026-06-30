@@ -455,8 +455,8 @@ type NodeCondition struct {
 	// Status of the condition, one of True, False, Unknown.
 	Status string `json:"status"`
 	// Last time we got an update on a given condition.
-	LastHeartbeatTime  time.Time `json:"lastHeartbeatTime,omitempty"`
-	LastTransitionTime time.Time `json:"lastTransitionTime,omitempty"`
+	LastHeartbeatTime  time.Time `json:"lastHeartbeatTime"`
+	LastTransitionTime time.Time `json:"lastTransitionTime"`
 	Reason             string    `json:"reason,omitempty"`
 	Message            string    `json:"message,omitempty"`
 }
