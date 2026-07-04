@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/gorilla/websocket"
 	"github.com/sony/gobreaker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -605,20 +606,55 @@ func TestClientCheck(t *testing.T) {
 }
 
 func TestClientDialWebsocket(t *testing.T) {
-	// Create a client
-	client, err := NewClient(
-		WithBaseURL("http://localhost"),
-		WithAuthPersonalToken("test-token"),
-	)
-	require.NoError(t, err)
-	require.NotNil(t, client)
+	tests := []struct {
+		name           string
+		options        []Option
+		wantAuthHeader string
+		wantOrgHeader  string
+	}{
+		{
+			name: "personal access token via Authorization header",
+			options: []Option{
+				WithAuthPersonalToken("test-token"),
+			},
+			wantAuthHeader: "Token test-token",
+		},
+		{
+			name: "organization header",
+			options: []Option{
+				WithAuthPersonalToken("test-token"),
+				WithOrganisation("test-org"),
+			},
+			wantAuthHeader: "Token test-token",
+			wantOrgHeader:  "test-org",
+		},
+	}
 
-	// Test DialWebsocket method
-	ctx := context.Background()
-	conn, err := client.DialWebsocket(ctx, "ws://localhost/ws")
-	// This will fail because we're not actually running a websocket server
-	assert.Error(t, err)
-	assert.Nil(t, conn)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			upgrader := websocket.Upgrader{}
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				assert.Empty(t, r.URL.Query().Get("token"), "token must not be sent in query string")
+				assert.Equal(t, tt.wantAuthHeader, r.Header.Get("Authorization"))
+				if tt.wantOrgHeader != "" {
+					assert.Equal(t, tt.wantOrgHeader, r.Header.Get("X-Organisation-Identity"))
+				}
+				conn, err := upgrader.Upgrade(w, r, nil)
+				require.NoError(t, err)
+				conn.Close()
+			}))
+			t.Cleanup(server.Close)
+
+			wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/ws"
+			client, err := NewClient(append([]Option{WithBaseURL(server.URL)}, tt.options...)...)
+			require.NoError(t, err)
+
+			conn, err := client.DialWebsocket(context.Background(), wsURL)
+			require.NoError(t, err)
+			require.NotNil(t, conn)
+			conn.Close()
+		})
+	}
 }
 
 func TestClientSetOrganisation(t *testing.T) {

@@ -188,11 +188,7 @@ func (c *thalassaCloudClient) GetAuthToken() string {
 // DialWebsocket creates a websocket connection to the specified URL, with authentication
 // and organization headers from the client.
 func (c *thalassaCloudClient) DialWebsocket(ctx context.Context, wsURL string) (*websocket.Conn, error) {
-
-	wsUrlWithToken := wsURL + "?token=" + c.GetAuthToken()
-
-	// Parse the WebSocket URL
-	parsedURL, err := url.Parse(wsUrlWithToken)
+	parsedURL, err := url.Parse(wsURL)
 	if err != nil {
 		return nil, fmt.Errorf("invalid websocket URL: %w", err)
 	}
