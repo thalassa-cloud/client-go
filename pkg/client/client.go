@@ -131,8 +131,8 @@ type thalassaCloudClient struct {
 	allowInsecureOIDC bool
 
 	// OIDC token exchange (RFC 8693-style) for IdP JWT → Thalassa bearer token.
-	oidcTokenExchange   *OIDCTokenExchangeConfig
-	oidcTokenExchangeMu sync.Mutex
+	oidcTokenExchange *OIDCTokenExchangeConfig
+	oidcTokenMu        sync.Mutex
 
 	// Personal Access Token.
 	personalToken string
@@ -176,6 +176,8 @@ func (c *thalassaCloudClient) SetOrganisation(organisation string) {
 func (c *thalassaCloudClient) GetAuthToken() string {
 	switch c.authType {
 	case AuthOIDC, AuthOIDCTokenExchange:
+		c.oidcTokenMu.Lock()
+		defer c.oidcTokenMu.Unlock()
 		if c.oidcToken != nil && c.oidcToken.Valid() {
 			return c.oidcToken.AccessToken
 		}

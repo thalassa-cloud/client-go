@@ -129,20 +129,12 @@ func (c *thalassaCloudClient) configureAuth() error {
 		if c.oidcConfig == nil {
 			return ErrMissingOIDCConfig
 		}
-		// For each request, ensure token is valid or refresh it.
 		c.resty.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
-			if c.oidcToken == nil || !c.oidcToken.Valid() {
-				ctx := req.Context()
-				if c.allowInsecureOIDC || c.rootCAs != nil {
-					ctx = context.WithValue(ctx, oauth2.HTTPClient, c.httpClientWithTLS())
-				}
-				tok, err := c.oidcConfig.Token(ctx)
-				if err != nil {
-					return fmt.Errorf("failed to fetch OIDC token: %w", err)
-				}
-				c.oidcToken = tok
+			accessToken, err := c.ensureOIDCClientCredentialsToken(req.Context())
+			if err != nil {
+				return err
 			}
-			req.SetAuthToken(c.oidcToken.AccessToken)
+			req.SetAuthToken(accessToken)
 			return nil
 		})
 
@@ -151,10 +143,11 @@ func (c *thalassaCloudClient) configureAuth() error {
 			return ErrOIDCTokenExchangeConfig
 		}
 		c.resty.OnBeforeRequest(func(_ *resty.Client, req *resty.Request) error {
-			if err := c.ensureOIDCTokenExchange(req.Context()); err != nil {
+			accessToken, err := c.ensureOIDCTokenExchange(req.Context())
+			if err != nil {
 				return err
 			}
-			req.SetAuthToken(c.oidcToken.AccessToken)
+			req.SetAuthToken(accessToken)
 			return nil
 		})
 
@@ -182,18 +175,35 @@ func (c *thalassaCloudClient) configureAuth() error {
 	return nil
 }
 
-func (c *thalassaCloudClient) ensureOIDCTokenExchange(ctx context.Context) error {
-	c.oidcTokenExchangeMu.Lock()
-	defer c.oidcTokenExchangeMu.Unlock()
+func (c *thalassaCloudClient) ensureOIDCClientCredentialsToken(ctx context.Context) (string, error) {
+	c.oidcTokenMu.Lock()
+	defer c.oidcTokenMu.Unlock()
 	if c.oidcToken != nil && c.oidcToken.Valid() {
-		return nil
+		return c.oidcToken.AccessToken, nil
+	}
+	if c.allowInsecureOIDC || c.rootCAs != nil {
+		ctx = context.WithValue(ctx, oauth2.HTTPClient, c.httpClientWithTLS())
+	}
+	tok, err := c.oidcConfig.Token(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch OIDC token: %w", err)
+	}
+	c.oidcToken = tok
+	return tok.AccessToken, nil
+}
+
+func (c *thalassaCloudClient) ensureOIDCTokenExchange(ctx context.Context) (string, error) {
+	c.oidcTokenMu.Lock()
+	defer c.oidcTokenMu.Unlock()
+	if c.oidcToken != nil && c.oidcToken.Valid() {
+		return c.oidcToken.AccessToken, nil
 	}
 	tok, err := c.fetchOIDCTokenExchange(ctx)
 	if err != nil {
-		return err
+		return "", err
 	}
 	c.oidcToken = tok
-	return nil
+	return tok.AccessToken, nil
 }
 
 func (c *thalassaCloudClient) tokenExchangeHTTPClient() *http.Client {
