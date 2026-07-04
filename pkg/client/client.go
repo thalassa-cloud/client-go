@@ -175,6 +175,10 @@ func (c *thalassaCloudClient) SetOrganisation(organisation string) {
 
 func (c *thalassaCloudClient) GetAuthToken() string {
 	switch c.authType {
+	case AuthToken:
+		if c.oidcToken != nil && c.oidcToken.Valid() {
+			return c.oidcToken.AccessToken
+		}
 	case AuthOIDC, AuthOIDCTokenExchange:
 		c.oidcTokenMu.Lock()
 		defer c.oidcTokenMu.Unlock()

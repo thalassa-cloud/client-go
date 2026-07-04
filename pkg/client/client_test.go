@@ -520,6 +520,14 @@ func TestClientGetAuthToken(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "test-token", client.GetAuthToken())
 
+	// Test with bearer token (WithToken)
+	client, err = NewClient(
+		WithBaseURL(server.URL),
+		WithToken("bearer-token"),
+	)
+	require.NoError(t, err)
+	assert.Equal(t, "bearer-token", client.GetAuthToken())
+
 	// Test with no auth
 	client, err = NewClient(
 		WithBaseURL(server.URL),
@@ -618,6 +626,13 @@ func TestClientDialWebsocket(t *testing.T) {
 				WithAuthPersonalToken("test-token"),
 			},
 			wantAuthHeader: "Token test-token",
+		},
+		{
+			name: "bearer token via WithToken",
+			options: []Option{
+				WithToken("bearer-token"),
+			},
+			wantAuthHeader: "Token bearer-token",
 		},
 		{
 			name: "organization header",
