@@ -216,10 +216,10 @@ func TestClientWithAuthOptions(t *testing.T) {
 			options: []Option{
 				WithBaseURL(server.URL),
 				WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
-					TokenURL:         server.URL + "/oidc/token",
-					SubjectToken:     "sub.jwt",
-					OrganisationID:   "org-1",
-					ServiceAccountID: "sa-1",
+					TokenURL:            server.URL + "/oidc/token",
+					SubjectToken:        "sub.jwt",
+					OrganisationID:      "org-1",
+					ServiceAccountID:    "sa-1",
 					AccessTokenLifetime: "39600s",
 				}),
 			},
@@ -253,7 +253,7 @@ func TestClientWithAuthOptions(t *testing.T) {
 		},
 	}
 
-		for _, tt := range tests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client, err := NewClient(tt.options...)
 			if tt.expectError {

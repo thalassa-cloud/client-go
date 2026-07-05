@@ -132,7 +132,7 @@ type thalassaCloudClient struct {
 
 	// OIDC token exchange (RFC 8693-style) for IdP JWT → Thalassa bearer token.
 	oidcTokenExchange *OIDCTokenExchangeConfig
-	oidcTokenMu        sync.Mutex
+	oidcTokenMu       sync.Mutex
 
 	// Personal Access Token.
 	personalToken string
@@ -153,7 +153,7 @@ type thalassaCloudClient struct {
 
 func (c *thalassaCloudClient) WithOptions(opts ...Option) Client {
 	for _, opt := range opts {
-		opt(c)
+		_ = opt(c)
 	}
 	return c
 }
