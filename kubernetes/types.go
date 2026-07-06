@@ -275,9 +275,11 @@ const (
 type KubernetesDefaultNetworkPolicies string
 
 const (
-	KubernetesDefaultNetworkPolicyNone     KubernetesDefaultNetworkPolicies = ""          // No default policy
+	KubernetesDefaultNetworkPolicyNone     KubernetesDefaultNetworkPolicies = ""          // Default policy Kubernetes behaviour
 	KubernetesDefaultNetworkPolicyAllowAll KubernetesDefaultNetworkPolicies = "allow-all" // Allow all traffic
-	KubernetesDefaultNetworkPolicyDenyAll  KubernetesDefaultNetworkPolicies = "deny-all"  // Deny all traffic
+	KubernetesDefaultNetworkPolicyDeny     KubernetesDefaultNetworkPolicies = "deny"      // Deny all traffic
+	// Deprecated: Use KubernetesDefaultNetworkPolicyDeny instead.
+	KubernetesDefaultNetworkPolicyDenyAll KubernetesDefaultNetworkPolicies = "deny-all" // Legacy
 )
 
 // KubernetesNodePool represents a group of nodes in a Kubernetes cluster with identical configuration.
