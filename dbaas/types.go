@@ -714,17 +714,28 @@ type DbClusterScheduledMaintenance struct {
 	CanceledAt *time.Time `json:"canceledAt,omitempty"`
 	// FailedAt is the date and time the scheduled maintenance failed
 	FailedAt *time.Time `json:"failedAt,omitempty"`
+	// PostponedAt is the date and time the scheduled maintenance was postponed
+	PostponedAt *time.Time `json:"postponedAt,omitempty"`
 	// DbCluster is the cluster the scheduled maintenance belongs to
 	DbCluster *DbCluster `json:"dbCluster"`
 	// Status is the status of the scheduled maintenance
 	Status DbClusterScheduledMaintenanceStatus `json:"status"`
 	// StatusReason is the reason for the status of the scheduled maintenance
 	StatusReason string `json:"statusReason,omitempty"`
+	// Type is the kind of scheduled maintenance
+	Type DbClusterScheduledMaintenanceType `json:"type"`
 	// CurrentVersion is the current version of the engine
 	CurrentVersion *DbClusterEngineVersion `json:"currentVersion,omitempty"`
 	// TargetVersion is the target version of the engine
 	TargetVersion *DbClusterEngineVersion `json:"targetVersion,omitempty"`
 }
+
+type DbClusterScheduledMaintenanceType string
+
+const (
+	DbClusterScheduledMaintenanceTypeUpgrade         DbClusterScheduledMaintenanceType = "upgrade"
+	DbClusterScheduledMaintenanceTypeNodeMaintenance DbClusterScheduledMaintenanceType = "nodeMaintenance"
+)
 
 type DbClusterScheduledMaintenanceStatus string
 
@@ -736,6 +747,20 @@ const (
 	DbClusterScheduledMaintenanceStatusCancelled  DbClusterScheduledMaintenanceStatus = "cancelled"
 	DbClusterScheduledMaintenanceStatusSkipped    DbClusterScheduledMaintenanceStatus = "skipped"
 )
+
+// DbClusterRevision is a point-in-time snapshot of cluster configuration used for deployments.
+type DbClusterRevision struct {
+	Identity          string               `json:"identity"`
+	ProjectId         string               `json:"projectId,omitempty"`
+	Revision          DbCluster            `json:"revision"`
+	InstanceType      DatabaseInstanceType `json:"instanceType"`
+	DeployStartedAt   *time.Time           `json:"deployStartedAt,omitempty"`
+	DeployCompletedAt *time.Time           `json:"deployCompletedAt,omitempty"`
+	CreatedAt         time.Time            `json:"createdAt"`
+	UpdatedAt         *time.Time           `json:"updatedAt,omitempty"`
+	ObjectVersion     int64                `json:"objectVersion"`
+	IsDeployTarget    bool                 `json:"isDeployTarget,omitempty"`
+}
 
 // DbObjectStore represents an object storage location for database backups.
 // When created, it provisions an object storage bucket with correct policies
