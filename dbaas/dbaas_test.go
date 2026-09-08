@@ -15,11 +15,39 @@ func setupTestServer() *httptest.Server {
 				w.Write([]byte(`{"message": "database created"}`))
 			}
 		case "/v1/dbaas/clusters/cluster-123/postgres-databases/testdb":
-			if r.Method == "PUT" {
+			if r.Method == "GET" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"identity":"testdb","name":"testdb","owner":"testuser","status":"ready"}`))
+			} else if r.Method == "PUT" {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"message": "database updated"}`))
 			} else if r.Method == "DELETE" {
 				w.WriteHeader(http.StatusNoContent)
+			}
+		case "/v1/dbaas/backups/backup-123":
+			if r.Method == "PUT" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"identity":"backup-123","deleteProtection":true,"status":"ready"}`))
+			}
+		case "/v1/dbaas/clusters/cluster-123/revisions":
+			if r.Method == "GET" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`[{"identity":"rev-1","objectVersion":1}]`))
+			}
+		case "/v1/dbaas/clusters/cluster-123/scheduled-maintenances":
+			if r.Method == "GET" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`[{"identity":"maint-1","status":"scheduled","type":"upgrade"}]`))
+			}
+		case "/v1/dbaas/clusters/cluster-123/scheduled-maintenances/maint-1/start":
+			if r.Method == "POST" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"identity":"maint-1","status":"inProgress","type":"upgrade"}`))
+			}
+		case "/v1/dbaas/clusters/cluster-123/scheduled-maintenances/maint-1/postpone":
+			if r.Method == "POST" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"identity":"maint-1","status":"scheduled","type":"upgrade"}`))
 			}
 		case "/v1/dbaas/clusters/cluster-123/postgres-roles":
 			if r.Method == "POST" {

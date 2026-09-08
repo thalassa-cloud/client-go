@@ -180,3 +180,36 @@ func TestDeletePgDatabase(t *testing.T) {
 		})
 	}
 }
+
+func TestGetPgDatabase(t *testing.T) {
+	server := setupTestServer()
+	defer server.Close()
+
+	base, err := client.NewClient(client.WithBaseURL(server.URL))
+	require.NoError(t, err)
+	dbaasClient, err := New(base)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name              string
+		dbClusterIdentity string
+		databaseIdentity  string
+		expectedError     string
+	}{
+		{name: "success", dbClusterIdentity: "cluster-123", databaseIdentity: "testdb"},
+		{name: "missing cluster", dbClusterIdentity: "", databaseIdentity: "testdb", expectedError: "database cluster identity is required"},
+		{name: "missing database", dbClusterIdentity: "cluster-123", databaseIdentity: "", expectedError: "postgres database identity is required"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db, err := dbaasClient.GetPgDatabase(context.Background(), tt.dbClusterIdentity, tt.databaseIdentity)
+			if tt.expectedError != "" {
+				assert.EqualError(t, err, tt.expectedError)
+				return
+			}
+			require.NoError(t, err)
+			assert.Equal(t, "testdb", db.Identity)
+		})
+	}
+}
