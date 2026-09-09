@@ -801,6 +801,36 @@ type DbObjectStore struct {
 	// For example, "30d" means backups will be retained for 30 days.
 	// This is used with barman-cloud-backup-delete command: --retention-policy "RECOVERY WINDOW OF <number> days"
 	RetentionPolicy string `json:"retentionPolicy,omitempty"`
+	// RetentionMode controls post-expiry cleanup behaviour for Barman backups.
+	// retainForPointInTime (default) keeps the latest backup so the recovery window stays restorable.
+	// forceCleanupAfterExpiry allows cleanup of backups (including the latest) after retention expiry.
+	RetentionMode DbObjectStoreRetentionMode `json:"retentionMode,omitempty"`
+}
+
+// DbObjectStoreRetentionMode controls how expired backups are cleaned up on an object store.
+type DbObjectStoreRetentionMode string
+
+const (
+	// DbObjectStoreRetentionModeRetainForPointInTime keeps the latest backup so PITR remains restorable.
+	DbObjectStoreRetentionModeRetainForPointInTime DbObjectStoreRetentionMode = "retainForPointInTime"
+	// DbObjectStoreRetentionModeForceCleanupAfterExpiry allows cleanup of all expired backups.
+	DbObjectStoreRetentionModeForceCleanupAfterExpiry DbObjectStoreRetentionMode = "forceCleanupAfterExpiry"
+)
+
+// RetainsForPointInTime reports whether this mode keeps the latest backup for PITR.
+// Empty/unknown values default to retainForPointInTime.
+func (m DbObjectStoreRetentionMode) RetainsForPointInTime() bool {
+	return m != DbObjectStoreRetentionModeForceCleanupAfterExpiry
+}
+
+// IsValid reports whether m is a known retention mode.
+func (m DbObjectStoreRetentionMode) IsValid() bool {
+	switch m {
+	case DbObjectStoreRetentionModeRetainForPointInTime, DbObjectStoreRetentionModeForceCleanupAfterExpiry:
+		return true
+	default:
+		return false
+	}
 }
 
 // CreateDbObjectStoreRequest is the request body for creating a DB object store.
@@ -816,6 +846,8 @@ type CreateDbObjectStoreRequest struct {
 	// RetentionPolicy is the retention policy for backups in the format "<number>d" where d is days.
 	// For example, "30d" means backups will be retained for 30 days.
 	RetentionPolicy string `json:"retentionPolicy,omitempty"`
+	// RetentionMode controls post-expiry cleanup. Omit or empty defaults to retainForPointInTime.
+	RetentionMode DbObjectStoreRetentionMode `json:"retentionMode,omitempty"`
 	// DeleteProtection is a flag to indicate if the object store is protected from deletion
 	DeleteProtection bool `json:"deleteProtection"`
 }
@@ -830,6 +862,8 @@ type UpdateDbObjectStoreRequest struct {
 	Labels Labels `json:"labels,omitempty"`
 	// RetentionPolicy is the retention policy for backups in the format "<number>d" where d is days.
 	RetentionPolicy string `json:"retentionPolicy,omitempty"`
+	// RetentionMode controls post-expiry cleanup. Nil leaves the current value unchanged.
+	RetentionMode *DbObjectStoreRetentionMode `json:"retentionMode,omitempty"`
 	// DeleteProtection is a flag to indicate if the object store is protected from deletion
 	DeleteProtection bool `json:"deleteProtection"`
 }
