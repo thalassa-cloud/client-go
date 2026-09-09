@@ -4,11 +4,11 @@ import "time"
 
 // DbObjectStoreRecoveryOverview is the aggregated recovery overview for a DB object store.
 type DbObjectStoreRecoveryOverview struct {
-	ObjectStoreIdentity string                               `json:"objectStoreIdentity"`
-	AnalysedAt          time.Time                            `json:"analysedAt"`
-	Complete            bool                                 `json:"complete"`
-	Truncation          DbObjectStoreRecoveryTruncation      `json:"truncation"`
-	Summary             DbObjectStoreRecoveryStoreSummary    `json:"summary"`
+	ObjectStoreIdentity string                                 `json:"objectStoreIdentity"`
+	AnalysedAt          time.Time                              `json:"analysedAt"`
+	Complete            bool                                   `json:"complete"`
+	Truncation          DbObjectStoreRecoveryTruncation        `json:"truncation"`
+	Summary             DbObjectStoreRecoveryStoreSummary      `json:"summary"`
 	Clusters            []DbObjectStoreRecoveryClusterOverview `json:"clusters"`
 }
 
@@ -36,14 +36,14 @@ type DbObjectStoreRecoveryStoreSummary struct {
 
 // DbObjectStoreRecoveryClusterOverview is per-cluster recovery state within a store.
 type DbObjectStoreRecoveryClusterOverview struct {
-	ClusterIdentity     string                             `json:"clusterIdentity"`
-	ClusterName         string                             `json:"clusterName"`
-	ClusterExists       bool                               `json:"clusterExists"`
-	RecoveryWindow      *DbObjectStoreRecoveryWindowDTO    `json:"recoveryWindow"`
-	LatestArchivedWal   string                             `json:"latestArchivedWal"`
-	LatestWalArchivedAt *time.Time                         `json:"latestWalArchivedAt"`
-	Timelines           []string                           `json:"timelines"`
-	GapCount            int                                `json:"gapCount"`
+	ClusterIdentity     string                                `json:"clusterIdentity"`
+	ClusterName         string                                `json:"clusterName"`
+	ClusterExists       bool                                  `json:"clusterExists"`
+	RecoveryWindow      *DbObjectStoreRecoveryWindowDTO       `json:"recoveryWindow"`
+	LatestArchivedWal   string                                `json:"latestArchivedWal"`
+	LatestWalArchivedAt *time.Time                            `json:"latestWalArchivedAt"`
+	Timelines           []string                              `json:"timelines"`
+	GapCount            int                                   `json:"gapCount"`
 	Backups             []DbObjectStoreRecoveryBackupCoverage `json:"backups"`
 }
 
@@ -56,17 +56,17 @@ type DbObjectStoreRecoveryWindowDTO struct {
 
 // DbObjectStoreRecoveryBackupCoverage embeds backup fields plus WAL coverage.
 type DbObjectStoreRecoveryBackupCoverage struct {
-	BackupIdentity string                                   `json:"backupIdentity"`
-	Status         string                                   `json:"status"`
-	StatusMessage  *string                                  `json:"statusMessage"`
-	CreatedAt      time.Time                                `json:"createdAt"`
-	StartedAt      *time.Time                               `json:"startedAt"`
-	StoppedAt      *time.Time                               `json:"stoppedAt"`
-	SizeBytes      *int64                                   `json:"sizeBytes"`
-	BeginWal       string                                   `json:"beginWal"`
-	EndWal         string                                   `json:"endWal"`
-	BeginLsn       string                                   `json:"beginLsn"`
-	EndLsn         string                                   `json:"endLsn"`
+	BackupIdentity string                                    `json:"backupIdentity"`
+	Status         string                                    `json:"status"`
+	StatusMessage  *string                                   `json:"statusMessage"`
+	CreatedAt      time.Time                                 `json:"createdAt"`
+	StartedAt      *time.Time                                `json:"startedAt"`
+	StoppedAt      *time.Time                                `json:"stoppedAt"`
+	SizeBytes      *int64                                    `json:"sizeBytes"`
+	BeginWal       string                                    `json:"beginWal"`
+	EndWal         string                                    `json:"endWal"`
+	BeginLsn       string                                    `json:"beginLsn"`
+	EndLsn         string                                    `json:"endLsn"`
 	Coverage       DbObjectStoreRecoveryBackupCoverageDetail `json:"coverage"`
 }
 
@@ -107,18 +107,18 @@ const (
 
 // DbObjectStoreRecoveryWalHierarchy is the default WAL browser hierarchy view.
 type DbObjectStoreRecoveryWalHierarchy struct {
-	ClusterIdentity string                           `json:"clusterIdentity"`
-	WalDirectory    string                           `json:"walDirectory"`
-	AnalysedAt      time.Time                        `json:"analysedAt"`
-	Complete        bool                             `json:"complete"`
-	Truncation      DbObjectStoreRecoveryTruncation  `json:"truncation"`
+	ClusterIdentity string                             `json:"clusterIdentity"`
+	WalDirectory    string                             `json:"walDirectory"`
+	AnalysedAt      time.Time                          `json:"analysedAt"`
+	Complete        bool                               `json:"complete"`
+	Truncation      DbObjectStoreRecoveryTruncation    `json:"truncation"`
 	Timelines       []DbObjectStoreRecoveryWalTimeline `json:"timelines"`
 }
 
 // DbObjectStoreRecoveryWalTimeline groups WAL log folders under one timeline.
 type DbObjectStoreRecoveryWalTimeline struct {
-	TimelineHex string                       `json:"timelineHex"`
-	Timeline    uint32                       `json:"timeline"`
+	TimelineHex string                        `json:"timelineHex"`
+	Timeline    uint32                        `json:"timeline"`
 	Logs        []DbObjectStoreRecoveryWalLog `json:"logs"`
 }
 
@@ -138,25 +138,25 @@ type DbObjectStoreRecoveryWalLog struct {
 
 // DbObjectStoreRecoveryWalSegments lists objects for one timeline/log folder or a flat view.
 type DbObjectStoreRecoveryWalSegments struct {
-	ClusterIdentity       string                        `json:"clusterIdentity"`
-	TimelineHex           string                        `json:"timelineHex"`
-	LogHex                string                        `json:"logHex"`
+	ClusterIdentity       string                           `json:"clusterIdentity"`
+	TimelineHex           string                           `json:"timelineHex"`
+	LogHex                string                           `json:"logHex"`
 	Objects               []DbObjectStoreRecoveryWalObject `json:"objects"`
-	NextContinuationToken *string                       `json:"nextContinuationToken"`
+	NextContinuationToken *string                          `json:"nextContinuationToken"`
 }
 
 // DbObjectStoreRecoveryWalObject is a single object under the WAL tree.
 type DbObjectStoreRecoveryWalObject struct {
-	Key                 string                  `json:"key"`
-	FileName            string                  `json:"fileName"`
-	Kind                DbObjectStoreWalKind    `json:"kind"`
-	WalName             string                  `json:"walName"`
-	TimelineHex         string                  `json:"timelineHex"`
-	LogHex              string                  `json:"logHex"`
-	SegmentHex          string                  `json:"segmentHex"`
-	BackupHistoryOffset *string                 `json:"backupHistoryOffset"`
-	SizeBytes           int64                   `json:"sizeBytes"`
-	ArchivedAt          *time.Time              `json:"archivedAt"`
+	Key                 string               `json:"key"`
+	FileName            string               `json:"fileName"`
+	Kind                DbObjectStoreWalKind `json:"kind"`
+	WalName             string               `json:"walName"`
+	TimelineHex         string               `json:"timelineHex"`
+	LogHex              string               `json:"logHex"`
+	SegmentHex          string               `json:"segmentHex"`
+	BackupHistoryOffset *string              `json:"backupHistoryOffset"`
+	SizeBytes           int64                `json:"sizeBytes"`
+	ArchivedAt          *time.Time           `json:"archivedAt"`
 }
 
 // DbObjectStoreWalKind classifies an object under a Barman WAL tree.
@@ -171,8 +171,8 @@ const (
 
 // DbObjectStoreRecoveryWalSearch is the result of a WAL name search.
 type DbObjectStoreRecoveryWalSearch struct {
-	ClusterIdentity string                          `json:"clusterIdentity"`
-	Query           string                          `json:"query"`
+	ClusterIdentity string                           `json:"clusterIdentity"`
+	Query           string                           `json:"query"`
 	Objects         []DbObjectStoreRecoveryWalObject `json:"objects"`
 }
 
