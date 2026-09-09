@@ -27,9 +27,9 @@ type KubernetesClusterSessionToken struct {
 // KubernetesClusterSession is a listed kubeconfig session (without the secret token/kubeconfig payload).
 type KubernetesClusterSession struct {
 	Identity       string              `json:"identity"`
-	CreatedAt      time.Time           `json:"createdAt,omitempty"`
+	CreatedAt      time.Time           `json:"createdAt"`
 	LastUsedAt     *time.Time          `json:"lastUsedAt,omitempty"`
-	ExpiresAt      time.Time           `json:"expiresAt,omitempty"`
+	ExpiresAt      time.Time           `json:"expiresAt"`
 	User           *base.AppUser       `json:"user,omitempty"`
 	ServiceAccount *iam.ServiceAccount `json:"serviceAccount,omitempty"`
 }
