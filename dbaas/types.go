@@ -619,6 +619,12 @@ type DbClusterBackup struct {
 	// StatusMessage is the message of the backup status
 	StatusMessage string `json:"statusMessage,omitempty"`
 
+	// RetentionExpired indicates the backup is outside the retention period of its backup store.
+	RetentionExpired bool `json:"retentionExpired"`
+
+	// SizeBytes is the size of the base backup in object storage, in bytes.
+	SizeBytes *int64 `json:"sizeBytes,omitempty"`
+
 	// CreatedAt is the date and time the object was created
 	CreatedAt time.Time `json:"createdAt"`
 
