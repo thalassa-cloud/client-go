@@ -79,6 +79,9 @@ type DbCluster struct {
 	// DatabaseInstancesStatus is the status of the database instances in the cluster
 	DatabaseInstancesStatus DatabaseInstancesStatus `json:"databaseInstancesStatus"`
 
+	// HealthStatus reports database engine health signals mirrored from the regional controller.
+	HealthStatus DbClusterHealthStatus `json:"healthStatus"`
+
 	// AutoUpgradePolicy is the auto upgrade policy for the cluster
 	AutoUpgradePolicy DbClusterAutoUpgradePolicy `json:"autoUpgradePolicy,omitempty"`
 	// MaintenanceDay is the day of the week for the maintenance window. 0 is Sunday, 6 is Saturday.
@@ -90,6 +93,24 @@ type DbCluster struct {
 	ScheduledMaintenances []DbClusterScheduledMaintenance `json:"scheduledMaintenances"`
 	// DbObjectStore is the DB object store used for barman backups
 	DbObjectStore *DbObjectStore `json:"dbObjectStore,omitempty"`
+}
+
+// DbClusterHealthStatus reports database engine health signals for a cluster.
+type DbClusterHealthStatus struct {
+	// ContinuousArchiving reports WAL archiving health when continuous archiving is enabled.
+	ContinuousArchiving *DbClusterHealthCondition `json:"continuousArchiving,omitempty"`
+}
+
+// DbClusterHealthCondition is a single health condition reported for a cluster.
+type DbClusterHealthCondition struct {
+	// Healthy indicates whether the condition is in a healthy state.
+	Healthy bool `json:"healthy"`
+	// Reason is the machine-readable reason for the current status.
+	Reason string `json:"reason,omitempty"`
+	// Message is a human-readable message with additional detail.
+	Message string `json:"message,omitempty"`
+	// LastTransitionTime is when the condition last changed.
+	LastTransitionTime *time.Time `json:"lastTransitionTime,omitempty"`
 }
 
 type DatabaseInstancesStatus struct {
