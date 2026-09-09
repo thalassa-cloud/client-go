@@ -93,6 +93,8 @@ type DbCluster struct {
 	ScheduledMaintenances []DbClusterScheduledMaintenance `json:"scheduledMaintenances"`
 	// DbObjectStore is the DB object store used for barman backups
 	DbObjectStore *DbObjectStore `json:"dbObjectStore,omitempty"`
+	// BackupRecoveryWindow is the Barman recovery window for this cluster's backup server.
+	BackupRecoveryWindow *DbObjectStoreRecoveryWindow `json:"backupRecoveryWindow,omitempty"`
 }
 
 // DbClusterHealthStatus reports database engine health signals for a cluster.
@@ -826,6 +828,26 @@ type DbObjectStore struct {
 	// retainForPointInTime (default) keeps the latest backup so the recovery window stays restorable.
 	// forceCleanupAfterExpiry allows cleanup of backups (including the latest) after retention expiry.
 	RetentionMode DbObjectStoreRetentionMode `json:"retentionMode,omitempty"`
+	// ServerRecoveryWindow maps Barman server names to their recovery window timestamps.
+	ServerRecoveryWindow map[string]DbObjectStoreRecoveryWindow `json:"serverRecoveryWindow,omitempty"`
+}
+
+// DbObjectStoreRecoveryWindow is the Barman recovery window for a backup server.
+type DbObjectStoreRecoveryWindow struct {
+	// FirstRecoverabilityPoint is the earliest point in time to which the database can be restored.
+	FirstRecoverabilityPoint *time.Time `json:"firstRecoverabilityPoint,omitempty"`
+	// LastSuccessfulBackupTime is the timestamp of the last successful backup.
+	LastSuccessfulBackupTime *time.Time `json:"lastSuccessfulBackupTime,omitempty"`
+	// LastFailedBackupTime is the timestamp of the last failed backup.
+	LastFailedBackupTime *time.Time `json:"lastFailedBackupTime,omitempty"`
+}
+
+// PitrAvailable reports whether point-in-time recovery can be offered for this window.
+func (w DbObjectStoreRecoveryWindow) PitrAvailable(objectStoreReady bool, backupObjectStoreReady bool) bool {
+	if !objectStoreReady || !backupObjectStoreReady {
+		return false
+	}
+	return w.FirstRecoverabilityPoint != nil && w.LastSuccessfulBackupTime != nil
 }
 
 // DbObjectStoreRetentionMode controls how expired backups are cleaned up on an object store.
