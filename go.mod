@@ -1,6 +1,6 @@
 module github.com/thalassa-cloud/client-go
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/go-resty/resty/v2 v2.17.2
@@ -8,7 +8,7 @@ require (
 	github.com/sony/gobreaker v1.0.0
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/oauth2 v0.36.0
-	golang.org/x/time v0.15.0
+	golang.org/x/time v0.16.0
 )
 
 require (
