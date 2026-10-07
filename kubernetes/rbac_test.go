@@ -519,6 +519,24 @@ func TestCreateRoleBinding(t *testing.T) {
 			expectError:  false,
 		},
 		{
+			name:     "successful binding creation with cluster scope",
+			identity: "role-1",
+			createRequest: CreateKubernetesClusterRoleBinding{
+				Name:                      "cluster-binding",
+				Description:               "Cluster scoped binding",
+				UserIdentity:              stringPtr("user-1"),
+				KubernetesClusterIdentity: stringPtr("cluster-1"),
+			},
+			serverResponse: &KubernetesClusterRoleBinding{
+				Identity:                  "binding-2",
+				Name:                      "cluster-binding",
+				Slug:                      "cluster-binding",
+				KubernetesClusterIdentity: stringPtr("cluster-1"),
+			},
+			serverStatus: http.StatusOK,
+			expectError:  false,
+		},
+		{
 			name:     "server error",
 			identity: "role-1",
 			createRequest: CreateKubernetesClusterRoleBinding{
@@ -610,6 +628,82 @@ func TestDeleteRoleBinding(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestListClusterRoleBindingsForCluster(t *testing.T) {
+	tests := []struct {
+		name             string
+		clusterIdentity  string
+		serverResponse   []KubernetesClusterRoleBinding
+		serverStatus     int
+		expectError      bool
+		expectedCount    int
+		expectedPath     string
+	}{
+		{
+			name:            "successful list",
+			clusterIdentity: "cluster-1",
+			serverResponse: []KubernetesClusterRoleBinding{
+				{
+					Identity:                  "binding-1",
+					Name:                      "org-wide",
+					KubernetesClusterIdentity: nil,
+				},
+				{
+					Identity:                  "binding-2",
+					Name:                      "cluster-scoped",
+					KubernetesClusterIdentity: stringPtr("cluster-1"),
+				},
+			},
+			serverStatus:  http.StatusOK,
+			expectError:   false,
+			expectedCount: 2,
+			expectedPath:  "/v1/kubernetes/clusters/cluster-1/iam/role-bindings",
+		},
+		{
+			name:            "server error",
+			clusterIdentity: "cluster-1",
+			serverResponse:  nil,
+			serverStatus:    http.StatusInternalServerError,
+			expectError:     true,
+			expectedCount:   0,
+			expectedPath:    "/v1/kubernetes/clusters/cluster-1/iam/role-bindings",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var gotPath string
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				gotPath = r.URL.Path
+				if r.Method == http.MethodGet && strings.HasSuffix(r.URL.Path, "/iam/role-bindings") {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(tt.serverStatus)
+					if tt.serverStatus == http.StatusOK {
+						_ = json.NewEncoder(w).Encode(tt.serverResponse)
+					}
+					return
+				}
+				w.WriteHeader(http.StatusNotFound)
+			}))
+			defer server.Close()
+
+			baseClient, err := client.NewClient(client.WithBaseURL(server.URL))
+			require.NoError(t, err)
+			c, err := New(baseClient)
+			require.NoError(t, err)
+
+			result, err := c.ListClusterRoleBindingsForCluster(context.Background(), tt.clusterIdentity)
+
+			assert.Equal(t, tt.expectedPath, gotPath)
+			if tt.expectError {
+				assert.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Len(t, result, tt.expectedCount)
 			}
 		})
 	}
