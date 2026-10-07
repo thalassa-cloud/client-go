@@ -226,7 +226,6 @@ func TestGetDnssec(t *testing.T) {
 			Enabled:      true,
 			DsDelegated:  true,
 			LastSignedAt: &now,
-			Region:       "nl-01",
 		}))
 	}))
 	defer server.Close()
