@@ -284,6 +284,7 @@ func TestOIDCTokenExchangeExchangesAndSetsBearer(t *testing.T) {
 			assert.Equal(t, "urn:ietf:params:oauth:token-type:jwt", r.FormValue("subject_token_type"))
 			assert.Equal(t, "org-42", r.FormValue("organisation_id"))
 			assert.Equal(t, "sa-99", r.FormValue("service_account_id"))
+			assert.Empty(t, r.FormValue("project_id"))
 			assert.Equal(t, "39600s", r.FormValue("access_token_lifetime"))
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
@@ -367,6 +368,38 @@ func TestOIDCTokenExchangeSubjectTokenFile(t *testing.T) {
 	_, err = cl.Do(context.Background(), cl.R(), GET, "/ok")
 	require.NoError(t, err)
 	assert.Equal(t, "jwt-from-mounted-file", gotSubject)
+}
+
+func TestOIDCTokenExchangeSendsProjectID(t *testing.T) {
+	var gotProject string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/oidc/token" && r.Method == http.MethodPost {
+			require.NoError(t, r.ParseForm())
+			gotProject = r.FormValue("project_id")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_ = json.NewEncoder(w).Encode(map[string]any{"access_token": "tok", "expires_in": 60})
+			return
+		}
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer srv.Close()
+
+	cl, err := NewClient(
+		WithBaseURL(srv.URL),
+		WithAuthOIDCTokenExchange(OIDCTokenExchangeConfig{
+			TokenURL:         srv.URL + "/oidc/token",
+			SubjectToken:     "jwt",
+			OrganisationID:   "o",
+			ServiceAccountID: "s",
+			ProjectID:        "  prj-1  ",
+		}),
+	)
+	require.NoError(t, err)
+
+	_, err = cl.Do(context.Background(), cl.R(), GET, "/ok")
+	require.NoError(t, err)
+	assert.Equal(t, "prj-1", gotProject)
 }
 
 func TestOIDCTokenExchangeUsesCustomUserAgent(t *testing.T) {
