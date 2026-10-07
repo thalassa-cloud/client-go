@@ -301,6 +301,7 @@ type VolumeAttachment struct {
 	AttachedToResourceType string     `json:"attachedToResourceType"`
 	DetachmentRequestedAt  *time.Time `json:"detachmentRequestedAt,omitempty"`
 	CanDetach              bool       `json:"canDetach"`
+	DeleteOnTermination    bool       `json:"deleteOnTermination"`
 
 	// Only set if attachedToResourceType == "cloud_virtual_machine"
 	VirtualMachine *Machine `json:"virtualMachine"`
@@ -439,9 +440,14 @@ type UpdateVolume struct {
 }
 
 type AttachVolumeRequest struct {
-	Description      string `json:"description"`
-	ResourceType     string `json:"resourceType"`
-	ResourceIdentity string `json:"resourceIdentity"`
+	Description         string `json:"description"`
+	ResourceType        string `json:"resourceType"`
+	ResourceIdentity    string `json:"resourceIdentity"`
+	DeleteOnTermination *bool  `json:"deleteOnTermination,omitempty"`
+}
+
+type UpdateVolumeAttachmentRequest struct {
+	DeleteOnTermination bool `json:"deleteOnTermination"`
 }
 
 type DetachVolumeRequest struct {
@@ -576,6 +582,9 @@ type CreateMachineVolume struct {
 	Description        *string     `json:"description,omitempty"`
 	Labels             Labels      `json:"labels"`
 	Annotations        Annotations `json:"annotations"`
+	// DeleteOnTermination deletes the volume when the instance is terminated.
+	// Omitted defaults to true for the root volume.
+	DeleteOnTermination *bool `json:"deleteOnTermination,omitempty"`
 }
 
 type UpdateMachine struct {
