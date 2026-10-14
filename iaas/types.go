@@ -202,7 +202,6 @@ type NatGatewayInstanceSize struct {
 	Identity             string `json:"identity"`
 	Name                 string `json:"name"`
 	Enabled              bool   `json:"enabled"`
-	Replicas             int32  `json:"replicas,omitempty"`
 	IngressBandwidthRate *uint  `json:"ingressBandwidthRate,omitempty"`
 	EgressBandwidthRate  *uint  `json:"egressBandwidthRate,omitempty"`
 }
