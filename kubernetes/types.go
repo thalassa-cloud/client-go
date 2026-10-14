@@ -81,6 +81,8 @@ type KubernetesVersion struct {
 	CiliumVersion string `json:"ciliumVersion"`
 	// Cloud controller manager version
 	CloudControllerManagerVersion string `json:"cloudControllerManagerVersion"`
+	// Cluster autoscaler image tag for this Kubernetes version. Empty means the platform default.
+	ClusterAutoscalerVersion string `json:"clusterAutoscalerVersion,omitempty"`
 	// Istio service mesh version
 	IstioVersion string `json:"istioVersion"`
 }
