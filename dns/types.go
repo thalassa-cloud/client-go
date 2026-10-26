@@ -19,17 +19,35 @@ const (
 	DnsRecordTypeSRV   DnsRecordType = "SRV"
 )
 
+type DnsDelegationStatus string
+
+const (
+	DnsDelegationStatusPending        DnsDelegationStatus = "pending"
+	DnsDelegationStatusDelegated      DnsDelegationStatus = "delegated"
+	DnsDelegationStatusDelegationLost DnsDelegationStatus = "delegation_lost"
+)
+
 type DnsZone struct {
-	Identity      string            `json:"identity"`
-	Name          string            `json:"name"`
-	Slug          string            `json:"slug"`
-	Description   string            `json:"description,omitempty"`
-	Labels        map[string]string `json:"labels,omitempty"`
-	Annotations   map[string]string `json:"annotations,omitempty"`
-	ProjectID     string            `json:"projectId,omitempty"`
-	CreatedAt     time.Time         `json:"createdAt"`
-	UpdatedAt     *time.Time        `json:"updatedAt,omitempty"`
-	ObjectVersion int64             `json:"objectVersion"`
+	Identity         string              `json:"identity"`
+	Name             string              `json:"name"`
+	Slug             string              `json:"slug"`
+	Description      string              `json:"description,omitempty"`
+	Labels           map[string]string   `json:"labels,omitempty"`
+	Annotations      map[string]string   `json:"annotations,omitempty"`
+	ProjectID        string              `json:"projectId,omitempty"`
+	Nameservers      []string            `json:"nameservers,omitempty"`
+	DelegationStatus DnsDelegationStatus `json:"delegationStatus,omitempty"`
+	Delegated        bool                `json:"delegated"`
+	Serving          bool                `json:"serving"`
+	NextNsProbeAt    *time.Time          `json:"nextNsProbeAt,omitempty"`
+	CreatedAt        time.Time           `json:"createdAt"`
+	UpdatedAt        *time.Time          `json:"updatedAt,omitempty"`
+	ObjectVersion    int64               `json:"objectVersion"`
+}
+
+type ScopeNameserversResponse struct {
+	Nameservers []string `json:"nameservers"`
+	ProjectID   string   `json:"projectId,omitempty"`
 }
 
 type DnsRecord struct {
