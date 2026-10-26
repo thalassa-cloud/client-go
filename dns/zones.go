@@ -79,6 +79,34 @@ func (c *Client) DeleteZone(ctx context.Context, zoneIdentity string) error {
 	return c.Check(resp)
 }
 
+// GetNameservers returns the fixed NS pair for the current organisation/project scope.
+func (c *Client) GetNameservers(ctx context.Context) (*ScopeNameserversResponse, error) {
+	var result ScopeNameserversResponse
+	r := c.R().SetResult(&result)
+	resp, err := c.Do(ctx, r, client.GET, DnsEndpoint+"/nameservers")
+	if err != nil {
+		return nil, err
+	}
+	if err := c.Check(resp); err != nil {
+		return &result, err
+	}
+	return &result, nil
+}
+
+// CheckZoneDelegation triggers a parent NS delegation check for the zone.
+func (c *Client) CheckZoneDelegation(ctx context.Context, zoneIdentity string) (*DnsZone, error) {
+	var zone DnsZone
+	r := c.R().SetResult(&zone)
+	resp, err := c.Do(ctx, r, client.POST, zonePath(zoneIdentity, "delegation", "check"))
+	if err != nil {
+		return nil, err
+	}
+	if err := c.Check(resp); err != nil {
+		return &zone, err
+	}
+	return &zone, nil
+}
+
 type listZonesFilter struct {
 	filter filters.Filter
 }

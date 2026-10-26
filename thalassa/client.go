@@ -2,6 +2,7 @@ package thalassa
 
 import (
 	"github.com/thalassa-cloud/client-go/audit"
+	"github.com/thalassa-cloud/client-go/certificates"
 	"github.com/thalassa-cloud/client-go/containerregistry"
 	"github.com/thalassa-cloud/client-go/dbaas"
 	"github.com/thalassa-cloud/client-go/dns"
@@ -40,6 +41,8 @@ type Client interface {
 	Secrets() *secrets.Client
 	// DNS returns a client for DNS zones and records.
 	DNS() *dns.Client
+	// Certificates returns a client for Certificate Manager.
+	Certificates() *certificates.Client
 	// Projects returns a client for organisation-scoped project management.
 	Projects() *projects.Client
 	// SetOrganisation sets the organisation for the client
@@ -188,6 +191,14 @@ func (c *thalassaCloudClient) DNS() *dns.Client {
 		panic(err)
 	}
 	return dnsClient
+}
+
+func (c *thalassaCloudClient) Certificates() *certificates.Client {
+	certificatesClient, err := certificates.New(c.client)
+	if err != nil {
+		panic(err)
+	}
+	return certificatesClient
 }
 
 func (c *thalassaCloudClient) Projects() *projects.Client {
