@@ -215,8 +215,10 @@ type UpdateKubernetesCluster struct {
 	DefaultNetworkPolicy        *KubernetesDefaultNetworkPolicies      `json:"defaultNetworkPolicy,omitempty"`        // Updated default network policy
 	PodSecurityStandardsProfile *KubernetesClusterPodSecurityStandards `json:"podSecurityStandardsProfile,omitempty"` // Updated pod security standards
 	AuditLogProfile             *KubernetesClusterAuditLoggingProfile  `json:"auditLogProfile,omitempty"`             // Updated audit logging configuration
-	DisablePublicEndpoint       *bool                                  `json:"disablePublicEndpoint,omitempty"`       // Updated public endpoint setting
-	ApiServerACLs               KubernetesApiServerACLs                `json:"apiServerACL"`                          // ApiServerACLs is the ACLs for the API server
+	DisablePublicEndpoint *bool `json:"disablePublicEndpoint,omitempty"` // Updated public endpoint setting
+	// ApiServerACLs updates the public API server ACL when set. Omit to leave unchanged.
+	// Prefer UpdateKubernetesClusterApiServerACL for dedicated updates.
+	ApiServerACLs *KubernetesApiServerACLs `json:"apiServerACL,omitempty"`
 
 	// KubeProxyMode is the mode of the kube proxy. Default is ipvs.
 	KubeProxyMode *KubernetesClusterKubeProxyMode `json:"kubeProxyMode,omitempty"`
@@ -233,13 +235,27 @@ type UpdateKubernetesCluster struct {
 	// For more information, see the Cluster Autoscaler documentation: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md
 	AutoscalerConfig *AutoscalerConfig `json:"autoscalerConfig,omitempty"`
 
-	// SecurityGroupAttachments is a list of security group identities that will be attached to the Control Plane VPC-internal endpoint.
-	// These do not apply to the public endpoint. If you wish to configure ACLs for the public endpoint, you can use the AllowedCIDRs field.
+	// SecurityGroupAttachments replaces the security groups on the Control Plane VPC-internal endpoint when set.
+	// Omit to leave unchanged. An empty list detaches all.
+	// Prefer AttachSecurityGroupToKubernetesCluster / DetachSecurityGroupFromKubernetesCluster for incremental updates.
 	SecurityGroupAttachments []string `json:"securityGroupAttachments,omitempty"`
 
 	// EnableOidcIssuer enables the OIDC issuer for legacy clusters that do not have one yet.
 	// Prefer ConfigureServiceAccountIssuer for an idempotent dedicated API.
 	EnableOidcIssuer *bool `json:"enableOidcIssuer,omitempty"`
+}
+
+// AttachSecurityGroupToKubernetesClusterRequest attaches a security group to a Kubernetes cluster control plane.
+type AttachSecurityGroupToKubernetesClusterRequest struct {
+	// SecurityGroupIdentity is the identity of the security group to attach.
+	SecurityGroupIdentity string `json:"securityGroupIdentity"`
+}
+
+// UpdateKubernetesClusterApiServerACLRequest updates the public API server ACL for a Kubernetes cluster.
+type UpdateKubernetesClusterApiServerACLRequest struct {
+	// AllowedCIDRs is a list of allowed CIDRs for the public API server endpoint.
+	// An empty list clears the ACL.
+	AllowedCIDRs []string `json:"allowedCIDRs"`
 }
 
 // KubernetesClusterNetworking represents the network configuration for a Kubernetes cluster.
