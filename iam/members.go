@@ -71,6 +71,8 @@ type OrganisationMemberType string
 const (
 	// OrganisationMemberTypeOwner is a role that indicates that the user is an owner of the organisation
 	OrganisationMemberTypeOwner OrganisationMemberType = "OWNER"
+	// OrganisationMemberTypeAdmin is a role that indicates that the user is an admin of the organisation
+	OrganisationMemberTypeAdmin OrganisationMemberType = "ADMIN"
 	// OrganisationMemberTypeMember is a role that indicates that the user is a member of the organisation
 	OrganisationMemberTypeMember OrganisationMemberType = "MEMBER"
 )
