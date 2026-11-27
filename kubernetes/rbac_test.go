@@ -635,13 +635,13 @@ func TestDeleteRoleBinding(t *testing.T) {
 
 func TestListClusterRoleBindingsForCluster(t *testing.T) {
 	tests := []struct {
-		name             string
-		clusterIdentity  string
-		serverResponse   []KubernetesClusterRoleBinding
-		serverStatus     int
-		expectError      bool
-		expectedCount    int
-		expectedPath     string
+		name            string
+		clusterIdentity string
+		serverResponse  []KubernetesClusterRoleBinding
+		serverStatus    int
+		expectError     bool
+		expectedCount   int
+		expectedPath    string
 	}{
 		{
 			name:            "successful list",
