@@ -59,7 +59,6 @@ func (c *Client) GetEndpoint(ctx context.Context, identity string) (*Endpoint, e
 	return endpoint, nil
 }
 
-
 type Endpoint struct {
 	// Identity is a unique identifier for the endpoint
 	Identity string `json:"identity"`
