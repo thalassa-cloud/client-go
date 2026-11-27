@@ -9,6 +9,56 @@ import (
 	"github.com/thalassa-cloud/client-go/pkg/client"
 )
 
+func TestGetPgRole(t *testing.T) {
+	server := setupTestServer()
+	defer server.Close()
+
+	client, err := client.NewClient(client.WithBaseURL(server.URL))
+	require.NoError(t, err)
+
+	dbaasClient, err := New(client)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name              string
+		dbClusterIdentity string
+		roleIdentity      string
+		expectedError     string
+	}{
+		{
+			name:              "successful role get",
+			dbClusterIdentity: "cluster-123",
+			roleIdentity:      "testrole",
+		},
+		{
+			name:              "missing cluster identity",
+			dbClusterIdentity: "",
+			roleIdentity:      "testrole",
+			expectedError:     "database cluster identity is required",
+		},
+		{
+			name:              "missing role identity",
+			dbClusterIdentity: "cluster-123",
+			roleIdentity:      "",
+			expectedError:     "postgres role identity is required",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			role, err := dbaasClient.GetPgRole(context.Background(), tt.dbClusterIdentity, tt.roleIdentity)
+
+			if tt.expectedError != "" {
+				assert.EqualError(t, err, tt.expectedError)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, role)
+			assert.Equal(t, "testrole", role.Identity)
+		})
+	}
+}
+
 func TestCreatePgRole(t *testing.T) {
 	server := setupTestServer()
 	defer server.Close()

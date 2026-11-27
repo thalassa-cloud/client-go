@@ -21,7 +21,10 @@ func setupGrantTestServer() *httptest.Server {
 				w.Write([]byte(`{"message": "grant created"}`))
 			}
 		case "/v1/dbaas/clusters/cluster-123/postgres-grants/testgrant":
-			if r.Method == "PUT" {
+			if r.Method == "GET" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"identity":"testgrant","name":"testgrant","status":"ready","read":true,"write":false}`))
+			} else if r.Method == "PUT" {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"message": "grant updated"}`))
 			} else if r.Method == "DELETE" {
@@ -32,6 +35,56 @@ func setupGrantTestServer() *httptest.Server {
 			w.Write([]byte(`{"error": "not found"}`))
 		}
 	}))
+}
+
+func TestGetPgGrant(t *testing.T) {
+	server := setupGrantTestServer()
+	defer server.Close()
+
+	client, err := client.NewClient(client.WithBaseURL(server.URL))
+	require.NoError(t, err)
+
+	dbaasClient, err := New(client)
+	require.NoError(t, err)
+
+	tests := []struct {
+		name              string
+		dbClusterIdentity string
+		grantIdentity     string
+		expectedError     string
+	}{
+		{
+			name:              "successful grant get",
+			dbClusterIdentity: "cluster-123",
+			grantIdentity:     "testgrant",
+		},
+		{
+			name:              "missing cluster identity",
+			dbClusterIdentity: "",
+			grantIdentity:     "testgrant",
+			expectedError:     "database cluster identity is required",
+		},
+		{
+			name:              "missing grant identity",
+			dbClusterIdentity: "cluster-123",
+			grantIdentity:     "",
+			expectedError:     "postgres grant identity is required",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			grant, err := dbaasClient.GetPgGrant(context.Background(), tt.dbClusterIdentity, tt.grantIdentity)
+
+			if tt.expectedError != "" {
+				assert.EqualError(t, err, tt.expectedError)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, grant)
+			assert.Equal(t, "testgrant", grant.Identity)
+		})
+	}
 }
 
 func TestCreatePgGrant(t *testing.T) {
