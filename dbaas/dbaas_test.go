@@ -55,7 +55,10 @@ func setupTestServer() *httptest.Server {
 				w.Write([]byte(`{"message": "role created"}`))
 			}
 		case "/v1/dbaas/clusters/cluster-123/postgres-roles/testrole":
-			if r.Method == "PUT" {
+			if r.Method == "GET" {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"identity":"testrole","name":"testrole","status":"ready","login":true}`))
+			} else if r.Method == "PUT" {
 				w.WriteHeader(http.StatusOK)
 				w.Write([]byte(`{"message": "role updated"}`))
 			} else if r.Method == "DELETE" {
