@@ -188,6 +188,7 @@ type VpcNatGateway struct {
 	SubnetIdentity string             `json:"subnetIdentity"`
 	Subnet         *Subnet            `json:"subnet"`
 	EndpointIP     string             `json:"endpointIP"`
+	EndpointIPv6   string             `json:"endpointIPv6,omitempty"`
 
 	V4IP string `json:"v4IP"`
 	V6IP string `json:"v6IP"`
